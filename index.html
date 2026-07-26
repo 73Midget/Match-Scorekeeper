@@ -237,6 +237,8 @@
   .mstat .box span{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);font-weight:700}
   .warnbox{background:#fdf2f0;border:1px solid #e7c3bd;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:10px;line-height:1.5}
   .warnbox b{color:var(--red)}
+  .goodbox{background:#eef7f2;border:1px solid #bcdccb;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.5}
+  .goodbox b{color:var(--green)}
   .steps{counter-reset:s;list-style:none;padding:0;margin:0 0 12px}
   .steps li{position:relative;padding:0 0 10px 30px;font-size:13px;color:var(--ink);line-height:1.5}
   .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
@@ -300,6 +302,7 @@
     <div style="height:8px"></div>
     <div class="btnrow"><button class="btn ghost sm" id="csvBtn">Export CSV</button><button class="btn ghost sm" id="backupBtn">Backup</button></div>
     <div class="btnrow"><button class="btn ghost sm" id="mergeBtn">Merge squad files</button><button class="btn ghost sm" id="restoreBtn">Restore</button></div>
+    <button class="btn ghost sm" id="undoBtn" style="display:none">↶ Undo last change</button>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -485,7 +488,7 @@
   <h3>Merge Summary</h3>
   <div id="mergeBody"></div>
   <div style="height:12px"></div>
-  <button class="btn ghost" id="mergeClose">Close</button>
+  <div class="btnrow"><button class="btn ghost" id="mergeUndo" style="display:none">↶ Undo this merge</button><button class="btn ghost" id="mergeClose">Close</button></div>
 </div></div>
 
 <div class="scrim" id="confirmScrim"><div class="sheet" style="max-width:440px">
@@ -528,7 +531,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-07-25-a";
+var APP_BUILD="2026-07-25-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -867,6 +870,7 @@ document.getElementById("checkinScrim").addEventListener("click",function(ev){if
 document.getElementById("checkinAddNew").addEventListener("click",function(){document.getElementById("checkinScrim").classList.remove("open");openEdit(null);});
 document.getElementById("newMatchBtn").addEventListener("click",function(){
   if(!confirm("Start a NEW match?\n\nThis clears ALL scores and check-ins on this tablet. Your shooter list (names, divisions, emails) is kept for next week.\n\nBack up first if you haven’t. Continue?"))return;
+  undoPush("Start new match");
   var seen={};state.entries=state.entries.filter(function(e){if(seen[e.personId])return false;seen[e.personId]=true;return true;});  /* collapse extra rounds → one per person */
   state.entries.forEach(function(e){clearAll(e);e.active=false;e.status="normal";e.checkinSeq=0;});
   state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;save();
@@ -1321,6 +1325,10 @@ function updateBackupInfo(){
   var lb=state.meta.lastBackup,txt=lb?('Last backup: '+new Date(lb).toLocaleString()):'Last backup: never';
   var ls=state.meta.lastShared;if(ls)txt+=' · Sent: '+new Date(ls).toLocaleTimeString();
   el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span>'+esc(txt)+'</span>';
+  var ub=document.getElementById("undoBtn");
+  if(ub){var t=undoTop();
+    if(t){ub.style.display="";ub.textContent="↶ Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
+    else ub.style.display="none";}
 }
 
 /* individual email */
@@ -1742,6 +1750,7 @@ document.getElementById("restoreFile").addEventListener("change",function(ev){va
       ? "This is a v1.0.7 backup. Import the SHOOTER LIST only (scores will not be carried over)?"
       : "REPLACE all current data with this file? (Use Merge to combine instead.)";
     if(!confirm(msg))return;
+    undoPush(kind==="legacy"?"Import of shooter list":"Restore from backup");
     if(kind==="legacy"){
       state.meta.matchType="outdoor";                 /* 1.0.7 was always outdoor; set BEFORE shaping */
       state.entries=d.entries.map(function(src){return rosterOnly(src);});
@@ -1765,8 +1774,9 @@ document.getElementById("mergeChoose").addEventListener("click",function(){docum
 document.getElementById("mergeFile").addEventListener("change",function(ev){
   var files=[].slice.call(ev.target.files);if(!files.length)return;
   Promise.all(files.map(readText)).then(function(texts){
-    var added=0,updated=0,kept=0,conflicts=0,bySquad={},errors=0,refused=0;
+    var added=0,updated=0,kept=0,conflicts=0,bySquad={},errors=0,refused=0,already=0;
     var curType=(state.meta&&state.meta.matchType)||"outdoor";
+    undoPush("Merge of "+files.length+" file"+(files.length===1?"":"s"));
     texts.forEach(function(txt){var d;try{d=JSON.parse(txt);}catch(e){errors++;return;}
       if(!d||!d.entries){errors++;return;}
       var kind=backupKind(d);
@@ -1779,34 +1789,103 @@ document.getElementById("mergeFile").addEventListener("change",function(ev){
         var idx=indexOfId(ie.id);
         if(idx<0){state.entries.push(ie);added++;return;}
         var ex=state.entries[idx],ieS=inResults(ie),exS=inResults(ex);
-        if(ieS&&exS){ie.id="e"+Date.now()+Math.floor(Math.random()*100000);state.entries.push(ie);added++;conflicts++;}
+        if(ieS&&exS){
+          /* Same entry, both scored. If the scores are identical this is the
+             same file being merged again (double-tap, re-picked, re-sent) —
+             skip it. Only genuinely different scores are a real conflict. */
+          if(scoreFingerprint(ie)===scoreFingerprint(ex)){already++;return;}
+          ie.id=uid("e");state.entries.push(ie);added++;conflicts++;
+        }
         else if(ieS&&!exS){state.entries[idx]=ie;updated++;}
         else{kept++;}
       });});
-    save();showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused);show("results");
+    save();showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already);show("results");
   });
   ev.target.value="";
 });
 function readText(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){res("");};r.readAsText(f);});}
 function indexOfId(id){for(var i=0;i<state.entries.length;i++)if(state.entries[i].id===id)return i;return -1;}
-function findDuplicates(){var map={},dups=[];
-  state.entries.forEach(function(e){if(!inResults(e))return;var k=(e.name||"").trim().toLowerCase()+"|"+(e.division||"").trim().toLowerCase();(map[k]=map[k]||[]).push(e);});
+/* --- score fingerprint -------------------------------------------------
+   A normalised signature of everything that counts as "the score" for an
+   entry. Used by merge to tell "this exact file again" (identical, skip)
+   apart from "two tablets scored this person differently" (real conflict).
+   Values are normalised through numf/num0 so a typed "3" and a stored 3
+   don't read as different data. Lock state (done) is deliberately excluded:
+   it's workflow, not score. */
+function fpNums(a){return (a||[]).map(function(v){return (v===null||v===undefined||v==="")?null:numf(v);});}
+function fpTargets(ts){return (ts||[]).map(function(t){t=t||{};return [num0(t.a),num0(t.c),num0(t.d),num0(t.miss)];});}
+function scoreFingerprint(e){
+  var core;
+  if(e.type==="indoor"){
+    core={s:(e.score==null?null:num0(e.score)),x:(e.x==null?null:num0(e.x))};
+  }else{
+    core={
+      f:{t:fpNums(e.five&&e.five.t),g:fpTargets(e.five&&e.five.targets)},
+      m:{t:fpNums(e.glockm&&e.glockm.t),g:fpTargets(e.glockm&&e.glockm.targets),
+         sh:num0(e.glockm&&e.glockm.steelHits),sm:num0(e.glockm&&e.glockm.steelMiss)},
+      p:{t:fpNums(e.plates&&e.plates.t),h:(e.plates&&e.plates.hits||[]).map(num0),m:(e.plates&&e.plates.miss||[]).map(num0)}
+    };
+  }
+  return JSON.stringify({d:(e.division||"").trim(),g:(e.gun||"").trim(),st:statusOf(e),c:core});
+}
+
+/* --- undo -------------------------------------------------------------
+   Snapshots taken before destructive actions (merge, restore, new match).
+   Stored under their OWN localStorage key, never inside state.meta, so
+   snapshots are never dragged into exported/shared files. */
+var UNDO_KEY="gssf_scorekeeper_undo",UNDO_MAX=3;
+function undoStack(){try{return JSON.parse(localStorage.getItem(UNDO_KEY)||"[]");}catch(e){return [];}}
+function undoWrite(st){try{localStorage.setItem(UNDO_KEY,JSON.stringify(st.slice(0,UNDO_MAX)));}catch(e){}}
+function undoPush(label){
+  try{
+    var st=undoStack();
+    st.unshift({at:Date.now(),label:label,n:state.entries.length,entries:state.entries,meta:state.meta});
+    undoWrite(st);
+  }catch(e){}
+}
+function undoTop(){return undoStack()[0]||null;}
+function undoApply(){
+  var t=undoTop();if(!t)return false;
+  var mt=(t.meta&&t.meta.matchType)||"outdoor";
+  state.entries=(t.entries||[]).map(function(e){return ensureShape(e,mt);});
+  if(t.meta)state.meta=t.meta;
+  var st=undoStack();st.shift();undoWrite(st);
+  save();return true;
+}
+function undoLabel(){var t=undoTop();if(!t)return "";
+  return t.label+" · "+new Date(t.at).toLocaleTimeString()+" ("+t.n+" → "+state.entries.length+" shooters)";}
+function doUndo(){
+  var t=undoTop();if(!t){toast("Nothing to undo");return;}
+  if(!confirm("Undo: "+t.label+"?\n\nThis puts the tablet back to how it was at "+new Date(t.at).toLocaleTimeString()+" ("+t.n+" shooters). Anything scored since then will be lost."))return;
+  if(undoApply()){toast("Undone");document.getElementById("mergeScrim").classList.remove("open");show("results");}
+}
+function findDuplicates(){var map={},dups=[],indoor=(state.meta.matchType||"outdoor")==="indoor";
+  state.entries.forEach(function(e){if(!inResults(e))return;
+    /* Indoor allows the same shooter in the same division more than once (one
+       entry per round), so name+division alone isn't a duplicate there —
+       include the score signature so only genuine copies are flagged. */
+    var k=(e.name||"").trim().toLowerCase()+"|"+(e.division||"").trim().toLowerCase()+(indoor?"|"+scoreFingerprint(e):"");
+    (map[k]=map[k]||[]).push(e);});
   for(var k in map){if(map[k].length>1)dups.push(map[k]);}return dups;}
-function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused){
+function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already){
   var dups=findDuplicates();
   var h='<div class="mstat"><div class="box"><b>'+added+'</b><span>added</span></div><div class="box"><b>'+updated+'</b><span>updated</span></div><div class="box"><b>'+state.entries.length+'</b><span>total</span></div></div>';
   var sk=Object.keys(bySquad);
   if(sk.length)h+='<div class="muted" style="margin-bottom:10px">From squads: '+sk.map(function(s){return esc(s)+' ('+bySquad[s]+')';}).join(", ")+'.</div>';
+  if(already)h+='<div class="goodbox"><b>'+already+' already merged</b> — skipped, because those scores were identical to what this tablet already had. Merging the same file twice is safe.</div>';
   if(errors)h+='<div class="warnbox">'+errors+' file(s) couldn’t be read and were skipped.</div>';
   if(refused)h+='<div class="warnbox"><b>'+refused+' file(s) skipped</b> — wrong match type (indoor vs outdoor) for this match. Merge only backups of the same type.</div>';
-  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and delete the wrong one from the Roster.</div>';
+  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and delete the wrong one from the Roster.</div>';
   if(dups.length)h+='<div class="warnbox"><b>Possible duplicates</b> — same name + division more than once:<br>'
     +dups.map(function(g){return '• '+esc(g[0].name||"(unnamed)")+' — '+esc(g[0].division||"—")+' ('+g.length+'×)';}).join("<br>")+'</div>';
   else h+='<div class="muted" style="margin-bottom:6px">No duplicate names detected.</div>';
   document.getElementById("mergeBody").innerHTML=h;
+  var ub=document.getElementById("mergeUndo");if(ub)ub.style.display=undoTop()?"":"none";
   document.getElementById("mergeScrim").classList.add("open");
-  toast("Merged: +"+added+" added, "+updated+" updated");
+  toast("Merged: +"+added+" added, "+updated+" updated"+(already?", "+already+" already had":""));
 }
+document.getElementById("mergeUndo").addEventListener("click",doUndo);
+document.getElementById("undoBtn").addEventListener("click",doUndo);
 document.getElementById("mergeClose").addEventListener("click",function(){document.getElementById("mergeScrim").classList.remove("open");});
 document.getElementById("mergeScrim").addEventListener("click",function(ev){if(ev.target.id==="mergeScrim")ev.currentTarget.classList.remove("open");});
 
