@@ -531,7 +531,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-07-25-b";
+var APP_BUILD="2026-07-26-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -601,13 +601,30 @@ function ensureShape(e,type){
    Identity (name/email/phone/ro/active/category) is shared across every run
    a person has; division/gun/squad/scores are per-run and are NOT touched here.
    Single choke point so an A->C move later changes only this function. */
-function updatePerson(personId,fields){
+function updatePerson(personId,fields,at){
   if(!personId)return;
   var IDENT=["name","email","phone","ro","active","category"];
+  var touched=IDENT.some(function(k){return k in fields&&k!=="active";});
+  var stamp=(at===undefined)?Date.now():at;
   state.entries.forEach(function(e){
     if(e.personId!==personId)return;
     IDENT.forEach(function(k){if(k in fields)e[k]=fields[k];});
+    if(touched)e.idAt=stamp;   /* when this person's identity last changed */
   });
+}
+/* Reconcile identity between two copies of the same entry arriving from
+   different tablets. Newer edit wins (idAt), blanks are filled from the other
+   copy, and an RO flag is never lost when neither side is timestamped. */
+function bestIdentity(ex,ie){
+  var ta=num0(ex.idAt),tb=num0(ie.idAt);
+  var win=(tb>ta)?ie:ex,lose=(tb>ta)?ex:ie;
+  var out={};
+  ["name","email","phone","category"].forEach(function(k){
+    var wv=win[k]&&String(win[k]).trim();
+    out[k]=wv?win[k]:(lose[k]||"");
+  });
+  out.ro=(ta===tb)?(!!ex.ro||!!ie.ro):!!win.ro;
+  return {fields:out,at:Math.max(ta,tb)};
 }
 function ensureOutdoor(e){
   e.done=e.done||{};e.done.five=!!e.done.five;e.done.glockm=!!e.done.glockm;e.done.plates=!!e.done.plates;
@@ -644,7 +661,7 @@ function load(){
   var _mx=0;state.entries.forEach(function(e){if((e.checkinSeq||0)>_mx)_mx=e.checkinSeq;});
   if(state.meta.seq<=_mx)state.meta.seq=_mx+1;
 }
-function payload(){return {appName:"Match Scorekeeper",appVersion:APP_VERSION,schemaVersion:SCHEMA_VERSION,matchType:(state.meta&&state.meta.matchType)||"outdoor",entries:state.entries,meta:state.meta};}
+function payload(){return {appName:"Match Scorekeeper",appVersion:APP_VERSION,schemaVersion:SCHEMA_VERSION,matchType:(state.meta&&state.meta.matchType)||"outdoor",match:(state.meta&&state.meta.match)||"",entries:state.entries,meta:state.meta};}
 function save(){var d=payload();mem=d;
   try{localStorage.setItem(KEY,JSON.stringify(d));markSaved(true);}catch(e){markSaved(false);}}
 /* --- import classification --------------------------------------------
@@ -653,6 +670,8 @@ function save(){var d=payload();mem=d;
    -> full import including scores/rounds. */
 function backupKind(d){if(d&&(typeof d.schemaVersion==="number"||(d.meta&&typeof d.meta.schemaVersion==="number")))return "v2";return "legacy";}
 function backupType(d){return (d&&(d.matchType||(d.meta&&d.meta.matchType)))||"outdoor";}
+function backupMatch(d){return (d&&(d.match||(d.meta&&d.meta.match)))||"";}
+function normMatch(s){return (s||"").trim().toLowerCase().replace(/\s+/g," ");}
 /* roster-only: keep who they are, drop what they shot (fresh blank scores) */
 function rosterOnly(src){var e=blankEntry();
   e.name=src.name||"";e.email=src.email||"";e.phone=src.phone||"";e.ro=!!src.ro;
@@ -801,16 +820,38 @@ function ciNeedsDG(e){return e.active&&(!e.division||!e.gun);}
 function ciNeedsEmail(e){return e.active&&!e.email;}
 function renderCheckin(){
   var q=(document.getElementById("checkinSearch").value||"").toLowerCase();
-  var all=state.entries.slice().sort(function(a,b){return (a.name||"").localeCompare(b.name||"");});
-  var shown=all.filter(function(e){return !q||(e.name||"").toLowerCase().indexOf(q)>=0;});
   var list=document.getElementById("checkinList");
   if(!state.entries.length){list.innerHTML='<div class="empty" style="padding:20px">No shooters on file yet.<br>Tap “Add new shooter”.</div>';return;}
-  list.innerHTML=shown.map(function(e){
+  /* One row per PERSON, not per entry. In v2 a person owns one entry per
+     round / division-run, so listing raw entries shows them repeatedly —
+     especially after merging several tablets. */
+  var byP={},order=[];
+  state.entries.forEach(function(e){
+    if(!byP[e.personId]){byP[e.personId]=[];order.push(e.personId);}
+    byP[e.personId].push(e);});
+  var people=order.map(function(pid){
+    var runs=byP[pid].slice().sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
+    var act=runs.filter(function(r){return r.active;});
+    return {pid:pid,runs:runs,rep:(act[0]||runs[0]),active:act.length>0,nActive:act.length};});
+  people.sort(function(a,b){return (a.rep.name||"").localeCompare(b.rep.name||"");});
+  var shown=people.filter(function(p){return !q||(p.rep.name||"").toLowerCase().indexOf(q)>=0;});
+  list.innerHTML=shown.map(function(p){
+    var e=p.rep;
     var badges=(ciNeedsDG(e)?' <span class="cibadge warn">needs div/gun</span>':'')
               +(ciNeedsEmail(e)?' <span class="cibadge email">no email</span>':'');
+    /* one run reads as before; several runs list their divisions so it's
+       clear why the person has more than one */
+    var sub;
+    if(p.nActive>1){
+      sub=p.nActive+' rounds · '+p.runs.filter(function(r){return r.active;})
+        .map(function(r){return esc(r.division||"—");}).join(", ");
+    }else{
+      sub=esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.squad?' · '+esc(e.squad):'');
+    }
+    if(p.runs.some(hasAny))sub+=' · scored';
     return '<div class="cirow" data-id="'+e.id+'"><div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+badges+'</div>'
-      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.squad?' · '+esc(e.squad):'')+(hasAny(e)?' · scored':'')+'</div></div>'
-      +'<span class="cistat'+(e.active?' on':'')+'">'+(e.active?'In':'Out')+'</span></div>';
+      +'<div class="dv">'+sub+'</div></div>'
+      +'<span class="cistat'+(p.active?' on':'')+'">'+(p.active?'In':'Out')+'</span></div>';
   }).join("");
   list.querySelectorAll(".cirow").forEach(function(row){row.addEventListener("click",function(){openCheckinChoice(byId(row.dataset.id));});});
 }
@@ -851,7 +892,8 @@ document.getElementById("ciConfirm").addEventListener("click",function(){
   var div=val("ci-div");var g=document.getElementById("ci-gun").value;if(g==="__other")g=val("ci-gun-other");
   var email=val("ci-email");
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast("Check the email address");return;}
-  e.division=div;e.gun=g;e.email=email;
+  e.division=div;e.gun=g;                       /* per-run */
+  updatePerson(e.personId,{email:email});       /* identity → all of this person's runs, timestamped */
   var wasActive=e.active;
   if(!wasActive){e.active=true;if(state.meta.squad)e.squad=state.meta.squad;e.checkinSeq=state.meta.seq++;}
   save();closeCi();renderCheckin();
@@ -1774,14 +1816,20 @@ document.getElementById("mergeChoose").addEventListener("click",function(){docum
 document.getElementById("mergeFile").addEventListener("change",function(ev){
   var files=[].slice.call(ev.target.files);if(!files.length)return;
   Promise.all(files.map(readText)).then(function(texts){
-    var added=0,updated=0,kept=0,conflicts=0,bySquad={},errors=0,refused=0,already=0;
+    var added=0,updated=0,kept=0,conflicts=0,bySquad={},errors=0,refused=0,already=0,wrongMatch=[];
     var curType=(state.meta&&state.meta.matchType)||"outdoor";
+    var curMatch=normMatch(state.meta&&state.meta.match);
     undoPush("Merge of "+files.length+" file"+(files.length===1?"":"s"));
     texts.forEach(function(txt){var d;try{d=JSON.parse(txt);}catch(e){errors++;return;}
       if(!d||!d.entries){errors++;return;}
       var kind=backupKind(d);
       /* a v2 backup of a different match type must never merge into this match */
       if(kind==="v2"&&backupType(d)!==curType){refused++;return;}
+      /* A file from a DIFFERENT match must not merge in: its scores would be
+         written onto entries this tablet has already cleared, resurrecting last
+         week's results. Only checked when both sides are labelled. */
+      var fileMatch=normMatch(backupMatch(d));
+      if(kind==="v2"&&curMatch&&fileMatch&&fileMatch!==curMatch){wrongMatch.push(backupMatch(d));return;}
       if(d.meta&&d.meta.match&&!state.meta.match)state.meta.match=d.meta.match;
       d.entries.forEach(function(ie){
         if(kind==="legacy")ie=rosterOnly(ie); else ensureShape(ie,curType);   /* legacy merges roster only, no scores */
@@ -1789,17 +1837,21 @@ document.getElementById("mergeFile").addEventListener("change",function(ev){
         var idx=indexOfId(ie.id);
         if(idx<0){state.entries.push(ie);added++;return;}
         var ex=state.entries[idx],ieS=inResults(ie),exS=inResults(ex);
+        /* Identity is person-level and must survive regardless of which copy
+           wins on scores — otherwise an email corrected at check-in on a
+           shooter who never shot is silently discarded. */
+        var bi=bestIdentity(ex,ie);
         if(ieS&&exS){
           /* Same entry, both scored. If the scores are identical this is the
              same file being merged again (double-tap, re-picked, re-sent) —
              skip it. Only genuinely different scores are a real conflict. */
-          if(scoreFingerprint(ie)===scoreFingerprint(ex)){already++;return;}
-          ie.id=uid("e");state.entries.push(ie);added++;conflicts++;
+          if(scoreFingerprint(ie)===scoreFingerprint(ex)){already++;updatePerson(ex.personId,bi.fields,bi.at);return;}
+          ie.id=uid("e");state.entries.push(ie);added++;conflicts++;updatePerson(ex.personId,bi.fields,bi.at);
         }
-        else if(ieS&&!exS){state.entries[idx]=ie;updated++;}
-        else{kept++;}
+        else if(ieS&&!exS){state.entries[idx]=ie;updated++;updatePerson(ie.personId,bi.fields,bi.at);}
+        else{kept++;updatePerson(ex.personId,bi.fields,bi.at);}
       });});
-    save();showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already);show("results");
+    save();showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already,wrongMatch);show("results");
   });
   ev.target.value="";
 });
@@ -1859,15 +1911,29 @@ function doUndo(){
   if(!confirm("Undo: "+t.label+"?\n\nThis puts the tablet back to how it was at "+new Date(t.at).toLocaleTimeString()+" ("+t.n+" shooters). Anything scored since then will be lost."))return;
   if(undoApply()){toast("Undone");document.getElementById("mergeScrim").classList.remove("open");show("results");}
 }
-function findDuplicates(){var map={},dups=[],indoor=(state.meta.matchType||"outdoor")==="indoor";
-  state.entries.forEach(function(e){if(!inResults(e))return;
-    /* Indoor allows the same shooter in the same division more than once (one
-       entry per round), so name+division alone isn't a duplicate there —
-       include the score signature so only genuine copies are flagged. */
-    var k=(e.name||"").trim().toLowerCase()+"|"+(e.division||"").trim().toLowerCase()+(indoor?"|"+scoreFingerprint(e):"");
-    (map[k]=map[k]||[]).push(e);});
-  for(var k in map){if(map[k].length>1)dups.push(map[k]);}return dups;}
-function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already){
+/* Duplicate PEOPLE in the master list: one name carrying more than one
+   personId means the same human was entered twice (typically added as a
+   walk-in on two different tablets, which merge can't reconcile on its own).
+   Deliberately NOT filtered to scored entries — a duplicate person is a
+   duplicate whether or not they shot. Round count is irrelevant here, so
+   this works the same for indoor and outdoor. */
+function findDuplicates(){
+  var byName={},out=[];
+  state.entries.forEach(function(e){
+    var n=(e.name||"").trim().toLowerCase().replace(/\s+/g," ");
+    if(!n)return;
+    (byName[n]=byName[n]||[]).push(e);
+  });
+  Object.keys(byName).forEach(function(n){
+    var pids={},list=byName[n];
+    list.forEach(function(e){pids[e.personId||"?"]=1;});
+    var k=Object.keys(pids);
+    if(k.length>1)out.push({name:list[0].name||"(unnamed)",entries:list,people:k.length,
+      divisions:list.map(function(e){return e.division||"—";})});
+  });
+  return out;
+}
+function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already,wrongMatch){
   var dups=findDuplicates();
   var h='<div class="mstat"><div class="box"><b>'+added+'</b><span>added</span></div><div class="box"><b>'+updated+'</b><span>updated</span></div><div class="box"><b>'+state.entries.length+'</b><span>total</span></div></div>';
   var sk=Object.keys(bySquad);
@@ -1875,10 +1941,14 @@ function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,al
   if(already)h+='<div class="goodbox"><b>'+already+' already merged</b> — skipped, because those scores were identical to what this tablet already had. Merging the same file twice is safe.</div>';
   if(errors)h+='<div class="warnbox">'+errors+' file(s) couldn’t be read and were skipped.</div>';
   if(refused)h+='<div class="warnbox"><b>'+refused+' file(s) skipped</b> — wrong match type (indoor vs outdoor) for this match. Merge only backups of the same type.</div>';
+  if(wrongMatch&&wrongMatch.length)h+='<div class="warnbox"><b>'+wrongMatch.length+' file(s) skipped — different match.</b><br>'
+    +'This match is “'+esc(state.meta.match||"—")+'”, but '+(wrongMatch.length===1?'that file is':'those files are')+' from '
+    +wrongMatch.map(function(m){return '“'+esc(m)+'”';}).join(", ")+'.<br>'
+    +'Merging it would have written those scores onto this match. If the label is just wrong, fix the match name on Results and try again.</div>';
   if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and delete the wrong one from the Roster.</div>';
-  if(dups.length)h+='<div class="warnbox"><b>Possible duplicates</b> — same name + division more than once:<br>'
-    +dups.map(function(g){return '• '+esc(g[0].name||"(unnamed)")+' — '+esc(g[0].division||"—")+' ('+g.length+'×)';}).join("<br>")+'</div>';
-  else h+='<div class="muted" style="margin-bottom:6px">No duplicate names detected.</div>';
+  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Delete the wrong one from the Roster (or keep both if they really are different people with the same name):<br>'
+    +dups.map(function(g){return '• '+esc(g.name)+' — '+g.people+' separate records ('+g.divisions.map(esc).join(", ")+')';}).join("<br>")+'</div>';
+  else h+='<div class="muted" style="margin-bottom:6px">No duplicate shooters detected.</div>';
   document.getElementById("mergeBody").innerHTML=h;
   var ub=document.getElementById("mergeUndo");if(ub)ub.style.display=undoTop()?"":"none";
   document.getElementById("mergeScrim").classList.add("open");
