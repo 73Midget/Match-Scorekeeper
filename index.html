@@ -531,7 +531,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-07-26-c";
+var APP_BUILD="2026-07-26-d";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -941,7 +941,18 @@ function renderScore(){
     + '<div class="btnrow" style="margin-bottom:0"><button class="btn ghost" id="editThis">Edit details</button><button class="btn dark" id="backRoster">Done</button></div>';
 
   body.querySelectorAll("input.timeinp").forEach(function(inp){
-    inp.addEventListener("input",function(){var st=inp.dataset.stage,ix=+inp.dataset.ix;var f=timeFromDigits(inp.value);inp.value=f;inp.classList.toggle("bad",timeBad(f));e[st].t[ix]=f===""?null:f;save();updateScoreUI(e);});
+    /* Fields are readonly and open the app's own pad. iPadOS has a long-standing
+       WebKit bug where installed web apps never raise the software keyboard, so
+       the OS keyboard is deliberately not relied on anywhere in scoring. */
+    inp.addEventListener("click",function(){
+      if(inp.disabled)return;
+      var st=inp.dataset.stage,ix=+inp.dataset.ix;
+      openPad({title:"String "+(ix+1)+" — "+stageLabel(st),sub:"seconds",mode:"time",value:inp.value,
+        onSave:function(v){
+          inp.value=v;inp.classList.toggle("bad",timeBad(v));
+          e[st].t[ix]=(v===""?null:v);save();updateScoreUI(e);
+        }});
+    });
   });
   body.querySelectorAll(".tap").forEach(function(el){wireTap(e,el);});
   body.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){e.status=b.dataset.st;save();updateStatusUI(e);});});
@@ -1046,20 +1057,36 @@ function renderScoreIndoor(){
 function setRoundStatus(rid,st){var r=byId(rid);if(!r)return;r.status=(statusOf(r)===st?"normal":st);save();renderScoreIndoor();}
 
 /* --- number pad (touch + physical keyboard) --- */
-var padState={val:"0",max:500,onSave:null,open:false};
+var padState={val:"0",max:500,onSave:null,open:false,mode:"int",digits:""};
 function openPadFor(rid,fld){var r=byId(rid);if(!r)return;var isX=(fld==="x");
   openPad({title:isX?"X count":"Score",sub:isX?"0–50":"0–500",value:(r[fld]!=null?num0(r[fld]):0),max:isX?50:500,
     onSave:function(v){r[fld]=v;save();renderScoreIndoor();}});}
-function openPad(o){padState.max=o.max;padState.onSave=o.onSave;padState.val=String(o.value||0);padState.open=true;
+function openPad(o){padState.mode=o.mode||"int";padState.max=o.max||500;padState.onSave=o.onSave;
+  if(padState.mode==="time")padState.digits=String(o.value||"").replace(/\D/g,"");
+  else padState.val=String(o.value||0);
+  padState.open=true;
   document.getElementById("padTitle").textContent=o.title;document.getElementById("padSub").textContent=o.sub||"";
   padRefresh();document.getElementById("padScrim").classList.add("open");}
-function padRefresh(){document.getElementById("padDisp").textContent=padState.val;}
-function padDigit(d){var cand=(padState.val==="0")?String(d):padState.val+String(d);
+function padRefresh(){document.getElementById("padDisp").textContent=
+  (padState.mode==="time")?(timeFromDigits(padState.digits)||"0.00"):padState.val;}
+function padDigit(d){
+  if(padState.mode==="time"){
+    var nd=(padState.digits+String(d)).replace(/^0+/,"");
+    if(nd.length>6){buzz([15,25]);return;}
+    padState.digits=nd;padRefresh();return;
+  }
+  var cand=(padState.val==="0")?String(d):padState.val+String(d);
   if(cand.length>3){buzz([15,25]);return;}if(parseInt(cand,10)>padState.max){buzz([15,25]);return;}padState.val=cand;padRefresh();}
-function padBack(){padState.val=padState.val.length>1?padState.val.slice(0,-1):"0";padRefresh();}
-function padClearV(){padState.val="0";padRefresh();}
+function padBack(){
+  if(padState.mode==="time"){padState.digits=padState.digits.slice(0,-1);padRefresh();return;}
+  padState.val=padState.val.length>1?padState.val.slice(0,-1):"0";padRefresh();}
+function padClearV(){
+  if(padState.mode==="time"){padState.digits="";padRefresh();return;}
+  padState.val="0";padRefresh();}
 function padClose(){padState.open=false;document.getElementById("padScrim").classList.remove("open");}
-function padDoSave(){var v=parseInt(padState.val,10)||0;var cb=padState.onSave;padClose();if(cb)cb(v);}
+function padDoSave(){
+  var v=(padState.mode==="time")?timeFromDigits(padState.digits):(parseInt(padState.val,10)||0);
+  var cb=padState.onSave;padClose();if(cb)cb(v);}
 document.querySelectorAll("#padScrim .padgrid button").forEach(function(b){b.addEventListener("click",function(){
   var k=b.dataset.k;if(k==="back")padBack();else if(k==="clear")padClearV();else padDigit(k);});});
 document.getElementById("padSave").addEventListener("click",padDoSave);
@@ -1136,7 +1163,7 @@ function paperStage(title,key,strings,steel){
     +(done?'<div class="donebanner">✓ Stage completed &amp; locked — tap “Review / edit” below to change scores</div>':'');
   h+='<div class="strings">';
   for(var i=0;i<strings;i++){var v=s.t[i];v=(v===null||v===undefined)?"":v;
-    h+='<div class="tinp"><label>String '+(i+1)+'</label><input class="timeinp'+(timeBad(v)?' bad':'')+'" inputmode="numeric" data-stage="'+key+'" data-ix="'+i+'" placeholder="0.00" value="'+v+'"'+(done?' disabled':'')+'></div>';}
+    h+='<div class="tinp"><label>String '+(i+1)+'</label><input class="timeinp'+(timeBad(v)?' bad':'')+'" readonly inputmode="numeric" data-stage="'+key+'" data-ix="'+i+'" placeholder="0.00" value="'+v+'"'+(done?' disabled':'')+'></div>';}
   h+='</div>';
   h+='<div class="penhdr">Targets <span class="hint">— tap to add · long-press to reset · '+exp+' hits each</span></div>';
   h+='<div class="tgrid"><div class="trow thead"><span>Tgt</span>'
@@ -1179,7 +1206,7 @@ function platesStage(e){
     var miss=num0(e.plates.miss[i]),hit=num0(e.plates.hits[i]),pen=miss*STEEL,acct=hit+miss,cls=statusCls(acct,6);
     h+='<div class="trow ptrow'+(cls==='warn'?' bad':'')+'" id="row-plate-'+i+'">'
       +'<span class="tnum">'+(i+1)+'<em class="cnt '+cls+'" id="cnt-plate-'+i+'">'+acct+'/6</em></span>'
-      +'<input class="timeinp'+(timeBad(v)?' bad':'')+'" inputmode="numeric" data-stage="plates" data-ix="'+i+'" placeholder="0.00" value="'+v+'"'+(done?' disabled':'')+'>'
+      +'<input class="timeinp'+(timeBad(v)?' bad':'')+'" readonly inputmode="numeric" data-stage="plates" data-ix="'+i+'" placeholder="0.00" value="'+v+'"'+(done?' disabled':'')+'>'
       +'<button type="button" class="tap'+(hit?'':' zero')+'" data-tap="phit" data-string="'+i+'">'+hit+'</button>'
       +'<button type="button" class="tap miss'+(miss?'':' zero')+'" data-tap="pmiss" data-string="'+i+'">'+miss+'</button>'
       +'<span class="tpen'+(pen?' has':'')+'" id="ppen-'+i+'">'+(pen?'+'+pen+'s':'·')+'</span></div>';
