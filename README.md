@@ -20,7 +20,7 @@ It's a Progressive Web App — open the link above and add it to your home scree
 iPad/iPhone: Safari → Share → Add to Home Screen. Android: Chrome → Install app. Desktop: bookmark
 it or install from the address bar.
 
-Step-by-step: **[install.html](install.html)** · Full manual: **[manual.html](manual.html)**
+Step-by-step: **[installation_instructions.html](installation_instructions.html)** · Full manual: **[manual.html](manual.html)**
 
 ## Coming soon
 
