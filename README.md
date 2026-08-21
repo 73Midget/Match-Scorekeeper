@@ -34,8 +34,6 @@ One plain HTML file — vanilla JavaScript, no frameworks, no build step, no dep
 manifest, service worker and icons add installability and offline caching on top. Data lives in
 `localStorage`; backups and squad transfers are plain JSON.
 
-Hosting and update instructions: **[DEPLOY-GUIDE.html](DEPLOY-GUIDE.html)**
-
 ## License
 
 Copyright (C) 2026 G. Groiss. Free software under the
