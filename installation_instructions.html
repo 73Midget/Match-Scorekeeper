@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!--
+  Match Scorekeeper — Installation Guide (for shooters / range officers)
+  Created by G. Groiss · Free software under the GNU AGPL v3.0
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Match Scorekeeper — How to Install</title>
+<style>
+  :root{
+    --paper:#f4f1ea; --card:#fbfaf6; --ink:#16181d; --steel:#5a6068; --steel-soft:#8a9098;
+    --line:#d9d4c8; --orange:#e8541e; --orange-deep:#b53c10; --green:#1f7a4d; --gold:#caa12a;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.55}
+  header{background:var(--ink);color:#fff;padding:20px;border-bottom:4px solid var(--orange)}
+  header h1{margin:0;font-size:20px;letter-spacing:-.01em}
+  header h1 b{color:var(--orange)}
+  header p{margin:6px 0 0;font-size:13px;color:#c9c6c0}
+  main{max-width:780px;margin:0 auto;padding:20px 16px 60px}
+  h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--steel);margin:30px 0 10px;font-weight:800;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .link{display:block;background:var(--ink);color:#fff;text-align:center;font-family:var(--mono);font-size:16px;
+        padding:16px;border-radius:12px;text-decoration:none;margin:14px 0;word-break:break-all}
+  .link span{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:0 0 14px}
+  .card h3{margin:0 0 8px;font-size:16px}
+  .card h3 .tag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+                background:var(--steel);color:#fff;border-radius:999px;padding:3px 9px;margin-left:8px;vertical-align:2px}
+  ol,ul{margin:8px 0;padding-left:22px}
+  li{margin:6px 0}
+  code{font-family:var(--mono);font-size:12px;background:#efece3;border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+  .note{border-left:3px solid var(--orange);background:#fdf3ee;padding:11px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  .warn{border-left:3px solid var(--gold);background:#fdf9ea;padding:11px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  .good{border-left:3px solid var(--green);background:#eef7f2;padding:11px 14px;border-radius:0 9px 9px 0;margin:12px 0;font-size:14px}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#efece3;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel)}
+  footer{border-top:1px solid var(--line);margin-top:36px;padding-top:14px;font-size:12px;color:var(--steel)}
+  @media print{
+    body{background:#fff}
+    header{background:#fff;color:#000;border-bottom:2px solid #000}
+    header h1 b{color:#000} header p{color:#333}
+    .link{background:#fff;color:#000;border:1px solid #000}
+    .link span{color:#000}
+    h2{color:#000} h2::after{background:#000}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Match <b>Scorekeeper</b> — How to Install</h1>
+  <p>Scoring app for GSSF-style indoor &amp; outdoor matches</p>
+</header>
+<main>
+
+<a class="link" href="https://gpl-scorekeeper.netlify.app"><span>Open this address on your device</span>gpl-scorekeeper.netlify.app</a>
+
+<div class="note">
+  <b>You don't download anything from an app store.</b> You open the address above in your web
+  browser once, then add it to your home screen. After that it behaves like a normal app — it has
+  its own icon and <b>works with no internet at all</b>, which is what we need at the range.
+</div>
+
+<h2>Install it</h2>
+
+<div class="card">
+  <h3>iPad or iPhone <span class="tag">Safari only</span></h3>
+  <ol>
+    <li>Open <b>Safari</b> and go to the address above.<br>
+        <span style="color:var(--steel);font-size:13px">This must be Safari. Chrome on an iPad can't install apps.</span></li>
+    <li>Tap the <b>Share</b> button — the square with an arrow pointing up.</li>
+    <li>Scroll down the list and tap <b>Add to Home Screen</b>.</li>
+    <li>Tap <b>Add</b> in the top right.</li>
+    <li>Close Safari, then tap the new bullseye icon on your home screen.</li>
+    <li><b>While you still have internet</b>, let it finish loading once.</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>Android tablet or phone <span class="tag">Chrome</span></h3>
+  <ol>
+    <li>Open <b>Chrome</b> and go to the address above.</li>
+    <li>Tap <b>Install</b> if it offers, or tap the <b>⋮</b> menu and choose
+        <b>Install app</b> (sometimes called <b>Add to Home screen</b>).</li>
+    <li>Confirm <b>Install</b>. The icon appears on your home screen.</li>
+    <li>Open it from the icon and, <b>while you still have internet</b>, let it finish loading once.</li>
+  </ol>
+</div>
+
+<div class="card">
+  <h3>Windows PC or Mac laptop</h3>
+  <p style="margin:0 0 8px">Either way works — pick whichever you prefer:</p>
+  <ul>
+    <li><b>Simplest:</b> just open the address and bookmark it. Nothing else to do.</li>
+    <li><b>As an app window:</b> in <b>Edge</b> or <b>Chrome</b>, click the install icon in the
+        address bar (or menu → Apps → Install). On a <b>Mac</b> in Safari, use
+        <b>File → Add to Dock</b>.</li>
+  </ul>
+  <p style="margin:8px 0 0;color:var(--steel);font-size:13px">
+    Firefox can't install it as an app, but the website works normally — just bookmark it.</p>
+</div>
+
+<div class="good">
+  <b>Needs internet the first time only.</b> After that first load it opens and works completely
+  offline. You can score an entire match with no signal.
+</div>
+
+<h2>Important — for tablets used at matches</h2>
+
+<div class="warn">
+  <b>Always open it from the home screen icon, never from Safari or Chrome.</b><br>
+  The icon version and the browser version keep <b>separate</b> saved data. If you score a squad in
+  the browser by mistake, those scores won't be in the app. On iPads there's a second reason: the
+  browser version can quietly discard its saved data after about a week of not being used, while
+  the home screen version does not.
+</div>
+
+<div class="warn">
+  <b>Never use "Clear History" or "Clear browsing data" on a match tablet.</b>
+  On an iPad, clearing Safari's history can also wipe the app's saved scores.
+</div>
+
+<h2>Updates</h2>
+
+<p><b>Updates install themselves.</b> There's nothing to download and no app store to check.</p>
+
+<div class="card">
+  <ol>
+    <li><b>Fully close the app</b> — don't just switch away from it. On a tablet, swipe it away from
+        the recent-apps list.</li>
+    <li><b>Open it again while you have internet.</b> The new version loads.</li>
+    <li>To confirm, look at the <b>Match Setup</b> screen — it shows the version and build number.
+        Every tablet at a match should show the <b>same</b> one.</li>
+  </ol>
+</div>
+
+<div class="note">
+  Updates never install in the middle of a match. If a new version comes out while you're scoring,
+  it waits until the next time the app is fully closed and reopened.
+</div>
+
+<h2>If something's not right</h2>
+
+<table>
+  <tr><th>Problem</th><th>What to do</th></tr>
+  <tr>
+    <td>App won't open with no internet</td>
+    <td>It needs one successful online load first. Get on wifi, open it once, let it finish loading.</td>
+  </tr>
+  <tr>
+    <td>Tablet shows an older version than everyone else</td>
+    <td>Fully close it and reopen while online. Check Match Setup again.</td>
+  </tr>
+  <tr>
+    <td>No "Add to Home Screen" on an iPad</td>
+    <td>You're probably in Chrome. Open the address in <b>Safari</b> instead.</td>
+  </tr>
+  <tr>
+    <td><b>iPad:</b> tapping a name or email box brings up no keyboard</td>
+    <td>This is an Apple bug affecting installed web apps generally, not this app. Restarting the
+        iPad usually fixes it. Scoring is unaffected.</td>
+  </tr>
+  <tr>
+    <td>My scores disappeared</td>
+    <td>Check whether you opened it in the browser instead of from the home screen icon — those keep
+        separate data. Tell the match director; a backup can usually be restored.</td>
+  </tr>
+</table>
+
+<div class="warn">
+  <b>Two identical icons?</b> If the address ever changes, delete the old icon once your data has
+  been moved across. Two look-alike icons on the same tablet is how a squad's scores end up in the
+  wrong place.
+</div>
+
+<footer>
+  Match Scorekeeper · created by G. Groiss · Free software under the GNU AGPL v3.0.<br>
+  Not affiliated with, endorsed by, or sponsored by Glock Ges.m.b.H. or GLOCK, Inc.
+  "GSSF" and "GLOCK" are trademarks of their respective owners and are used here only to describe match format.
+</footer>
+
+</main>
+</body>
+</html>
