@@ -540,7 +540,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-07-26-f";
+var APP_BUILD="2026-07-26-g";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -934,6 +934,21 @@ document.getElementById("newMatchBtn").addEventListener("click",function(){
 });
 
 /* score */
+/* Outdoor: a shooter may enter several divisions, each a separate scored entry.
+   Show their other entries so it's obvious they exist and can be jumped to. */
+function otherDivisionsBlock(e){
+  var mine=state.entries.filter(function(r){return r.personId===e.personId&&r.active;})
+    .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
+  if(mine.length<2)return '';
+  return '<div class="card pad" style="margin-bottom:8px"><div class="muted" style="font-weight:800;margin-bottom:6px">'
+    +esc(firstName(e.name))+'’s divisions this match</div>'
+    +mine.map(function(r){var cur=(r.id===e.id);
+      return '<div class="lbrow'+(cur?' gold':'')+'" data-jump="'+r.id+'" style="cursor:pointer">'
+        +'<div class="meta"><div class="nm">'+esc(r.division||"—")+(r.gun?' · '+esc(r.gun):'')+'</div>'
+        +'<div class="dv">'+(cur?'currently scoring':'tap to switch')+'</div></div>'
+        +'<div class="sc">'+(hasAny(r)?fmt(total(r)):'—')+'<small>'+(hasAny(r)?'total':'not shot')+'</small></div></div>';}).join("")
+    +'</div>';
+}
 function renderScore(){
   var body=document.getElementById("scoreBody"),e=byId(state.selected);
   if((state.meta.matchType||"outdoor")==="indoor")return renderScoreIndoor();
@@ -950,6 +965,8 @@ function renderScore(){
     + paperStage("GLOCK\u2019M","glockm",3,true)
     + platesStage(e)
     + (e.email?'<button class="btn green" id="emailOne">✉ Email scores to '+esc(firstName(e.name))+'</button><div style="height:8px"></div>':'')
+    + otherDivisionsBlock(e)
+    + '<button class="btn" id="addDivBtn" style="margin-bottom:8px">+ Add another division for '+esc(firstName(e.name))+'</button>'
     + '<button class="btn danger" id="clearScores" style="margin-bottom:8px">Clear ALL scores for this competitor</button>'
     + '<div class="btnrow" style="margin-bottom:0"><button class="btn ghost" id="editThis">Edit details</button><button class="btn dark" id="backRoster">Done</button></div>';
 
@@ -981,6 +998,10 @@ function renderScore(){
   });
   body.querySelector("#editThis").addEventListener("click",function(){openEdit(e.id);});
   body.querySelector("#backRoster").addEventListener("click",function(){show("roster");});
+  var adb=body.querySelector("#addDivBtn");
+  if(adb)adb.addEventListener("click",function(){openRoundModal("add",null);});
+  body.querySelectorAll("[data-jump]").forEach(function(row){
+    row.addEventListener("click",function(){state.selected=row.dataset.jump;renderScore();window.scrollTo(0,0);});});
   updateScoreUI(e);updateStatusUI(e);
 }
 function updateStatusUI(e){
@@ -1136,9 +1157,12 @@ function openRoundModal(mode,rid){roundMode=mode;rdPair.asked=false;
     setSelectValue("rd-div",r.division||"");setGunValue(r.gun||"","rd-gun","rd-gun-other");
     document.getElementById("roundTitle").textContent="Change gun / division";document.getElementById("roundConfirm").textContent="Save";
   }else{var sel=byId(state.selected);roundPid=sel.personId;roundEditId=null;
+    var indoor=(state.meta.matchType||"outdoor")==="indoor";
     var rs=personRounds(roundPid),lastR=rs[rs.length-1]||sel;
-    setSelectValue("rd-div",lastR.division||"");setGunValue(lastR.gun||"","rd-gun","rd-gun-other");
-    document.getElementById("roundTitle").textContent="Add round";document.getElementById("roundConfirm").textContent="Add round";}
+    setSelectValue("rd-div",indoor?(lastR.division||""):"");   /* outdoor: a new division, so start blank */
+    setGunValue(indoor?(lastR.gun||""):"","rd-gun","rd-gun-other");
+    document.getElementById("roundTitle").textContent=indoor?"Add round":"Add another division";
+    document.getElementById("roundConfirm").textContent=indoor?"Add round":"Add division";}
   document.getElementById("roundScrim").classList.add("open");
 }
 function closeRound(){document.getElementById("roundScrim").classList.remove("open");roundEditId=null;}
@@ -1153,12 +1177,17 @@ document.getElementById("roundCancel").addEventListener("click",closeRound);
 document.getElementById("roundScrim").addEventListener("click",function(ev){if(ev.target.id==="roundScrim")closeRound();});
 document.getElementById("roundConfirm").addEventListener("click",function(){
   var div=val("rd-div"),g=document.getElementById("rd-gun").value;if(g==="__other")g=val("rd-gun-other");
+  var indoor=(state.meta.matchType||"outdoor")==="indoor";
   if(roundMode==="edit"){var r=byId(roundEditId);if(r){r.division=div;r.gun=g;save();}}
-  else{var sel=byId(state.selected);var nr=blankEntry("indoor");nr.personId=roundPid;
+  else{var sel=byId(state.selected);var nr=blankEntry(indoor?"indoor":"outdoor");
+    nr.personId=roundPid||sel.personId;      /* never orphan the new entry */
     nr.name=sel.name;nr.email=sel.email;nr.phone=sel.phone;nr.ro=sel.ro;nr.category=sel.category;nr.squad=sel.squad;
+    nr.idAt=sel.idAt;
     nr.division=div;nr.gun=g;nr.active=true;nr.checkinSeq=state.meta.seq++;
-    state.entries.push(nr);save();}
-  closeRound();renderScoreIndoor();
+    state.entries.push(nr);save();
+    if(!indoor){state.selected=nr.id;closeRound();show("score");toast("Added "+esc(div||"division")+" — score it like any other");return;}}
+  closeRound();
+  if(indoor)renderScoreIndoor(); else renderScore();
 });
 function clearStage(e,key){
   if(key==="five"){e.five.t=[null,null,null];e.five.targets=mkTargets(5);}
@@ -1723,7 +1752,7 @@ function execCopy(html){
 
 /* edit */
 var editingId=null;
-function openEdit(id){editingId=id||null;var e=id?byId(id):blankEntry();
+function openEdit(id){editingId=id||null;fPair.asked=false;var e=id?byId(id):blankEntry();
   document.getElementById("editTitle").textContent=id?"Edit Competitor":"Add Competitor";
   document.getElementById("f-name").value=e.name||"";
   setSelectValue("f-div",e.division||"");
@@ -1740,7 +1769,12 @@ document.getElementById("addBtn").addEventListener("click",function(){openEdit(n
 document.getElementById("f-gun").addEventListener("change",function(){
   var other=document.getElementById("f-gun-other");
   if(this.value==="__other"){other.style.display="block";other.focus();}else{other.style.display="none";}
+  syncDivGun("gun","f-div","f-gun","f-gun-other",fPair);
 });
+document.getElementById("f-gun-other").addEventListener("change",function(){
+  syncDivGun("gun","f-div","f-gun","f-gun-other",fPair);});
+document.getElementById("f-div").addEventListener("change",function(){
+  syncDivGun("div","f-div","f-gun","f-gun-other",fPair);});
 document.getElementById("editCancel").addEventListener("click",closeEdit);
 document.getElementById("editScrim").addEventListener("click",function(ev){if(ev.target.id==="editScrim")closeEdit();});
 document.getElementById("editSave").addEventListener("click",function(){
@@ -2077,7 +2111,7 @@ function syncDivGun(which,divId,gunId,gunOtherId,flags){
       setGunValue(p2.gun,gunId,gunOtherId);if(gunOther)gunOther.style.display="none";}
   }
 }
-var ciPair={asked:false},rdPair={asked:false};
+var ciPair={asked:false},rdPair={asked:false},fPair={asked:false};
 function setSelectValue(id,value){var el=document.getElementById(id);if(!el)return;
   if(value&&!Array.prototype.some.call(el.options,function(o){return o.value===value;})){
     var opt=document.createElement("option");opt.value=value;opt.textContent=value;el.appendChild(opt);}
