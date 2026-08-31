@@ -245,6 +245,10 @@
   .warnbox b{color:var(--red)}
   .goodbox{background:#eef7f2;border:1px solid #bcdccb;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.5}
   .goodbox b{color:var(--green)}
+  .pendbadge{background:var(--gold);color:#231b06;border:none;font-size:10px;font-weight:800;letter-spacing:.03em;
+             padding:5px 9px;border-radius:999px;margin-left:auto;flex:0 0 auto;cursor:pointer;white-space:nowrap;max-width:46%;
+             overflow:hidden;text-overflow:ellipsis}
+  .pendbadge+.sub{margin-left:8px}
   .gearbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:17px;line-height:1;
            width:34px;height:34px;border-radius:9px;margin-left:10px;flex:0 0 auto;cursor:pointer}
   .gearbtn:active{background:rgba(255,255,255,.26)}
@@ -276,6 +280,7 @@
 </head>
 <body>
 <header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
+  <button class="pendbadge" id="pendingBadge" style="display:none"></button>
   <span class="sub" id="saved">not saved yet</span>
   <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools">⚙</button></div></header>
 
@@ -327,6 +332,8 @@
     <div style="height:8px"></div>
     <button class="btn dark" id="squadResultsBtn">📊 Squad results &amp; email</button>
     <div style="height:8px"></div>
+    <button class="btn green" id="uploadSquadBtn" style="display:none">⬆ Upload squad to club server</button>
+    <div style="height:8px" id="uploadSquadGap"></div>
     <button class="btn" id="sendResultsBtn">📤 Send squad results</button>
     <div style="height:8px"></div>
     <div class="btnrow"><button class="btn ghost sm" id="csvBtn">Export CSV</button><button class="btn ghost sm" id="backupBtn">Backup</button></div>
@@ -630,7 +637,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-c";
+var APP_BUILD="2026-08-29-d";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -783,7 +790,7 @@ function rosterOnly(src){var e=blankEntry();
    server upload — so anything stored there travels off the device. This key
    holds settings that belong to the tablet and must never leave it. */
 var CFG_KEY="gssf_scorekeeper_cfg";
-var cfg={deviceLabel:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0};
+var cfg={deviceLabel:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0,pending:null};
 function loadCfg(){try{var raw=localStorage.getItem(CFG_KEY);if(raw)cfg=Object.assign(cfg,JSON.parse(raw)||{});}catch(e){}}
 function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}}
 
@@ -841,6 +848,7 @@ function renderSync(){
   else if(!cfg.online)syncStatus("","");
   else if(showSetup)syncStatus("idle","Paste your club's setup code to finish.");
   else syncStatus("ok","Connected"+(cfg.clubName?" to "+cfg.clubName:""));
+  renderPending();
 }
 
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
@@ -1064,6 +1072,82 @@ document.getElementById("set-putroster").addEventListener("click",function(){
   if(!confirm("Upload this tablet's "+n+" shooters as the club's shooter list?\n\nEvery tablet that downloads the list will get this one."))return;
   pushRoster();
 });
+/* --- squad upload (§4.3) ------------------------------------------------
+   payload is generated ONCE and sent verbatim — the server hashes those exact
+   bytes for duplicate detection, so it must not be re-serialized in between.
+   A 200 with duplicate:true is a success, not an error (§4.3). */
+function matchKey(rawMatch,matchType){return String(matchType||"outdoor")+"|"+normMatch(rawMatch);}
+function apiPostSquad(txt){
+  var body={
+    match_key:matchKey(state.meta.match,state.meta.matchType),
+    device_id:cfg.deviceId,
+    match_type:(state.meta.matchType||"outdoor"),
+    payload:txt,                                   /* verbatim */
+    schema_version:SCHEMA_VERSION,
+    squad_key:normMatch(state.meta.squad),
+    squad_label:(state.meta.squad||""),
+    match_label:(state.meta.match||""),
+    device_label:(cfg.deviceLabel||""),
+    app_version:APP_VERSION,app_build:APP_BUILD,
+    entry_count:state.entries.filter(function(e){return e.active;}).length
+  };
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){
+    return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,body:j};});
+  });
+}
+/* Attempt an upload, retrying a few times with a short delay (§5.3). */
+function uploadSquad(txt,attempt){
+  attempt=attempt||1;
+  return apiPostSquad(txt).then(function(r){
+    if(r.status===201||r.status===200)return r.body;    /* duplicate:true counts as stored */
+    if(r.status===401)throw AUTH_ERR;
+    if(r.status===409&&attempt<3)
+      return new Promise(function(res){setTimeout(res,600*attempt);}).then(function(){return uploadSquad(txt,attempt+1);});
+    if(r.status===400)throw "The server rejected the upload"+((r.body&&r.body.error&&r.body.error.message)?": "+r.body.error.message:".");
+    throw "The server answered with an error ("+r.status+").";
+  }).catch(function(err){
+    if(err===AUTH_ERR||typeof err==="string")throw err;
+    if(attempt<3)return new Promise(function(res){setTimeout(res,600*attempt);}).then(function(){return uploadSquad(txt,attempt+1);});
+    throw "no-connection";
+  });
+}
+
+/* --- pending upload (§5.3) ---------------------------------------------
+   Survives restarts: stored in cfg, which is its own localStorage key.
+   Tagged with the club it was queued for — a queued upload must never be
+   sent to a different club after reconfiguration. */
+function setPending(txt){
+  cfg.pending={payload:txt,clubId:cfg.clubId,squad:(state.meta.squad||""),
+               match:(state.meta.match||""),at:Date.now()};
+  saveCfg();renderPending();
+}
+function clearPending(){cfg.pending=null;saveCfg();renderPending();}
+function pendingValid(){
+  var p=cfg.pending;
+  return !!(p&&p.payload&&p.clubId&&p.clubId===cfg.clubId);
+}
+function renderPending(){
+  var b=document.getElementById("pendingBadge");if(!b)return;
+  if(syncOn()&&pendingValid()){
+    b.style.display="";
+    b.textContent="⚠ "+(cfg.pending.squad?cfg.pending.squad:"Squad")+" not uploaded";
+    b.title="Tap to retry uploading "+(cfg.pending.squad||"this squad")+" from "+(cfg.pending.match||"this match");
+  }else b.style.display="none";
+}
+function retryPending(){
+  if(!syncOn()||!pendingValid())return;
+  var p=cfg.pending;
+  toast("Retrying upload\u2026");
+  uploadSquad(p.payload).then(function(){
+    clearPending();toast("Squad uploaded");
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected — check Tools":"Still no connection. It will stay pending.");
+  });
+}
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
@@ -1749,6 +1833,8 @@ function renderResults(){
   var mi=document.getElementById("resultsMatchInfo");
   mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(state.meta.match||"—")+'<button class="linklike" id="editMatchBtn">edit</button>';
   var emb=document.getElementById("editMatchBtn");if(emb)emb.addEventListener("click",editMatchInfo);
+  var usb=document.getElementById("uploadSquadBtn"),usg=document.getElementById("uploadSquadGap");
+  if(usb){usb.style.display=syncOn()?"":"none";if(usg)usg.style.display=syncOn()?"":"none";}
   if((state.meta.matchType||"outdoor")==="indoor")return renderResultsIndoor();
   var ie=document.getElementById("indoorExtra");if(ie)ie.innerHTML="";
   var divs=["All"].concat(divisions()),sqs=["All"].concat(squads());
@@ -2234,9 +2320,36 @@ function saveShooterList(){
   download("shooter-list-"+matchTag()+".json",JSON.stringify(p,null,2),"application/json");
   toast(p.entries.length+" shooters saved for next match");}
 function doBackup(){var sq=sanit(state.meta.squad);
-  download("match-backup"+(sq?"-"+sq:"")+"-"+stamp()+".json",JSON.stringify(payload(),null,2),"application/json");
-  state.meta.lastBackup=Date.now();save();updateBackupInfo();toast("Backup saved");}
+  /* The local backup always happens first and always succeeds on its own.
+     When sync is configured the same tap also uploads — §5.2. A failed upload
+     must never make the successful local backup look like it failed. */
+  var txt=JSON.stringify(payload(),null,2);
+  download("match-backup"+(sq?"-"+sq:"")+"-"+stamp()+".json",txt,"application/json");
+  state.meta.lastBackup=Date.now();save();updateBackupInfo();
+  if(!syncOn()){toast("Backup saved");return;}
+  toast("Backup saved \u00b7 uploading\u2026");
+  uploadSquad(txt).then(function(){
+    clearPending();toast("Backed up and uploaded");
+  }).catch(function(err){
+    setPending(txt);
+    toast(err===AUTH_ERR?"Backed up locally \u00b7 setup code rejected"
+                        :"Backed up locally \u00b7 not uploaded, will stay pending");
+  });}
 document.getElementById("backupBtn").addEventListener("click",doBackup);
+document.getElementById("pendingBadge").addEventListener("click",retryPending);
+document.getElementById("uploadSquadBtn").addEventListener("click",function(){
+  if(!syncOn())return;
+  if(!state.meta.match){toast("Set the match date on Setup first");return;}
+  var txt=JSON.stringify(payload(),null,2);
+  toast("Uploading squad\u2026");
+  uploadSquad(txt).then(function(b){
+    clearPending();
+    toast(b&&b.duplicate?"Already uploaded \u2014 nothing changed":"Squad uploaded");
+  }).catch(function(err){
+    setPending(txt);
+    toast(err===AUTH_ERR?"Setup code rejected \u2014 check Tools":"No connection. Marked pending \u2014 retry from the header badge.");
+  });
+});
 
 /* --- send squad results ------------------------------------------------
    Hands this tablet's data to whoever is compiling the match, using the
@@ -2535,7 +2648,7 @@ setInterval(function(){
 
 loadCfg();load();markSaved(true);
 if(state.meta.started===undefined)state.meta.started=state.entries.some(function(e){return e.active||hasAny(e);});  /* mid-match reload skips Setup */
-applyPhase();
+applyPhase();renderPending();
 show(state.meta.started?"roster":"setup");
 document.getElementById("ci-div").innerHTML=document.getElementById("f-div").innerHTML;
 document.getElementById("ci-gun").innerHTML=document.getElementById("f-gun").innerHTML;
