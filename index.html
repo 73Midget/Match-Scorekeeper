@@ -256,6 +256,16 @@
   .setgrp>h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:0 0 8px}
   .setgrp .card{margin-bottom:8px}
   .rdonly{background:#efece3;color:var(--steel)}
+  .crow{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .crow:last-child{border-bottom:none}
+  .crow input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;margin:2px 0 0}
+  .crow .cbody{flex:1;min-width:0}
+  .crow .nm{font-weight:800;font-size:14px}
+  .crow .dv{font-size:11px;color:var(--steel);margin-top:2px;line-height:1.5}
+  .crow .src{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--steel);color:#fff;margin-left:6px}
+  .crow .src.file{background:var(--orange-deep)}
+  .crow .exp{background:none;border:none;color:var(--orange-deep);font-size:11px;font-weight:800;text-decoration:underline;padding:4px 0 0;cursor:pointer}
+  .crow .names{font-size:11px;color:var(--ink);background:#f6f4ee;border-radius:8px;padding:7px 9px;margin-top:6px;line-height:1.6}
   .subhd{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
   .sethint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 0}
   .togrow{display:flex;align-items:center;gap:10px;padding:2px 0 8px}
@@ -338,7 +348,7 @@
     <button class="btn" id="sendResultsBtn">📤 Send squad results</button>
     <div style="height:8px"></div>
     <div class="btnrow"><button class="btn ghost sm" id="csvBtn">Export CSV</button><button class="btn ghost sm" id="backupBtn">Backup</button></div>
-    <button class="btn ghost sm" id="mergeBtn">Merge squad files</button>
+    <button class="btn ghost sm" id="compileBtn">Compile match results</button>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -394,6 +404,18 @@
   <div style="height:10px"></div>
 </div></div>
 
+<div class="scrim" id="compileScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Compile match results</h3>
+  <p class="muted" style="margin:0 0 8px">Squads for <b id="compile-match"></b>. Tick the ones to include, then Compile.</p>
+  <div class="card" id="compileList" style="max-height:46vh;overflow:auto"></div>
+  <div id="compile-warn"></div>
+  <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="compile-addfiles">+ Add squad files</button><button class="btn ghost sm" id="compile-refresh">&#8635; Refresh</button></div>
+  <div style="height:8px"></div>
+  <button class="btn green" id="compile-go">Compile selected squads</button>
+  <div style="height:8px"></div>
+  <button class="btn ghost" id="compileClose">Close</button>
+</div></div>
+
 <div class="scrim" id="squadScrim"><div class="sheet">
   <h3>Restore a squad from the server</h3>
   <p class="muted" style="margin:0 0 8px">Uploads for <b id="squad-match"></b>. Pick the squad to load onto this tablet — you don't need to know which tablet uploaded it.</p>
@@ -443,7 +465,8 @@
 
       <div id="sync-info" style="display:none">
         <div class="kv"><span class="k">Server</span><span class="v" id="sync-url"></span></div>
-        <div class="kv"><span class="k">Club</span><span class="v" id="sync-club"></span></div>
+        <div class="kv" id="sync-clubname-row"><span class="k">Club name</span><span class="v" id="sync-clubname"></span></div>
+        <div class="kv"><span class="k">Club ID</span><span class="v" id="sync-club"></span></div>
         <div class="kv"><span class="k">Code</span><span class="v">••••••••••••</span></div>
         <div class="kv"><span class="k">Shooter list</span><span class="v" id="sync-rev">—</span></div>
         <div style="height:10px"></div>
@@ -547,62 +570,7 @@
   <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="emailListClose">Close</button><button class="btn" id="emailListCopy">⧉ Copy</button></div>
 </div></div>
 
-<div class="scrim" id="mergeHelpScrim"><div class="sheet">
-  <h3>Merge Squad Results — Step by Step</h3>
-  <p class="muted" style="margin:0 0 14px"><b>What this does:</b> Combines all squad backup files from tonight into one master list with all scores and shooters. You only do this once, on one tablet, at the end of the match.</p>
-  
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">BEFORE YOU START — Each Squad Must Backup</div>
-    <p class="muted" style="margin:0">On <b>every scorekeeper's tablet</b> (Squad A, B, C, etc.):</p>
-    <ol class="steps" style="margin:6px 0 0">
-      <li>Open the <b>Results</b> tab</li>
-      <li>Tap <b>Backup</b> (orange button)</li>
-      <li>A file like <i>match-backup-SquadA-….json</i> downloads to your Downloads folder</li>
-      <li style="margin-bottom:0"><b>If using shared Google Drive:</b> Open the Google Drive app, tap <b>+</b> to upload, select that backup file, and save it to the shared RO folder</li>
-    </ol>
-  </div>
 
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">NOW MERGE — On This Tablet Only</div>
-    <ol class="steps">
-      <li><b>Get all backup files.</b> If they're on Google Drive, open the Google Drive app, find each squad's backup file, and download them to this tablet's Downloads folder. (Or ask each squad RO to email/text you their backup file and save it to Downloads.)</li>
-      <li><b>Stay on this screen.</b> You're ready to merge.</li>
-      <li><b>Tap "Choose files"</b> below.</li>
-      <li><b>Select EVERY squad's backup file at once.</b> When the file picker opens, tap or click each backup file. On a tablet, tap one, then tap the others while holding. On a computer, hold Ctrl/Cmd and click each file. Make sure you see all files highlighted before tapping "Open" or "Done".</li>
-      <li><b>Wait for merge to finish.</b> A message will appear showing how many shooters were added, updated, and if there are any conflicts.</li>
-      <li><b>Read the summary carefully.</b> Look for:
-        <ul style="margin:4px 0;padding-left:20px">
-          <li><b>Added:</b> new shooters from other squads ✓ good</li>
-          <li><b>Updated:</b> shooters already on this tablet who got scores from other squad files</li>
-          <li><b>Conflicts:</b> same person scored on two different tablets. App kept both; check Roster and delete the duplicate.</li>
-        </ul>
-      </li>
-      <li style="margin-bottom:0"><b>If conflicts flagged:</b> Go back to the <b>Roster</b> tab and look for duplicate names. Keep the entry with scores, delete the empty one.</li>
-    </ol>
-  </div>
-
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">AFTER MERGE — Verify &amp; Share Results</div>
-    <ol class="steps">
-      <li>Go to the <b>Results</b> tab. You should see shooters from all squads ranked together.</li>
-      <li>Scroll through and spot-check: Are all squads represented? Are the rankings correct?</li>
-      <li><b>Share results:</b> Tap <b>📊 Squad results &amp; email</b> to email scorecards, download the HTML sheet, or copy a formatted table.</li>
-      <li style="margin-bottom:0"><b>Final backup:</b> Tap <b>Backup</b> one more time so you have a complete record of everything merged.</li>
-    </ol>
-  </div>
-
-  <div class="help"><b>Important notes:</b><br>
-  • Each squad RO taps Backup on <b>their own</b> tablet first — not you<br>
-  • You only tap "Choose files" and select all of them at once<br>
-  • <b>Never</b> use "Restore" unless recovering from a failed backup — it erases your current data<br>
-  • "Merge" only adds; it never erases scores already on this tablet<br>
-  • If someone new checked in late on another squad, they'll automatically appear here</div>
-
-  <div style="height:12px"></div>
-  <button class="btn" id="mergeChoose">Choose files to merge</button>
-  <div style="height:8px"></div>
-  <button class="btn ghost" id="mergeHelpCancel">Cancel</button>
-</div></div>
 
 <div class="scrim" id="mergeScrim"><div class="sheet">
   <h3>Merge Summary</h3>
@@ -653,7 +621,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-e";
+var APP_BUILD="2026-08-29-f";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -842,7 +810,7 @@ function apiPing(c){
     if(res.status===401)throw "The server rejected this setup code. Check you were sent the right one.";
     if(!res.ok)throw "The server answered with an error ("+res.status+"). Try again shortly.";
     return res.json();
-  }).then(function(j){return (j&&j.club)||"";});
+  }).then(function(j){return (j&&j.club_name)||"";});   /* blank is legal — caller falls back to the id */
 }
 function syncStatus(kind,msg){
   var el=document.getElementById("sync-status");if(!el)return;
@@ -858,6 +826,8 @@ function renderSync(){
   if(conf){
     document.getElementById("sync-url").textContent=cfg.serverUrl.replace(/^https?:\/\//,"");
     document.getElementById("sync-club").textContent=cfg.clubId;
+    document.getElementById("sync-clubname-row").style.display=cfg.clubName?"":"none";
+    document.getElementById("sync-clubname").textContent=cfg.clubName||"";
     document.getElementById("sync-rev").textContent=cfg.rosterRevision?("#"+cfg.rosterRevision):"not downloaded";
   }
   if(!cfg.online&&conf)syncStatus("idle","Off. Your setup code is kept \u2014 tick the box to use it again.");
@@ -1256,6 +1226,117 @@ function restoreSquad(deviceId,revision,row){
 document.getElementById("set-getsquad").addEventListener("click",openSquadPicker);
 document.getElementById("squadClose").addEventListener("click",function(){document.getElementById("squadScrim").classList.remove("open");});
 document.getElementById("squadScrim").addEventListener("click",function(ev){if(ev.target.id==="squadScrim")ev.currentTarget.classList.remove("open");});
+/* --- compile screen (§10) ----------------------------------------------
+   One list, mixed sources: server uploads and local files side by side, one
+   Compile. A club with no server sees the same screen with only file rows.
+   Never asks how many squads there should be (§10.3), never resolves an
+   ambiguity on the RO's behalf. */
+var compileRows=[];
+function compileNames(d){
+  var seen={},out=[];
+  (d.entries||[]).forEach(function(e){
+    if(!e.active)return;var n=(e.name||"").trim();if(!n||seen[n])return;seen[n]=1;out.push(n);});
+  return out;
+}
+function renderCompile(){
+  var el=document.getElementById("compileList");
+  if(!compileRows.length){
+    el.innerHTML='<div class="empty" style="padding:18px">'
+      +(syncOn()?"No squads uploaded for this match yet.<br>Use <b>+ Add squad files</b> for squads sent by file."
+                :"Add the squad files you've collected.")+'</div>';
+  }else{
+    /* flag squad labels claimed by more than one row — cause is ambiguous (§10.2) */
+    var counts={};compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();counts[k]=(counts[k]||0)+1;});
+    el.innerHTML=compileRows.map(function(r,i){
+      var dup=counts[(r.squad||"").toLowerCase()]>1;
+      return '<div class="crow"><input type="checkbox" data-i="'+i+'"'+(r.selected?" checked":"")+'>'
+        +'<div class="cbody"><div class="nm">'+esc(r.squad||"(no squad name)")
+        +'<span class="src'+(r.kind==="file"?" file":"")+'">'+(r.kind==="file"?"file":"server")+'</span>'
+        +(dup?' <span class="cibadge warn">2 tablets</span>':'')+'</div>'
+        +'<div class="dv">'+esc(r.device||(r.kind==="file"?"from a file":"unnamed tablet"))
+        +' · '+(r.count||0)+' shooters'+(r.at?' · '+esc(whenText(r.at)):'')+'</div>'
+        +'<button class="exp" data-x="'+i+'">'+(r.open?"Hide shooters":"Show shooters")+'</button>'
+        +(r.open?'<div class="names">'+(r.names?esc(r.names.join(", ")):"Loading…")+'</div>':'')
+        +'</div></div>';}).join("");
+    el.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+      cb.addEventListener("change",function(){compileRows[+cb.dataset.i].selected=cb.checked;renderCompileWarn();});});
+    el.querySelectorAll(".exp").forEach(function(b){
+      b.addEventListener("click",function(){toggleCompileNames(+b.dataset.x);});});
+  }
+  renderCompileWarn();
+}
+function renderCompileWarn(){
+  var w=document.getElementById("compile-warn"),counts={};
+  compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();if(k)counts[k]=(counts[k]||0)+1;});
+  var dups=Object.keys(counts).filter(function(k){return counts[k]>1;});
+  var h="";
+  if(dups.length)h+='<div class="warnbox" style="margin-top:10px"><b>Two tablets used the same squad name.</b> '
+    +'Check whether these are different squads that were both labelled the same — compile both — or a replacement tablet taking over, in which case compile one. '
+    +'Tap <b>Show shooters</b> on each: overlapping names mean a replacement, different names mean two squads.</div>';
+  var n=compileRows.filter(function(r){return r.selected;}).length;
+  h+='<div class="sethint" style="margin-top:8px">'+n+' of '+compileRows.length+' selected.</div>';
+  w.innerHTML=h;
+}
+function ensurePayload(r){
+  if(r.payload)return Promise.resolve(r.payload);
+  if(r.kind==="file")return Promise.resolve(null);
+  return apiGetSquad(r.device_id,r.revision).then(function(sq){
+    if(!sq||!sq.payload)throw "That squad came back empty.";
+    var d=JSON.parse(sq.payload);r.payload=d;return d;});
+}
+function toggleCompileNames(i){
+  var r=compileRows[i];r.open=!r.open;
+  if(r.open&&!r.names){
+    renderCompile();
+    ensurePayload(r).then(function(d){r.names=d?compileNames(d):[];renderCompile();})
+      .catch(function(){r.names=["(couldn't load)"];renderCompile();});
+    return;
+  }
+  renderCompile();
+}
+function openCompile(){
+  if(!state.meta.match){toast("Set the match date on Setup first");return;}
+  compileRows=[];
+  document.getElementById("compile-match").textContent=(state.meta.match||"")+" · "+typeLabel();
+  document.getElementById("compileScrim").classList.add("open");
+  renderCompile();
+  if(syncOn())loadCompileServer();
+}
+function loadCompileServer(){
+  document.getElementById("compileList").innerHTML='<div class="empty" style="padding:18px">Looking…</div>';
+  apiListSquads().then(function(list){
+    /* "compiled" is a result, not a squad (§10.1) */
+    list.filter(function(s){return s.device_id!=="compiled";}).forEach(function(s){
+      if(compileRows.some(function(r){return r.kind==="server"&&r.device_id===s.device_id;}))return;
+      compileRows.push({kind:"server",device_id:s.device_id,revision:s.revision,
+        squad:s.squad_label||"",device:s.device_label||"",count:s.entry_count||0,
+        at:s.uploaded_at,selected:true,payload:null,names:null,open:false});   /* default selected (§10.2) */
+    });
+    renderCompile();
+  }).catch(function(err){
+    renderCompile();
+    document.getElementById("compile-warn").innerHTML='<div class="warnbox" style="margin-top:10px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))
+      +' You can still add squad files below.</div>';
+  });
+}
+function doCompile(){
+  var sel=compileRows.filter(function(r){return r.selected;});
+  if(!sel.length){toast("Nothing selected");return;}
+  toast("Compiling "+sel.length+" squad"+(sel.length===1?"":"s")+"…");
+  Promise.all(sel.map(function(r){return ensurePayload(r).catch(function(){return null;});})).then(function(list){
+    var payloads=list.filter(Boolean);
+    if(!payloads.length){toast("Couldn't load the selected squads");return;}
+    var r=mergePayloads(payloads,{undoLabel:"Compiled "+payloads.length+" squad"+(payloads.length===1?"":"s")});
+    document.getElementById("compileScrim").classList.remove("open");
+    showMergeSummary(r);show("results");
+  });
+}
+document.getElementById("compile-go").addEventListener("click",doCompile);
+document.getElementById("compile-refresh").addEventListener("click",function(){if(syncOn())loadCompileServer();else renderCompile();});
+document.getElementById("compile-addfiles").addEventListener("click",function(){document.getElementById("mergeFile").click();});
+document.getElementById("compileClose").addEventListener("click",function(){document.getElementById("compileScrim").classList.remove("open");});
+document.getElementById("compileScrim").addEventListener("click",function(ev){if(ev.target.id==="compileScrim")ev.currentTarget.classList.remove("open");});
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
@@ -2513,10 +2594,6 @@ document.getElementById("restoreFile").addEventListener("change",function(ev){va
     }catch(e){toast("Couldn't read that file");}};
   rd.readAsText(f);ev.target.value="";});
 
-document.getElementById("mergeBtn").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.add("open");});
-document.getElementById("mergeHelpCancel").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.remove("open");});
-document.getElementById("mergeHelpScrim").addEventListener("click",function(ev){if(ev.target.id==="mergeHelpScrim")ev.currentTarget.classList.remove("open");});
-document.getElementById("mergeChoose").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.remove("open");document.getElementById("mergeFile").click();});
 /* --- merge core --------------------------------------------------------
    Merges parsed payloads into local state and returns a stats object. Kept
    free of DOM and file handling so it can be driven from the file picker,
@@ -2574,8 +2651,21 @@ function parsePayloads(texts){
 }
 document.getElementById("mergeFile").addEventListener("change",function(ev){
   var files=[].slice.call(ev.target.files);ev.target.value="";if(!files.length)return;
+  var names=files.map(function(f){return f.name;});
   Promise.all(files.map(readText)).then(function(texts){
-    var r=mergePayloads(parsePayloads(texts),{undoLabel:"Merge of "+files.length+" file"+(files.length===1?"":"s")});
+    var parsed=parsePayloads(texts);
+    /* Files picked from the compile screen join the list rather than merging
+       immediately, so server and file squads compile in one operation (§10). */
+    if(document.getElementById("compileScrim").classList.contains("open")){
+      parsed.forEach(function(d,i){
+        if(!d||!d.entries){toast("Couldn't read "+names[i]);return;}
+        compileRows.push({kind:"file",squad:(d.meta&&d.meta.squad)||"",device:names[i],
+          count:(d.entries||[]).filter(function(e){return e.active;}).length,
+          at:0,selected:true,payload:d,names:null,open:false});
+      });
+      renderCompile();return;
+    }
+    var r=mergePayloads(parsed,{undoLabel:"Merge of "+files.length+" file"+(files.length===1?"":"s")});
     showMergeSummary(r);show("results");
   });
 });
