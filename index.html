@@ -621,7 +621,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-g";
+var APP_BUILD="2026-08-29-h";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1345,6 +1345,7 @@ function doCompile(){
     showMergeSummary(r);show("results");
   });
 }
+document.getElementById("compileBtn").addEventListener("click",openCompile);
 document.getElementById("compile-go").addEventListener("click",doCompile);
 document.getElementById("compile-refresh").addEventListener("click",function(){if(syncOn())loadCompileServer();else renderCompile();});
 document.getElementById("compile-addfiles").addEventListener("click",function(){document.getElementById("mergeFile").click();});
