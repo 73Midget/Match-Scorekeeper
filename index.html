@@ -621,7 +621,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-f";
+var APP_BUILD="2026-08-29-g";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -878,6 +878,10 @@ document.getElementById("set-blob-save").addEventListener("click",function(){
         syncStatus("idle","Setup code not saved.");return;
       }
     }
+    /* Anything scoped to a club must be dropped when the club changes —
+       a carried-over roster revision is meaningless against a different
+       club and produces a 409 on the first push. */
+    if(cfg.clubId&&cfg.clubId!==c.club){cfg.rosterRevision=0;cfg.pending=null;}
     cfg.serverUrl=c.url;cfg.clubId=c.club;cfg.secret=c.secret;
     cfg.clubName=clubName||"";
     if(!cfg.deviceId)cfg.deviceId=newDeviceId();      /* generate once, never regenerate (§2.3) */
@@ -1034,10 +1038,19 @@ function pushRoster(attempt){
     if(r.status===409){
       if(attempt>=3)throw "The roster kept changing while uploading. Try again in a moment.";
       var who=(r.body&&r.body.current_author)||"another tablet";
-      syncStatus("idle",who+" updated the list first \u2014 pulling their changes\u2026");
+      var curRev=(r.body&&r.body.current_revision);
+      syncStatus("idle",(curRev===null||curRev===undefined)
+        ? "This club has no shooter list yet \u2014 starting a new one\u2026"
+        : who+" updated the list first \u2014 pulling their changes\u2026");
       /* pull + merge + push again with the new base */
       return apiGetRoster().then(function(cur){
-        if(!cur)throw "The roster changed but couldn't be read back.";
+        if(!cur){
+          /* No roster exists — the base_revision we sent was stale (usually
+             left over from a different club). Retry from scratch rather than
+             treating this as terminal. */
+          cfg.rosterRevision=0;saveCfg();
+          return pushRoster(attempt+1);
+        }
         var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
         mergePayloads([d],{skipMatchGuard:true,undoLabel:"Merged "+who+"'s shooter list"});
         cfg.rosterRevision=cur.revision;saveCfg();

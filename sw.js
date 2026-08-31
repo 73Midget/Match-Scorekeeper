@@ -4,7 +4,7 @@
    BUMP THIS on every deploy. It must match APP_BUILD in index.html.
    Changing it is what makes tablets pick up a new build: the browser sees
    sw.js has changed, installs the new one, and the old cache is deleted. */
-const BUILD = "2026-08-29-f";
+const BUILD = "2026-08-29-g";
 const CACHE = "scorekeeper-" + BUILD;
 
 /* Everything needed to run with no signal. Keep this list accurate —
