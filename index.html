@@ -433,6 +433,9 @@
         <div style="height:10px"></div>
         <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
         <div class="sethint">Replaces this tablet's shooter list with the club's current one. Do this before the match, on every tablet.</div>
+        <div style="height:8px"></div>
+        <button class="btn ghost sm" id="set-putroster">⬆ Upload this tablet's shooter list</button>
+        <div class="sethint">Makes this tablet's list the club's list. Use it to set up a new club, or after adding walk-ins.</div>
         <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
       </div>
 
@@ -627,7 +630,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-b";
+var APP_BUILD="2026-08-29-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -951,12 +954,13 @@ document.getElementById("removeScrim").addEventListener("click",function(ev){
    Fetches the club's shooter list and RESTORES it, per §7 — the online
    equivalent of restoring the shooter-list file, so one mental model covers
    both. Retains `revision`, which is required for the next push (§4.7). */
+var AUTH_ERR="__auth__";
 function apiGetRoster(){
   return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster",
     {headers:{"Authorization":"Bearer "+cfg.secret}})
   .then(function(res){
     if(res.status===404)return null;                  /* normal for a new club */
-    if(res.status===401)throw "The server rejected this tablet's setup code.";
+    if(res.status===401)throw AUTH_ERR;
     if(!res.ok)throw "The server answered with an error ("+res.status+").";
     return res.json();
   }).then(function(j){return j?(j.roster||null):null;});
@@ -969,7 +973,12 @@ function getRoster(){
   if(!confirm(warn))return;
   syncStatus("idle","Fetching\u2026");
   apiGetRoster().then(function(r){
-    if(!r){syncStatus("idle","The club hasn't published a shooter list yet. Nothing to download.");return;}
+    if(!r){
+      /* 404 is a normal state for a new club, not an error (§4.6) */
+      syncStatus("idle","The club hasn't published a shooter list yet.");
+      offerRosterFile("The club hasn't published a shooter list yet.\n\nLoad one from a file on this tablet instead?");
+      return;
+    }
     var d;try{d=JSON.parse(r.payload);}catch(e){throw "The shooter list from the server couldn't be read.";}
     if(!d||!d.entries)throw "The shooter list from the server was empty or malformed.";
     undoPush("Downloaded shooter list");
@@ -980,10 +989,81 @@ function getRoster(){
     syncStatus("ok",d.entries.length+" shooters downloaded (list #"+r.revision+").");
     toast(d.entries.length+" shooters downloaded");
   }).catch(function(err){
-    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. The app still works offline \u2014 restore from a file instead.");
+    if(err===AUTH_ERR){
+      /* a rejected setup code is a misconfigured tablet — routing around it
+         with a file would leave a tablet that looks fine but can't upload */
+      syncStatus("bad","The server rejected this tablet's setup code. Check the setup code before the match \u2014 this tablet can't upload until it's fixed.");
+      return;
+    }
+    var msg=(typeof err==="string")?err:"Couldn't reach the server.";
+    syncStatus("bad",msg+" The app still works offline.");
+    offerRosterFile(msg+"\n\nLoad the shooter list from a file on this tablet instead?");
   });
 }
+/* Surfaces the offline path at the moment it's needed, rather than making the
+   RO go and find it. Same Restore flow, so it's a control they already use. */
+function offerRosterFile(msg){
+  if(!confirm(msg))return;
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("restoreFile").click();
+}
 document.getElementById("set-getroster").addEventListener("click",getRoster);
+/* --- roster push (§4.7) ------------------------------------------------
+   base_revision is the revision we compiled from; null only when the GET
+   returned 404. On 409 the roster moved under us — that is a normal outcome
+   of two people working at once, not a failure (§4.8): pull, merge, push
+   again with the new base. Capped at three automatic attempts. */
+function apiPutRoster(body){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster",{
+    method:"PUT",
+    headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){
+    return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,ok:res.ok,body:j};});
+  });
+}
+function pushRoster(attempt){
+  attempt=attempt||1;
+  if(!syncOn())return Promise.resolve();
+  var p=rosterPayload(),txt=JSON.stringify(p);
+  var body={payload:txt,schema_version:SCHEMA_VERSION,
+    base_revision:(cfg.rosterRevision?cfg.rosterRevision:null),
+    entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
+    author:cfg.deviceLabel||"Unnamed tablet"};
+  syncStatus("idle",attempt>1?"Retrying\u2026":"Uploading shooter list\u2026");
+  return apiPutRoster(body).then(function(r){
+    if(r.status===201){
+      cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();renderSync();
+      syncStatus("ok",p.entries.length+" shooters uploaded (list #"+cfg.rosterRevision+").");
+      toast("Shooter list uploaded");return;
+    }
+    if(r.status===409){
+      if(attempt>=3)throw "The roster kept changing while uploading. Try again in a moment.";
+      var who=(r.body&&r.body.current_author)||"another tablet";
+      syncStatus("idle",who+" updated the list first \u2014 pulling their changes\u2026");
+      /* pull + merge + push again with the new base */
+      return apiGetRoster().then(function(cur){
+        if(!cur)throw "The roster changed but couldn't be read back.";
+        var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
+        mergePayloads([d],{skipMatchGuard:true,undoLabel:"Merged "+who+"'s shooter list"});
+        cfg.rosterRevision=cur.revision;saveCfg();
+        return pushRoster(attempt+1);
+      });
+    }
+    if(r.status===401)throw "The server rejected this tablet's setup code.";
+    if(r.status===400)throw "The server rejected the upload"+((r.body&&r.body.error&&r.body.error.message)?": "+r.body.error.message:".");
+    throw "The server answered with an error ("+r.status+").";
+  }).catch(function(err){
+    if(err===AUTH_ERR)err="The server rejected this tablet's setup code.";
+    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. Nothing was uploaded \u2014 the list is still on this tablet.");
+  });
+}
+document.getElementById("set-putroster").addEventListener("click",function(){
+  var n=rosterPayload().entries.length;
+  if(!n){syncStatus("bad","There are no shooters on this tablet to upload.");return;}
+  if(!confirm("Upload this tablet's "+n+" shooters as the club's shooter list?\n\nEvery tablet that downloads the list will get this one."))return;
+  pushRoster();
+});
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
