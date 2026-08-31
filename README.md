@@ -1,3 +1,13 @@
+⚠️ This is the backend branch — beta, not for club use
+
+Work in progress adding optional online services: sharing the shooter list and collecting squad results through a club server. The app still works fully offline; online is opt-in and inert until configured.
+
+Beta build: backend--gpl-scorekeeper.netlify.app — separate storage from the live app, so nothing here can touch real match data.
+
+Club tablets run main, not this branch: gpl-scorekeeper.netlify.app
+
+Progress: settings and device identity ✅ · shooter list up/download ✅ · squad upload ⬜ · compile screen ⬜ · publish ⬜
+
 # Match Scorekeeper
 
 An offline scoring app for GSSF-style indoor and outdoor pistol matches.
