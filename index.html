@@ -49,11 +49,12 @@
   html,body{margin:0}
   body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.45;padding-bottom:84px;-webkit-text-size-adjust:100%}
   header{background:var(--ink);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:30;border-bottom:4px solid var(--orange);padding-top:calc(14px + env(safe-area-inset-top))}
-  header .row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  header .row{display:flex;align-items:center;gap:10px}
+  header h1{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   header h1{font-size:15px;margin:0;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
   header h1 b{color:var(--orange)}
   header h1 .ver{font-size:10px;font-weight:700;color:var(--steel-soft);letter-spacing:.06em;margin-left:6px}
-  header .sub{font-family:var(--mono);font-size:11px;color:var(--steel-soft);letter-spacing:.04em;white-space:nowrap}
+  header .sub{font-family:var(--mono);font-size:11px;color:var(--steel-soft);letter-spacing:.04em;white-space:nowrap;flex:0 0 auto;margin-left:auto;text-align:right}
   header .sub b{color:#9fd9b6;font-weight:700}
   main{max-width:680px;margin:0 auto;padding:14px 14px 30px}
   .view{display:none}.view.active{display:block}
@@ -383,7 +384,15 @@
     <button class="btn" id="editSave">Save</button>
   </div>
   <div style="height:10px"></div>
-  <button class="btn danger" id="editDelete" style="display:none">Delete competitor</button>
+</div></div>
+
+<div class="scrim" id="removeScrim"><div class="sheet">
+  <h3>Remove a shooter</h3>
+  <p class="muted" style="margin:0 0 8px">Removes the person and all of their entries from this tablet's list. Use <b>↶ Undo</b> in Tools if you remove the wrong one.</p>
+  <input type="search" id="removeSearch" placeholder="Search shooters" style="margin-bottom:10px">
+  <div class="card" id="removeList" style="max-height:52vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="removeClose">Close</button>
 </div></div>
 
 <div class="scrim" id="gearScrim"><div class="sheet" style="max-height:94vh">
@@ -420,6 +429,10 @@
         <div class="kv"><span class="k">Server</span><span class="v" id="sync-url"></span></div>
         <div class="kv"><span class="k">Club</span><span class="v" id="sync-club"></span></div>
         <div class="kv"><span class="k">Code</span><span class="v">••••••••••••</span></div>
+        <div class="kv"><span class="k">Shooter list</span><span class="v" id="sync-rev">—</span></div>
+        <div style="height:10px"></div>
+        <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
+        <div class="sethint">Replaces this tablet's shooter list with the club's current one. Do this before the match, on every tablet.</div>
         <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
       </div>
 
@@ -432,6 +445,7 @@
     <div class="btnrow"><button class="btn ghost sm" id="set-roster">💾 Save shooter list</button><button class="btn ghost sm" id="set-archive">💾 Save match archive</button></div>
     <div class="sethint" style="margin-bottom:8px"><b>Shooter list</b> = names only, for the other tablets. <b>Match archive</b> = this match with scores, for your records.</div>
     <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
+    <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">Remove a shooter from the list</button>
     <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
     <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
   </div>
@@ -613,7 +627,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-a";
+var APP_BUILD="2026-08-29-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -766,7 +780,7 @@ function rosterOnly(src){var e=blankEntry();
    server upload — so anything stored there travels off the device. This key
    holds settings that belong to the tablet and must never leave it. */
 var CFG_KEY="gssf_scorekeeper_cfg";
-var cfg={deviceLabel:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:""};
+var cfg={deviceLabel:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0};
 function loadCfg(){try{var raw=localStorage.getItem(CFG_KEY);if(raw)cfg=Object.assign(cfg,JSON.parse(raw)||{});}catch(e){}}
 function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}}
 
@@ -818,6 +832,7 @@ function renderSync(){
   if(conf){
     document.getElementById("sync-url").textContent=cfg.serverUrl.replace(/^https?:\/\//,"");
     document.getElementById("sync-club").textContent=cfg.clubId;
+    document.getElementById("sync-rev").textContent=cfg.rosterRevision?("#"+cfg.rosterRevision):"not downloaded";
   }
   if(!cfg.online&&conf)syncStatus("idle","Off. Your setup code is kept \u2014 tick the box to use it again.");
   else if(!cfg.online)syncStatus("","");
@@ -887,6 +902,88 @@ document.getElementById("set-test").addEventListener("click",function(){
     syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. The app still works offline.");
   });
 });
+/* --- remove a shooter --------------------------------------------------
+   Operates on the PERSON, not one entry: a shooter with several division-runs
+   or rounds loses all of them together, so no orphaned entries are left behind.
+   Warns (rather than blocks) when they have scores — a wrongly-added shooter
+   with a stray tap on them is a real case, and Undo covers a mistake. */
+function removePerson(pid){
+  var mine=state.entries.filter(function(e){return e.personId===pid;});
+  if(!mine.length)return;
+  var nm=mine[0].name||"(unnamed)",scored=mine.filter(hasAny).length;
+  var msg="Remove "+nm+" from this tablet's list?";
+  if(mine.length>1)msg+="\n\nThis removes all "+mine.length+" of their entries.";
+  if(scored)msg+="\n\n\u26a0 "+(scored===1?"They have a score":scored+" of their entries have scores")+" in this match. That will be removed too.";
+  if(!confirm(msg))return;
+  undoPush("Removed "+nm);
+  state.entries=state.entries.filter(function(e){return e.personId!==pid;});
+  if(state.selected&&!byId(state.selected))state.selected=null;
+  save();renderRemoveList();toast(nm+" removed");
+}
+function renderRemoveList(){
+  var q=(document.getElementById("removeSearch").value||"").toLowerCase();
+  var byP={},order=[];
+  state.entries.forEach(function(e){if(!byP[e.personId]){byP[e.personId]=[];order.push(e.personId);}byP[e.personId].push(e);});
+  var people=order.map(function(pid){var runs=byP[pid];return {pid:pid,rep:runs[0],n:runs.length,scored:runs.some(hasAny)};})
+    .filter(function(p){return !q||(p.rep.name||"").toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return (a.rep.name||"").localeCompare(b.rep.name||"");});
+  var list=document.getElementById("removeList");
+  if(!people.length){list.innerHTML='<div class="empty" style="padding:18px">'+(state.entries.length?"No match for \u201c"+esc(q)+"\u201d.":"No shooters on file.")+'</div>';return;}
+  list.innerHTML=people.map(function(p){
+    return '<div class="cirow" data-pid="'+p.pid+'"><div class="meta"><div class="nm">'+esc(p.rep.name||"(unnamed)")+'</div>'
+      +'<div class="dv">'+(p.n>1?p.n+" entries":esc(p.rep.division||"\u2014"))+(p.scored?' \u00b7 has scores':'')+(p.rep.active?' \u00b7 checked in':'')+'</div></div>'
+      +'<span class="cistat" style="background:var(--red);color:#fff">Remove</span></div>';}).join("");
+  list.querySelectorAll(".cirow").forEach(function(row){
+    row.addEventListener("click",function(){removePerson(row.dataset.pid);});});
+}
+document.getElementById("set-remove").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("removeSearch").value="";renderRemoveList();
+  document.getElementById("removeScrim").classList.add("open");
+});
+document.getElementById("removeSearch").addEventListener("input",renderRemoveList);
+document.getElementById("removeClose").addEventListener("click",function(){
+  document.getElementById("removeScrim").classList.remove("open");renderRoster();});
+document.getElementById("removeScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="removeScrim"){ev.currentTarget.classList.remove("open");renderRoster();}});
+
+/* --- roster pull (§4.6) ------------------------------------------------
+   Fetches the club's shooter list and RESTORES it, per §7 — the online
+   equivalent of restoring the shooter-list file, so one mental model covers
+   both. Retains `revision`, which is required for the next push (§4.7). */
+function apiGetRoster(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===404)return null;                  /* normal for a new club */
+    if(res.status===401)throw "The server rejected this tablet's setup code.";
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return j?(j.roster||null):null;});
+}
+function getRoster(){
+  if(!syncOn())return;
+  var scored=state.entries.filter(hasAny).length;
+  var warn="Replace this tablet's shooter list with the club's current one?";
+  if(scored)warn+="\n\n\u26a0 "+scored+" shooter"+(scored===1?" has":"s have")+" scores in this match. Those scores will be replaced.\n\nUpload this squad first if you haven't.";
+  if(!confirm(warn))return;
+  syncStatus("idle","Fetching\u2026");
+  apiGetRoster().then(function(r){
+    if(!r){syncStatus("idle","The club hasn't published a shooter list yet. Nothing to download.");return;}
+    var d;try{d=JSON.parse(r.payload);}catch(e){throw "The shooter list from the server couldn't be read.";}
+    if(!d||!d.entries)throw "The shooter list from the server was empty or malformed.";
+    undoPush("Downloaded shooter list");
+    var mt=(state.meta&&state.meta.matchType)||"outdoor";
+    state.entries=d.entries.map(function(e){return ensureShape(e,mt);});
+    cfg.rosterRevision=r.revision;saveCfg();
+    save();renderSync();renderRoster();
+    syncStatus("ok",d.entries.length+" shooters downloaded (list #"+r.revision+").");
+    toast(d.entries.length+" shooters downloaded");
+  }).catch(function(err){
+    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. The app still works offline \u2014 restore from a file instead.");
+  });
+}
+document.getElementById("set-getroster").addEventListener("click",getRoster);
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
@@ -1962,7 +2059,6 @@ function openEdit(id){editingId=id||null;fPair.asked=false;var e=id?byId(id):bla
   document.getElementById("f-phone").value=e.phone||"";document.getElementById("f-email").value=e.email||"";
   document.getElementById("f-ro").checked=!!e.ro;
   document.getElementById("f-squad").value=e.squad||state.meta.squad||"";
-  document.getElementById("editDelete").style.display=id?"flex":"none";
   document.getElementById("editScrim").classList.add("open");
   if(!id){editingId="__new__";window.__draft=e;}}
 function closeEdit(){document.getElementById("editScrim").classList.remove("open");}
@@ -1993,11 +2089,7 @@ document.getElementById("editSave").addEventListener("click",function(){
   save();closeEdit();toast("Saved");
   if(document.getElementById("view-score").classList.contains("active"))renderScore();else show("roster");
 });
-document.getElementById("editDelete").addEventListener("click",function(){
-  if(!editingId||editingId==="__new__")return;if(!confirm("Delete this competitor and their scores?"))return;
-  state.entries=state.entries.filter(function(x){return x.id!==editingId;});
-  if(state.selected===editingId)state.selected=null;save();closeEdit();toast("Deleted");show("roster");
-});
+
 
 /* export / backup / restore / merge */
 function download(fn,txt,type){var b=new Blob([txt],{type:type||"text/plain"}),u=URL.createObjectURL(b),a=document.createElement("a");
@@ -2051,8 +2143,9 @@ function rosterPayload(){
     if(seen[e.personId])return;seen[e.personId]=true;out.push(stripScores(e));});
   var meta=JSON.parse(JSON.stringify(state.meta));
   meta.started=false;meta.seq=1;meta.lastShared=null;
+  meta.match="";                       /* §4.6 — a roster is not a match artifact */
   return {appName:"Match Scorekeeper",appVersion:APP_VERSION,schemaVersion:SCHEMA_VERSION,
-          matchType:meta.matchType||"outdoor",match:meta.match||"",entries:out,meta:meta};}
+          matchType:meta.matchType||"outdoor",match:"",entries:out,meta:meta};}
 function saveArchive(){
   download("match-archive-"+matchTag()+".json",JSON.stringify(payload(),null,2),"application/json");
   state.meta.lastBackup=Date.now();save();updateBackupInfo();toast("Match archive saved");}
@@ -2277,8 +2370,8 @@ function showMergeSummary(r){
     +'This match is “'+esc(state.meta.match||"—")+'”, but '+(wrongMatch.length===1?'that file is':'those files are')+' from '
     +wrongMatch.map(function(m){return '“'+esc(m)+'”';}).join(", ")+'.<br>'
     +'Merging it would have written those scores onto this match. If the label is just wrong, fix the match name on Results and try again.</div>';
-  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and delete the wrong one from the Roster.</div>';
-  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Delete the wrong one from the Roster (or keep both if they really are different people with the same name):<br>'
+  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and remove the wrong one with ⚙ Tools ▸ Remove a shooter.</div>';
+  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Remove the wrong one with ⚙ Tools ▸ Remove a shooter (or keep both if they really are different people with the same name):<br>'
     +dups.map(function(g){return '• '+esc(g.name)+' — '+g.people+' separate records ('+g.divisions.map(esc).join(", ")+')';}).join("<br>")+'</div>';
   else h+='<div class="muted" style="margin-bottom:6px">No duplicate shooters detected.</div>';
   document.getElementById("mergeBody").innerHTML=h;
