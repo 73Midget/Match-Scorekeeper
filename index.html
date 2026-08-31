@@ -256,6 +256,7 @@
   .setgrp>h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:0 0 8px}
   .setgrp .card{margin-bottom:8px}
   .rdonly{background:#efece3;color:var(--steel)}
+  .subhd{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
   .sethint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 0}
   .togrow{display:flex;align-items:center;gap:10px;padding:2px 0 8px}
   .togrow input{width:22px;height:22px;flex:0 0 auto;margin:0}
@@ -393,6 +394,14 @@
   <div style="height:10px"></div>
 </div></div>
 
+<div class="scrim" id="squadScrim"><div class="sheet">
+  <h3>Restore a squad from the server</h3>
+  <p class="muted" style="margin:0 0 8px">Uploads for <b id="squad-match"></b>. Pick the squad to load onto this tablet — you don't need to know which tablet uploaded it.</p>
+  <div class="card" id="squadList" style="max-height:52vh;overflow:auto"></div>
+  <div class="warnbox" style="margin-top:10px">This replaces everything on this tablet with the squad you pick.</div>
+  <button class="btn ghost" id="squadClose">Close</button>
+</div></div>
+
 <div class="scrim" id="removeScrim"><div class="sheet">
   <h3>Remove a shooter</h3>
   <p class="muted" style="margin:0 0 8px">Removes the person and all of their entries from this tablet's list. Use <b>↶ Undo</b> in Tools if you remove the wrong one.</p>
@@ -438,12 +447,19 @@
         <div class="kv"><span class="k">Code</span><span class="v">••••••••••••</span></div>
         <div class="kv"><span class="k">Shooter list</span><span class="v" id="sync-rev">—</span></div>
         <div style="height:10px"></div>
+        <div class="subhd">Shooter list</div>
         <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
-        <div class="sethint">Replaces this tablet's shooter list with the club's current one. Do this before the match, on every tablet.</div>
+        <div class="sethint">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
         <div style="height:8px"></div>
         <button class="btn ghost sm" id="set-putroster">⬆ Upload this tablet's shooter list</button>
-        <div class="sethint">Makes this tablet's list the club's list. Use it to set up a new club, or after adding walk-ins.</div>
-        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
+        <div class="sethint">Makes this tablet's list the club's. For setting up a new club, or after adding walk-ins.</div>
+
+        <div class="subhd">This match</div>
+        <button class="btn ghost sm" id="set-getsquad">⬇ Restore a squad from the server</button>
+        <div class="sethint">For a replacement tablet taking over a squad. Pick from the squads uploaded for this match.</div>
+
+        <div class="subhd">Connection</div>
+        <div class="btnrow"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
       </div>
 
       <div class="syncstat idle" id="sync-status" style="display:none"></div>
@@ -637,7 +653,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-d";
+var APP_BUILD="2026-08-29-e";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1148,6 +1164,98 @@ function retryPending(){
     toast(err===AUTH_ERR?"Setup code rejected — check Tools":"Still no connection. It will stay pending.");
   });
 }
+/* --- squad list & download (§4.4, §4.5) --------------------------------
+   The match_key carries the match type, so the list can never return squads
+   from a different match type — no client-side filtering needed. */
+function apiListSquads(){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)+"/squads",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squads)||[];});
+}
+function apiGetSquad(deviceId,revision){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  var u=cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)
+       +"/squads/"+encodeURIComponent(deviceId)+(revision?("?revision="+encodeURIComponent(revision)):"");
+  return fetch(u,{headers:{"Authorization":"Bearer "+cfg.secret}}).then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "That squad couldn't be downloaded ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squad)||null;});
+}
+/* Absolute plus relative, stating facts only — never "possibly stale" (§10.2). */
+function whenText(ms){
+  if(!ms)return "";
+  var d=new Date(ms),mins=Math.round((Date.now()-ms)/60000),rel;
+  if(mins<1)rel="just now"; else if(mins<60)rel=mins+"m ago";
+  else if(mins<1440)rel=Math.round(mins/60)+"h ago";
+  else rel=Math.round(mins/1440)+"d ago";
+  return d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" ("+rel+")";
+}
+/* --- restore a squad from the server -----------------------------------
+   Presents the match's uploads and lets the RO pick by squad label, so a
+   replacement tablet doesn't need to know which device failed or how its
+   squad was spelled. Deliberately asks "which squad", never "which tablet
+   is alive" — same framing as the compile screen. */
+function openSquadPicker(){
+  if(!syncOn())return;
+  if(!state.meta.match){toast("Set the match date on Setup first");return;}
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("squad-match").textContent=(state.meta.match||"")+" \u00b7 "+typeLabel();
+  document.getElementById("squadList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("squadScrim").classList.add("open");
+  apiListSquads().then(function(list){
+    var el=document.getElementById("squadList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No squads have been uploaded for this match yet.</div>';return;}
+    list.sort(function(a,b){return (a.squad_label||"").localeCompare(b.squad_label||"")||((b.uploaded_at||0)-(a.uploaded_at||0));});
+    /* flag squad labels claimed by more than one device — the RO decides */
+    var counts={};list.forEach(function(s){var k=(s.squad_label||"").toLowerCase();counts[k]=(counts[k]||0)+1;});
+    el.innerHTML=list.map(function(s){
+      var dup=counts[(s.squad_label||"").toLowerCase()]>1;
+      return '<div class="cirow" data-dev="'+esc(s.device_id)+'" data-rev="'+(s.revision||"")+'">'
+        +'<div class="meta"><div class="nm">'+esc(s.squad_label||"(no squad name)")
+        +(dup?' <span class="cibadge warn">2 tablets</span>':'')
+        +(s.first_upload_for_device?' <span class="cibadge email">new tablet</span>':'')+'</div>'
+        +'<div class="dv">'+esc(s.device_label||"unnamed tablet")+' \u00b7 '+(s.entry_count||0)+' shooters \u00b7 '+esc(whenText(s.uploaded_at))+'</div></div>'
+        +'<span class="cistat on">Load</span></div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      row.addEventListener("click",function(){restoreSquad(row.dataset.dev,row.dataset.rev,row);});});
+  }).catch(function(err){
+    document.getElementById("squadList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function restoreSquad(deviceId,revision,row){
+  var label=row?(row.querySelector(".nm")?row.querySelector(".nm").textContent:""):"";
+  if(!confirm("Load this squad onto this tablet?\n\nEverything currently on this tablet will be replaced."))return;
+  toast("Downloading\u2026");
+  apiGetSquad(deviceId,revision).then(function(sq){
+    if(!sq||!sq.payload)throw "That squad came back empty.";
+    var d;try{d=JSON.parse(sq.payload);}catch(e){throw "That squad's data couldn't be read.";}
+    if(!d||!d.entries)throw "That squad's data was empty or malformed.";
+    undoPush("Restored a squad from the server");
+    state.meta.matchType=backupType(d);
+    state.entries=d.entries.map(function(e){return ensureShape(e,state.meta.matchType);});
+    if(d.meta){
+      /* take over that squad's identity — this tablet IS that squad now */
+      if(d.meta.squad)state.meta.squad=d.meta.squad;
+      if(d.meta.match)state.meta.match=d.meta.match;
+      state.meta.started=true;
+    }
+    save();document.getElementById("squadScrim").classList.remove("open");
+    applyPhase();syncSetupSquad();show("roster");
+    toast("Squad restored \u2014 this tablet is now "+(state.meta.squad||"that squad"));
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected \u2014 check Tools":(typeof err==="string"?err:"Couldn't download that squad."));
+  });
+}
+document.getElementById("set-getsquad").addEventListener("click",openSquadPicker);
+document.getElementById("squadClose").addEventListener("click",function(){document.getElementById("squadScrim").classList.remove("open");});
+document.getElementById("squadScrim").addEventListener("click",function(ev){if(ev.target.id==="squadScrim")ev.currentTarget.classList.remove("open");});
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
