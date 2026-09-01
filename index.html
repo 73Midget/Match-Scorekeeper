@@ -253,7 +253,17 @@
            width:34px;height:34px;border-radius:9px;margin-left:10px;flex:0 0 auto;cursor:pointer}
   .gearbtn:active{background:rgba(255,255,255,.26)}
   .setgrp{margin:0 0 18px}
-  .setgrp>h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:0 0 8px}
+  .setgrp>h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:800;
+             margin:0 0 10px;background:var(--ink);padding:8px 12px;border-radius:8px;border-left:5px solid var(--orange)}
+  /* On the sheet background a white button with a pale border disappears.
+     Give settings buttons a visible edge so they read as tappable. */
+  #gearScrim .btn.ghost{background:#fff;border:1.5px solid var(--steel-soft);color:var(--ink);font-weight:800}
+  #gearScrim .btn.ghost:active{background:var(--line)}
+  #gearScrim .btn.danger{background:var(--red);border:1.5px solid var(--red);color:#fff;font-weight:800}
+  #gearScrim .card{border:1px solid var(--line)}
+  .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
+             font-size:11px;line-height:1.6;color:var(--steel-soft);text-align:center}
+  .setcredit b{color:var(--steel);font-weight:800}
   .setgrp .card{margin-bottom:8px}
   .rdonly{background:#efece3;color:var(--steel)}
   .crow{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
@@ -467,6 +477,9 @@
         <div class="kv"><span class="k">Code</span><span class="v">••••••••••••</span></div>
         <div class="kv"><span class="k">Shooter list</span><span class="v" id="sync-rev">—</span></div>
         <div style="height:10px"></div>
+        <div class="subhd">Connection</div>
+        <div class="btnrow"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
+
         <div class="subhd">Shooter list</div>
         <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
         <div class="sethint">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
@@ -478,8 +491,7 @@
         <button class="btn ghost sm" id="set-getsquad">⬇ Restore a squad from the server</button>
         <div class="sethint">For a replacement tablet taking over a squad. Pick from the squads uploaded for this match.</div>
 
-        <div class="subhd">Connection</div>
-        <div class="btnrow"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
+
       </div>
 
       <div class="syncstat idle" id="sync-status" style="display:none"></div>
@@ -497,6 +509,9 @@
     <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
   </div>
 
+  <div class="setcredit">Match Scorekeeper · <b>created by G. Groiss</b><br>
+    Free software under the GNU AGPL v3.0</div>
+  <div style="height:12px"></div>
   <button class="btn ghost" id="gearClose">Close</button>
 </div></div>
 
@@ -619,7 +634,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-i";
+var APP_BUILD="2026-08-29-j";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
