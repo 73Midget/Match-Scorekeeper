@@ -504,6 +504,7 @@
     <div class="sethint" style="margin-bottom:8px"><b>Shooter list</b> = names only, for the other tablets. <b>Match archive</b> = this match with scores, for your records.</div>
     <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
     <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">Remove a shooter from the list</button>
+    <button class="btn ghost sm" id="set-compile" style="margin-bottom:8px">Compile match results</button>
     <button class="btn ghost sm" id="set-csv" style="margin-bottom:8px">Export results as CSV</button>
     <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
     <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
@@ -634,7 +635,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-01-a";
+var APP_BUILD="2026-09-01-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1134,13 +1135,30 @@ function uploadSquad(txt,attempt){
    sent to a different club after reconfiguration. */
 function setPending(txt){
   cfg.pending={payload:txt,clubId:cfg.clubId,squad:(state.meta.squad||""),
-               match:(state.meta.match||""),at:Date.now()};
+               match:(state.meta.match||""),matchType:(state.meta.matchType||"outdoor"),at:Date.now()};
   saveCfg();renderPending();
 }
 function clearPending(){cfg.pending=null;saveCfg();renderPending();}
+/* A queued upload belongs to a specific club AND a specific match. Sending it
+   into a different one would file a squad under a match it isn't from — the
+   payload still carries the old label, so the compiler would silently refuse it. */
 function pendingValid(){
   var p=cfg.pending;
-  return !!(p&&p.payload&&p.clubId&&p.clubId===cfg.clubId);
+  if(!(p&&p.payload&&p.clubId&&p.clubId===cfg.clubId))return false;
+  if(normMatch(p.match)!==normMatch(state.meta.match))return false;
+  if((p.matchType||"outdoor")!==((state.meta&&state.meta.matchType)||"outdoor"))return false;
+  return true;
+}
+/* Called when the match changes: drop a queued upload that no longer belongs,
+   and say so rather than losing it quietly. */
+function checkPendingMatch(){
+  var p=cfg.pending;
+  if(!p||!p.payload)return;
+  if(p.clubId===cfg.clubId&&normMatch(p.match)===normMatch(state.meta.match)&&
+     (p.matchType||"outdoor")===((state.meta&&state.meta.matchType)||"outdoor"))return;
+  var was=p.squad||"a squad",lbl=p.match||"another match";
+  cfg.pending=null;saveCfg();renderPending();
+  toast("The upload waiting for "+was+" was for "+lbl+" — not sent. Save or upload it again under this match.");
 }
 function renderPending(){
   var b=document.getElementById("pendingBadge");if(!b)return;
@@ -1344,7 +1362,7 @@ function toggleCompileNames(i){
   renderCompile();
 }
 function openCompile(){
-  if(!state.meta.match){toast("Set the match date on Setup first");return;}
+  if(!state.meta.match){toast("Set the match date on Setup first — it has to match the squads you're compiling");return;}
   compileRows=[];
   document.getElementById("compile-match").textContent=(state.meta.match||"")+" · "+typeLabel();
   document.getElementById("compileScrim").classList.add("open");
@@ -1374,14 +1392,25 @@ function loadCompileServer(){
 }
 function doCompile(){
   var sel=compileRows.filter(function(r){return r.selected;});
-  if(!sel.length){toast("Nothing selected");return;}
+  if(!sel.length){
+    var missed=compileRows.filter(function(r){return !r.done;});
+    if(missed.length){
+      toast("Nothing selected — “"+(missed[0].squad||"one squad")+"” hasn't been compiled yet. Tick it to include it.");
+    }else{
+      var n=compiledSet().length;
+      toast("Nothing new to compile — these results already include "+n+" squad"+(n===1?"":"s")+". Check the results, then upload the shooter list if you've made corrections.");
+    }
+    return;
+  }
   toast("Compiling "+sel.length+" squad"+(sel.length===1?"":"s")+"…");
   Promise.all(sel.map(function(r){return ensurePayload(r).catch(function(){return null;});})).then(function(list){
     var payloads=list.filter(Boolean);
     if(!payloads.length){toast("Couldn't load the selected squads");return;}
     var r=mergePayloads(payloads,{undoLabel:"Compiled "+payloads.length+" squad"+(payloads.length===1?"":"s")});
     sel.forEach(function(row){if(row.kind==="server")markCompiled(row.device_id,row.revision);});
-    state.meta.compiledAt=Date.now();save();
+    state.meta.compiledAt=Date.now();
+    state.meta.started=true;    /* compiling means the match is underway here — show the tabs */
+    save();applyPhase();
     document.getElementById("compileScrim").classList.remove("open");
     showMergeSummary(r);show("results");
   });
@@ -1421,6 +1450,15 @@ function stageAccountProblem(e,key){
   if(key==="plates"){
     for(var i=0;i<4;i++){var acct=num0(e.plates.hits[i])+num0(e.plates.miss[i]);
       if(acct!==6)return "String "+(i+1)+" is "+acct+"/6 — each plates string must total 6 (hits + misses standing).";}
+    return "";
+  }
+  /* Paper: every target must account for all its shots. ROs enter A-zone hits
+     as well as down-zones and misses, so the row has to add up. Catches both an
+     untouched target and one where a shot was missed off the tally. */
+  var tg=(e[key]&&e[key].targets)||[],want=expectedPaper(e);
+  for(var j=0;j<tg.length;j++){
+    var t=tg[j]||{},got=num0(t.a)+num0(t.c)+num0(t.d)+num0(t.miss);
+    if(got!==want)return "Target "+(j+1)+" is "+got+"/"+want+" — each target must account for all "+want+" shots (A + C + D + misses).";
   }
   return "";}
 function sumT(a){var s=0;for(var i=0;i<a.length;i++)s+=numf(a[i]);return s;}
@@ -1497,7 +1535,8 @@ function renderRoster(){
   list.innerHTML=shown.map(function(e,i){var s=hasAny(e),st=statusOf(e);
     return '<div class="entry" data-id="'+e.id+'"><div class="ord">'+(i+1)+'</div><div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")
       +(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>'
-      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')
+      +(divGunMismatch(e)?' <span class="cibadge warn">check division/gun</span>':'')+'</div></div>'
       +'<div class="stagedots"><span class="sdot'+(e.done.five?' on':'')+'" title="Five to Glock">F</span><span class="sdot'+(e.done.glockm?' on':'')+'" title="Glock\u2019M">M</span><span class="sdot'+(e.done.plates?' on':'')+'" title="Glock the Plates">P</span></div>'
       +'<div class="tot">'+(s?fmt(total(e)):'—')+'<small>'+(s?'total':'not shot')+'</small></div></div>';}).join("");
   list.querySelectorAll(".entry").forEach(function(r){r.addEventListener("click",function(){state.selected=r.dataset.id;show("score");});});
@@ -1526,6 +1565,7 @@ function renderRosterIndoor(active,q){
 }
 document.getElementById("set-squad").addEventListener("input",function(){state.meta.squad=this.value.trim();save();syncSetupSquad();});
 document.getElementById("f-match").addEventListener("input",function(){state.meta.match=this.value.trim();save();});
+document.getElementById("f-match").addEventListener("change",checkPendingMatch);
 document.getElementById("rosterSearch").addEventListener("input",renderRoster);
 
 /* check-in */
@@ -1635,7 +1675,8 @@ document.getElementById("set-newmatch").addEventListener("click",function(){
   var seen={};state.entries=state.entries.filter(function(e){if(seen[e.personId])return false;seen[e.personId]=true;return true;});  /* collapse extra rounds → one per person */
   state.entries.forEach(function(e){clearAll(e);e.active=false;e.status="normal";e.checkinSeq=0;});
   state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;
-  state.meta.compiled=[];state.meta.compiledAt=null;state.meta.lastUpload=null;save();
+  state.meta.compiled=[];state.meta.compiledAt=null;
+  state.meta.lastUpload=null;state.meta.lastBackup=null;state.meta.lastShared=null;save();
   document.getElementById("checkinScrim").classList.remove("open");
   applyPhase();show("setup");toast("New match — pick type & check in");
 });
@@ -1662,7 +1703,8 @@ function renderScore(){
   if(!e){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">◎</div>Pick a competitor from the Roster to score them.</div>';return;}
   body.innerHTML=
     '<div class="totalcard"><div class="who"><div class="nm">'+esc(e.name||"(unnamed)")+' <span id="statusBadge"></span></div>'
-      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')
+      +(divGunMismatch(e)?' <span class="cibadge warn">check division/gun</span>':'')+'</div></div>'
       +'<div class="big" id="grandTotal">'+fmt(total(e))+'<small>match total</small></div></div>'
     +'<div class="statusctl"><span class="lbl">Status</span><div class="seg">'
       +'<button data-st="normal">Finished</button><button data-st="DNF">DNF</button><button data-st="DQ">DQ</button></div></div>'
@@ -1733,7 +1775,7 @@ function openStageConfirm(e,key){
     +(review?'<div class="confnote">This stage is completed and locked. Unlock it to make changes.</div>':'');
   var acc=document.getElementById("confirmAccept"),rej=document.getElementById("confirmReject");
   if(review){acc.textContent="Keep completed";rej.textContent="Unlock & edit";}
-  else{acc.textContent="Accept";rej.textContent="Reject &amp; edit";}
+  else{acc.textContent="Accept";rej.textContent="Reject & edit";}
   document.getElementById("confirmScrim").classList.add("open");
 }
 document.getElementById("confirmAccept").addEventListener("click",function(){
@@ -1771,7 +1813,8 @@ function renderScoreIndoor(){
     h+='<div class="hd"><div class="name">ROUND '+(k+1)+(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>';
     h+='<div class="stagescore">'+(r.score!=null?num0(r.score):'—')+'<small>'+(r.x!=null?num0(r.x)+'X':'score')+'</small></div></div>';
     h+='<div class="bd">';
-    h+='<div class="rmeta">'+esc(r.division||"—")+' · '+(r.gun?esc(r.gun):'no gun')+(locked?'':' <button class="linklike" data-rdedit="'+r.id+'">change</button>')+'</div>';
+    h+='<div class="rmeta">'+esc(r.division||"—")+' · '+(r.gun?esc(r.gun):'no gun')
+      +(divGunMismatch(r)?' <span class="cibadge warn">check division/gun</span>':'')+(locked?'':' <button class="linklike" data-rdedit="'+r.id+'">change</button>')+'</div>';
     if(locked)h+='<div class="donebanner">✓ Round locked — tap “Review / edit” to change</div>';
     h+='<div class="scorepads">'
       +'<button type="button" class="padfield'+(locked?' locked':'')+'" data-fld="score" data-rid="'+r.id+'"'+(locked?' disabled':'')+'><span class="pfnum">'+(r.score!=null?num0(r.score):'—')+'</span><span class="pflab">Score · 0–500</span></button>'
@@ -2072,7 +2115,7 @@ function placeIn(list,e){var ord=ordered(list);for(var i=0;i<ord.length;i++)if(o
 function editMatchInfo(){
   var v=prompt("Match name / date:",state.meta.match||"");
   if(v===null)return;
-  state.meta.match=v.trim();save();renderResults();
+  state.meta.match=v.trim();save();checkPendingMatch();renderResults();
 }
 function renderResults(){
   var mi=document.getElementById("resultsMatchInfo");
@@ -2147,9 +2190,10 @@ function renderResultsIndoor(){
 }
 function updateBackupInfo(){
   var el=document.getElementById("backupInfo");if(!el)return;
-  var lb=state.meta.lastBackup,txt=lb?('Saved '+new Date(lb).toLocaleTimeString()):'Not saved yet';
-  if(syncOn())txt+=state.meta.lastUpload?(' · uploaded '+new Date(state.meta.lastUpload).toLocaleTimeString()):' · not uploaded';
-  var ls=state.meta.lastShared;if(ls)txt+=' · sent '+new Date(ls).toLocaleTimeString();
+  function hm(t){return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}
+  var lb=state.meta.lastBackup,txt=lb?('Saved '+hm(lb)):'Not saved yet';
+  if(syncOn())txt+=state.meta.lastUpload?(' · uploaded '+hm(state.meta.lastUpload)):' · not uploaded';
+  var ls=state.meta.lastShared;if(ls)txt+=' · sent '+hm(ls);
   el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span>'+esc(txt)+'</span>';
   var ub=document.getElementById("set-undo");
   if(ub){var t=undoTop();
@@ -2505,6 +2549,9 @@ function csvIndoor(){
     lines.push(row.map(q).join(","));});
   download("match-results-"+stamp()+".csv",lines.join("\n"),"text/csv");toast("CSV exported");
 }
+document.getElementById("set-compile").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");openCompile();
+});
 document.getElementById("set-csv").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");
   if((state.meta.matchType||"outdoor")==="indoor")return csvIndoor();
@@ -2828,6 +2875,16 @@ var DIV_GUN_PAIRS=[
    isGun:function(g){return String(g||"").toLowerCase().replace(/[^a-z0-9]/g,"")==="g44"
                           ||String(g||"").replace(/[^0-9]/g,"")==="44";}}
 ];
+/* True when this entry's division and gun contradict a known pairing.
+   The prompt catches a mismatch going in; this catches one however it arrived. */
+function divGunMismatch(e){
+  if(!e||!e.division||!e.gun)return false;
+  var p=pairForDiv(e.division);
+  if(p)return !p.isGun(e.gun);
+  var q=pairForGun(e.gun);
+  if(q)return String(e.division).trim().toLowerCase()!==q.div.toLowerCase();
+  return false;
+}
 function pairForDiv(d){var n=String(d||"").trim().toLowerCase();
   for(var i=0;i<DIV_GUN_PAIRS.length;i++)if(DIV_GUN_PAIRS[i].div.toLowerCase()===n)return DIV_GUN_PAIRS[i];
   return null;}
@@ -2870,7 +2927,7 @@ function firstName(n){if(!n)return "there";n=n.trim();if(n.indexOf(",")>=0){var 
 function esc(s){return (""+s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function stamp(){var d=new Date();function p(n){return (n<10?"0":"")+n;}return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes());}
 var toastT;function toast(m,action){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");t.classList.toggle("act",!!action);
-  t.onclick=action||null;clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");t.classList.remove("act");t.onclick=null;},action?6000:1600);}
+  t.onclick=action||null;clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");t.classList.remove("act");t.onclick=null;},action?6000:(String(m).length>60?4500:2400));}
 
 /* resilience */
 document.addEventListener("visibilitychange",function(){if(document.hidden)save();});
