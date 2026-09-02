@@ -649,7 +649,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-02-a";
+var APP_BUILD="2026-09-02-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1504,6 +1504,14 @@ function stageAccountProblem(e,key){
   for(var j=0;j<tg.length;j++){
     var t=tg[j]||{},got=num0(t.a)+num0(t.c)+num0(t.d)+num0(t.miss);
     if(got!==want)return "Target "+(j+1)+" is "+got+"/"+want+" — each target must account for all "+want+" shots (A + C + D + misses).";
+  }
+  /* Glock'M has one steel popper per string, three strings — so hits plus
+     standing must come to exactly 3. Requiring the exact total (not merely
+     "something entered") catches the likelier mistake: two poppers recorded
+     and the third forgotten, which silently drops a 10-second penalty. */
+  if(key==="glockm"){
+    var st=num0(e.glockm.steelHits)+num0(e.glockm.steelMiss);
+    if(st!==3)return "Steel is "+st+"/3 — one popper per string, so hits plus standing must total 3.";
   }
   return "";}
 function sumT(a){var s=0;for(var i=0;i<a.length;i++)s+=numf(a[i]);return s;}
