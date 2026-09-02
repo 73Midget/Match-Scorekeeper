@@ -468,13 +468,28 @@
   <button class="btn ghost" id="rsquadClose">Close</button>
 </div></div>
 
-<div class="scrim" id="removeScrim"><div class="sheet">
-  <h3>Remove a shooter</h3>
-  <p class="muted" style="margin:0 0 8px">Removes the person and all of their entries from this tablet's list. Use <b>↶ Undo</b> in Tools if you remove the wrong one.</p>
-  <input type="search" id="removeSearch" placeholder="Search shooters" style="margin-bottom:10px">
-  <div class="card" id="removeList" style="max-height:52vh;overflow:auto"></div>
+<div class="scrim" id="removeScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Shooter list</h3>
+  <p class="muted" id="shooters-sub" style="margin:0 0 8px"></p>
+  <div id="shooters-empty" style="display:none"></div>
+  <div id="shooters-main">
+    <div class="btnrow" style="margin-bottom:8px"><button class="btn ghost sm" id="shooters-add">+ Add shooter</button><button class="btn ghost sm" id="shooters-history">Earlier versions</button></div>
+    <input type="search" id="removeSearch" placeholder="Search shooters" style="margin-bottom:10px">
+    <div class="card" id="removeList" style="max-height:44vh;overflow:auto"></div>
+    <div style="height:10px"></div>
+    <button class="btn green" id="shooters-publish">⬆ Publish as the club's shooter list</button>
+    <div class="sethint">Every tablet that downloads the list will get this one.</div>
+  </div>
   <div style="height:12px"></div>
   <button class="btn ghost" id="removeClose">Close</button>
+</div></div>
+
+<div class="scrim" id="histScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Earlier shooter lists</h3>
+  <p class="muted" style="margin:0 0 8px">Published versions of the club's list, newest first. Rolling back publishes the old list again as a new version — nothing is deleted.</p>
+  <div class="card" id="histList" style="max-height:56vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="histClose">Close</button>
 </div></div>
 
 <div class="scrim" id="gearScrim"><div class="sheet" style="max-height:94vh">
@@ -512,13 +527,17 @@
   <div class="setgrp">
     <h4>Match Data</h4>
     <div class="card pad" style="margin-bottom:8px">
-      <label class="fld" style="margin:0"><span>Match date</span><input type="date" id="set-match" min="2020-01-01"></label>
+      <div class="kv"><span class="k">Match date</span><span class="v" id="set-match-shown">not set</span></div>
+      <div style="height:8px"></div>
+      <button class="btn ghost sm" id="set-match-edit">Update match date</button>
+      <label class="fld" id="set-match-box" style="display:none;margin-top:10px"><span>Pick the date</span>
+        <input type="date" id="set-match" min="2020-01-01"></label>
       <div class="sethint" id="set-match-hint"></div>
     </div>
     <div class="btnrow"><button class="btn ghost sm" id="set-roster">💾 Save shooter list</button><button class="btn ghost sm" id="set-archive">💾 Save match archive</button></div>
     <div class="sethint" style="margin-bottom:8px"><b>Shooter list</b> = names only, for the other tablets. <b>Match archive</b> = this match with scores, for your records.</div>
     <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
-    <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">Remove a shooter from the list</button>
+    <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">View &amp; edit shooter list</button>
     <button class="btn ghost sm" id="set-compile" style="margin-bottom:8px">Compile match results</button>
     <button class="btn ghost sm" id="set-csv" style="margin-bottom:8px">Export results as CSV</button>
     <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
@@ -554,8 +573,6 @@
         <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
         <div class="sethint">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
         <div style="height:8px"></div>
-        <button class="btn ghost sm" id="set-putroster">⬆ Upload this tablet's shooter list</button>
-        <div class="sethint">Makes this tablet's list the club's. For setting up a new club, or after adding walk-ins.</div>
 
         <div class="subhd">This match</div>
         <button class="btn ghost sm" id="set-getsquad">⬇ Restore a squad from the server</button>
@@ -692,7 +709,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-02-c";
+var APP_BUILD="2026-09-02-d";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -943,7 +960,7 @@ document.querySelectorAll("#set-screen button").forEach(function(b){
   b.addEventListener("click",function(){cfg.screen=b.dataset.s||"";saveCfg();applyScreen();});
 });
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
-var namesEditing=false;
+var namesEditing=false,matchEditing=false;
 function renderSettings(){
   document.getElementById("set-squad").value=state.meta.squad||"";
   document.getElementById("set-device").value=cfg.deviceLabel||"";
@@ -953,8 +970,10 @@ function renderSettings(){
   document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
   applyScreen();
   document.getElementById("set-match").value=state.meta.match||"";
-  document.getElementById("set-match-hint").textContent=state.meta.match
-    ?matchDisplay(state.meta.match):"Not set — pick tonight's date.";
+  document.getElementById("set-match-shown").textContent=state.meta.match?matchDisplay(state.meta.match):"not set";
+  document.getElementById("set-match-box").style.display=matchEditing?"":"none";
+  document.getElementById("set-match-edit").style.display=matchEditing?"none":"";
+  document.getElementById("set-match-hint").textContent=matchEditing?"":"";
   document.getElementById("set-version").textContent="Version "+APP_VERSION+" · build "+APP_BUILD;
   renderSync();
   updateBackupInfo();   /* refreshes the undo button's label and visibility */
@@ -964,6 +983,9 @@ function closeSettings(){document.getElementById("gearScrim").classList.remove("
 document.getElementById("gearBtn").addEventListener("click",openSettings);
 document.getElementById("gearClose").addEventListener("click",closeSettings);
 document.getElementById("gearScrim").addEventListener("click",function(ev){if(ev.target.id==="gearScrim")closeSettings();});
+document.getElementById("set-match-edit").addEventListener("click",function(){
+  matchEditing=true;renderSettings();
+  var el=document.getElementById("set-match");try{if(el.showPicker)el.showPicker();}catch(e){}});
 document.getElementById("names-edit").addEventListener("click",function(){namesEditing=true;renderSettings();});
 document.getElementById("names-cancel").addEventListener("click",function(){namesEditing=false;renderSettings();});
 document.getElementById("names-save").addEventListener("click",function(){
@@ -1046,7 +1068,7 @@ function removePerson(pid){
   undoPush("Removed "+nm);
   state.entries=state.entries.filter(function(e){return e.personId!==pid;});
   if(state.selected&&!byId(state.selected))state.selected=null;
-  save();renderRemoveList();toast(nm+" removed");
+  save();renderShooters();toast(nm+" removed");
 }
 function renderRemoveList(){
   var q=(document.getElementById("removeSearch").value||"").toLowerCase();
@@ -1064,9 +1086,103 @@ function renderRemoveList(){
   list.querySelectorAll(".cirow").forEach(function(row){
     row.addEventListener("click",function(){removePerson(row.dataset.pid);});});
 }
+/* A roster push replaces the club's whole list, so it belongs to whoever holds
+   the complete picture: a director curating beforehand, or the tablet that just
+   compiled. A squad tablet mid-match holds only its own view. */
+function matchInProgress(){return !!state.meta.started&&!state.meta.compiledAt;}
+function renderShooters(){
+  var n=state.entries.length,empty=document.getElementById("shooters-empty"),
+      main=document.getElementById("shooters-main"),sub=document.getElementById("shooters-sub");
+  if(!n){
+    main.style.display="none";empty.style.display="";
+    empty.innerHTML=syncOn()
+      ? '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
+        +'<button class="btn green" id="shooters-get">\u2b07 Get shooter list from server</button>'
+        +'<div class="sethint">Or add them one at a time.</div>'
+        +'<div style="height:8px"></div><button class="btn ghost sm" id="shooters-add2">+ Add shooter</button>'
+      : '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
+        +'<button class="btn ghost sm" id="shooters-restore">Restore from a backup file</button>'
+        +'<div style="height:8px"></div><button class="btn ghost sm" id="shooters-add2">+ Add shooter</button>';
+    sub.textContent="";
+    var g=document.getElementById("shooters-get");
+    if(g)g.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");getRoster();});
+    var r=document.getElementById("shooters-restore");
+    if(r)r.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");document.getElementById("restoreFile").click();});
+    var a2=document.getElementById("shooters-add2");
+    if(a2)a2.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");openEdit(null);});
+    return;
+  }
+  empty.style.display="none";main.style.display="";
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  sub.textContent=Object.keys(people).length+" shooters on this tablet"
+    +(syncOn()&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"");
+  document.getElementById("shooters-history").style.display=syncOn()?"":"none";
+  document.getElementById("shooters-publish").style.display=syncOn()?"":"none";
+  renderRemoveList();
+}
+/* Rollback publishes an old list again as a NEW revision — nothing is deleted,
+   the conflict model is untouched, and the history records that a rollback
+   happened rather than pretending it didn't. */
+function openHistory(){
+  if(!syncOn())return;
+  document.getElementById("histList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("histScrim").classList.add("open");
+  apiRosterRevisions().then(function(list){
+    var el=document.getElementById("histList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No shooter list has been published yet.</div>';return;}
+    var newest=list[0]&&list[0].revision;
+    el.innerHTML=list.map(function(r){
+      var cur=r.revision===newest;
+      return '<div class="cirow" data-rev="'+r.revision+'"><div class="meta">'
+        +'<div class="nm">Version '+r.revision+(cur?' <span class="cibadge">current</span>':'')+'</div>'
+        +'<div class="dv">'+r.entry_count+' shooters \u00b7 '+esc(r.author||"unknown")
+        +(r.updated_at?' \u00b7 '+esc(whenText(r.updated_at)):'')+'</div></div>'
+        +(cur?'':'<span class="cistat on">Roll back</span>')+'</div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      var rev=+row.dataset.rev;if(rev===newest)return;
+      row.addEventListener("click",function(){rollbackTo(rev);});});
+  }).catch(function(err){
+    document.getElementById("histList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function rollbackTo(rev){
+  toast("Fetching version "+rev+"\u2026");
+  apiGetRoster(rev).then(function(r){
+    if(!r)throw "That version couldn't be found.";
+    var d;try{d=JSON.parse(r.payload);}catch(e){throw "That version couldn't be read.";}
+    if(!d||!d.entries)throw "That version was empty.";
+    var who=r.author||"unknown";
+    if(!confirm("Roll back to version "+rev+"?\n\n"+d.entries.length+" shooters, published by "+who+".\n\nThis loads that list onto this tablet and publishes it again as a new version. Nothing is deleted."))return;
+    undoPush("Rolled back the shooter list");
+    var mt=(state.meta&&state.meta.matchType)||"outdoor";
+    state.entries=d.entries.map(function(e){return ensureShape(e,mt);});
+    save();renderRoster();
+    document.getElementById("histScrim").classList.remove("open");
+    /* say what it is in the history — an unexplained duplicate of an earlier
+       revision is a puzzle six months later */
+    pushRoster(1,"Rolled back to r"+rev+" ("+who+")").then(function(){renderShooters();});
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected — check Tools":(typeof err==="string"?err:"Couldn't fetch that version."));
+  });
+}
+document.getElementById("shooters-history").addEventListener("click",openHistory);
+document.getElementById("histClose").addEventListener("click",function(){document.getElementById("histScrim").classList.remove("open");});
+document.getElementById("histScrim").addEventListener("click",function(ev){if(ev.target.id==="histScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("shooters-add").addEventListener("click",function(){
+  document.getElementById("removeScrim").classList.remove("open");openEdit(null);});
+document.getElementById("shooters-publish").addEventListener("click",function(){
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  var n=Object.keys(people).length;
+  if(!n){toast("There are no shooters on this tablet to publish");return;}
+  if(matchInProgress()&&!confirm("WARNING — MATCH IN PROGRESS\n\nThis tablet is part-way through a match and hasn't compiled the other squads.\n\nPublishing now makes THIS tablet's list the club's list, which may not include shooters other squads have added.\n\nContinue anyway?"))return;
+  if(!confirm("Publish "+n+" shooters as the club's list?\n\nEvery tablet that downloads the list will get this one."))return;
+  document.getElementById("removeScrim").classList.remove("open");
+  pushRoster();
+});
 document.getElementById("set-remove").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");
-  document.getElementById("removeSearch").value="";renderRemoveList();
+  document.getElementById("removeSearch").value="";renderShooters();
   document.getElementById("removeScrim").classList.add("open");
 });
 document.getElementById("removeSearch").addEventListener("input",renderRemoveList);
@@ -1080,8 +1196,8 @@ document.getElementById("removeScrim").addEventListener("click",function(ev){
    equivalent of restoring the shooter-list file, so one mental model covers
    both. Retains `revision`, which is required for the next push (§4.7). */
 var AUTH_ERR="__auth__";
-function apiGetRoster(){
-  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster",
+function apiGetRoster(revision){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster"+(revision?("?revision="+encodeURIComponent(revision)):""),
     {headers:{"Authorization":"Bearer "+cfg.secret}})
   .then(function(res){
     if(res.status===404)return null;                  /* normal for a new club */
@@ -1147,14 +1263,24 @@ function apiPutRoster(body){
     return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,ok:res.ok,body:j};});
   });
 }
-function pushRoster(attempt){
+function apiRosterRevisions(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster/revisions",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return [];
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.revisions)||[];});
+}
+function pushRoster(attempt,authorNote){
   attempt=attempt||1;
   if(!syncOn())return Promise.resolve();
   var p=rosterPayload(),txt=JSON.stringify(p);
   var body={payload:txt,schema_version:SCHEMA_VERSION,
     base_revision:(cfg.rosterRevision?cfg.rosterRevision:null),
     entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
-    author:cfg.deviceLabel||"Unnamed tablet"};
+    author:authorNote||cfg.deviceLabel||"Unnamed tablet"};
   syncStatus("idle",attempt>1?"Retrying\u2026":"Uploading shooter list\u2026");
   return apiPutRoster(body).then(function(r){
     if(r.status===201){
@@ -1176,12 +1302,12 @@ function pushRoster(attempt){
              left over from a different club). Retry from scratch rather than
              treating this as terminal. */
           cfg.rosterRevision=0;saveCfg();
-          return pushRoster(attempt+1);
+          return pushRoster(attempt+1,authorNote);
         }
         var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
         mergePayloads([d],{skipMatchGuard:true,undoLabel:"Merged "+who+"'s shooter list"});
         cfg.rosterRevision=cur.revision;saveCfg();
-        return pushRoster(attempt+1);
+        return pushRoster(attempt+1,authorNote);
       });
     }
     if(r.status===401)throw "The server rejected this tablet's setup code.";
@@ -1192,12 +1318,6 @@ function pushRoster(attempt){
     syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. Nothing was uploaded \u2014 the list is still on this tablet.");
   });
 }
-document.getElementById("set-putroster").addEventListener("click",function(){
-  var n=rosterPayload().entries.length;
-  if(!n){syncStatus("bad","There are no shooters on this tablet to upload.");return;}
-  if(!confirm("Upload this tablet's "+n+" shooters as the club's shooter list?\n\nEvery tablet that downloads the list will get this one."))return;
-  pushRoster();
-});
 /* --- squad upload (§4.3) ------------------------------------------------
    payload is generated ONCE and sent verbatim — the server hashes those exact
    bytes for duplicate detection, so it must not be re-serialized in between.
@@ -2690,7 +2810,7 @@ document.getElementById("set-match").addEventListener("change",function(){
     this.value=state.meta.match||"";return;
   }
   state.meta.match=this.value;save();checkPendingMatch();
-  renderSettings();syncSetupSquad();renderRoster();
+  matchEditing=false;renderSettings();syncSetupSquad();renderRoster();
 });
 document.getElementById("set-csv").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");
