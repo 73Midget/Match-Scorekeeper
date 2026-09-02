@@ -315,7 +315,8 @@
           <button type="button" data-type="indoor">Indoor</button>
         </div>
       </div>
-      <label class="fld"><span>Match (date)</span><input type="text" id="f-match" placeholder="6/16/2026" autocomplete="off"></label>
+      <label class="fld"><span>Match date</span><input type="date" id="f-match"></label>
+      <div class="sethint" id="f-match-shown"></div>
       <label class="fld" style="margin:0"><span>Squad / relay on this tablet</span>
         <input type="text" id="f-squad-device" class="rdonly" placeholder="not set" autocomplete="off" readonly></label>
       <div class="sethint">Set in <b>⚙ Tools</b> — it belongs to the tablet, not to tonight's match.</div>
@@ -446,14 +447,39 @@
   <div class="setgrp">
     <h4>This Tablet</h4>
     <div class="card pad">
-      <label class="fld"><span>Squad / relay on this tablet</span>
-        <input type="text" id="set-squad" placeholder="e.g. Squad A" autocomplete="off"></label>
-      <label class="fld" style="margin:0"><span>Device name</span>
-        <input type="text" id="set-device" placeholder="e.g. Club Tablet 2" autocomplete="off"></label>
+      <div id="names-view">
+        <div class="kv"><span class="k">Squad / relay</span><span class="v" id="set-squad-shown">not set</span></div>
+        <div class="kv"><span class="k">Device name</span><span class="v" id="set-device-shown">not set</span></div>
+        <div style="height:8px"></div>
+        <button class="btn ghost sm" id="names-edit">Change squad / device name</button>
+      </div>
+      <div id="names-edit-box" style="display:none">
+        <label class="fld"><span>Squad / relay on this tablet</span>
+          <input type="text" id="set-squad" placeholder="e.g. Squad A" autocomplete="off"></label>
+        <label class="fld" style="margin:0"><span>Device name</span>
+          <input type="text" id="set-device" placeholder="e.g. Club Tablet 2" autocomplete="off"></label>
+        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="names-cancel">Cancel</button><button class="btn green sm" id="names-save">Save names</button></div>
+      </div>
       <div class="sethint">The squad name labels this tablet's results and files. The device name
         identifies this tablet itself, and stays the same from match to match.</div>
       <div class="sethint" id="set-version" style="margin-top:8px;font-weight:700"></div>
     </div>
+  </div>
+
+  <div class="setgrp">
+    <h4>Match Data</h4>
+    <div class="card pad" style="margin-bottom:8px">
+      <label class="fld" style="margin:0"><span>Match date</span><input type="date" id="set-match"></label>
+      <div class="sethint" id="set-match-hint"></div>
+    </div>
+    <div class="btnrow"><button class="btn ghost sm" id="set-roster">💾 Save shooter list</button><button class="btn ghost sm" id="set-archive">💾 Save match archive</button></div>
+    <div class="sethint" style="margin-bottom:8px"><b>Shooter list</b> = names only, for the other tablets. <b>Match archive</b> = this match with scores, for your records.</div>
+    <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
+    <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">Remove a shooter from the list</button>
+    <button class="btn ghost sm" id="set-compile" style="margin-bottom:8px">Compile match results</button>
+    <button class="btn ghost sm" id="set-csv" style="margin-bottom:8px">Export results as CSV</button>
+    <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
+    <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
   </div>
 
   <div class="setgrp">
@@ -479,6 +505,7 @@
         <div style="height:10px"></div>
         <div class="subhd">Connection</div>
         <div class="btnrow"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
+        <div class="syncstat idle" id="sync-status" style="display:none"></div>
 
         <div class="subhd">Shooter list</div>
         <button class="btn" id="set-getroster">⬇ Get latest shooter list</button>
@@ -494,20 +521,7 @@
 
       </div>
 
-      <div class="syncstat idle" id="sync-status" style="display:none"></div>
     </div>
-  </div>
-
-  <div class="setgrp">
-    <h4>Match Data</h4>
-    <div class="btnrow"><button class="btn ghost sm" id="set-roster">💾 Save shooter list</button><button class="btn ghost sm" id="set-archive">💾 Save match archive</button></div>
-    <div class="sethint" style="margin-bottom:8px"><b>Shooter list</b> = names only, for the other tablets. <b>Match archive</b> = this match with scores, for your records.</div>
-    <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
-    <button class="btn ghost sm" id="set-remove" style="margin-bottom:8px">Remove a shooter from the list</button>
-    <button class="btn ghost sm" id="set-compile" style="margin-bottom:8px">Compile match results</button>
-    <button class="btn ghost sm" id="set-csv" style="margin-bottom:8px">Export results as CSV</button>
-    <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
-    <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
   </div>
 
   <div class="setcredit">Match Scorekeeper · <b>created by G. Groiss</b><br>
@@ -635,7 +649,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-01-b";
+var APP_BUILD="2026-09-02-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -674,7 +688,17 @@ var MATCH_TYPES={
   }
 };
 function MT(e){var t=(e&&e.type)||(state.meta&&state.meta.matchType)||"outdoor";return MATCH_TYPES[t]||MATCH_TYPES.outdoor;}
-function todayStr(){return new Date().toLocaleDateString();}
+function todayStr(){var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+/* The match date is stored canonically (YYYY-MM-DD) so every tablet produces
+   an identical match key — "9/1/2026" and "09/01/2026" used to be two matches.
+   Display and the server-side label stay human-readable. */
+function matchDisplay(v){
+  v=String(v||"");
+  var m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return v;                                   /* older free-text values shown as-is */
+  return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString();
+}
 function mkTargets(n){var a=[];for(var i=0;i<n;i++)a.push({a:0,c:0,d:0,miss:0});return a;}
 function uid(p){return (p||"e")+Date.now()+Math.floor(Math.random()*100000);}
 function blankEntry(type){
@@ -852,9 +876,17 @@ function renderSync(){
 }
 
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
+var namesEditing=false;
 function renderSettings(){
   document.getElementById("set-squad").value=state.meta.squad||"";
   document.getElementById("set-device").value=cfg.deviceLabel||"";
+  document.getElementById("set-squad-shown").textContent=state.meta.squad||"not set";
+  document.getElementById("set-device-shown").textContent=cfg.deviceLabel||"not set";
+  document.getElementById("names-view").style.display=namesEditing?"none":"";
+  document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
+  document.getElementById("set-match").value=state.meta.match||"";
+  document.getElementById("set-match-hint").textContent=state.meta.match
+    ?matchDisplay(state.meta.match):"Not set — pick tonight's date.";
   document.getElementById("set-version").textContent="Version "+APP_VERSION+" · build "+APP_BUILD;
   renderSync();
   updateBackupInfo();   /* refreshes the undo button's label and visibility */
@@ -864,7 +896,20 @@ function closeSettings(){document.getElementById("gearScrim").classList.remove("
 document.getElementById("gearBtn").addEventListener("click",openSettings);
 document.getElementById("gearClose").addEventListener("click",closeSettings);
 document.getElementById("gearScrim").addEventListener("click",function(ev){if(ev.target.id==="gearScrim")closeSettings();});
-document.getElementById("set-device").addEventListener("input",function(){cfg.deviceLabel=this.value.trim();saveCfg();});
+document.getElementById("names-edit").addEventListener("click",function(){namesEditing=true;renderSettings();});
+document.getElementById("names-cancel").addEventListener("click",function(){namesEditing=false;renderSettings();});
+document.getElementById("names-save").addEventListener("click",function(){
+  var sq=document.getElementById("set-squad").value.trim(),dv=document.getElementById("set-device").value.trim();
+  var chg=[];
+  if(sq!==(state.meta.squad||""))chg.push("Squad: \u201c"+(state.meta.squad||"not set")+"\u201d \u2192 \u201c"+(sq||"not set")+"\u201d");
+  if(dv!==(cfg.deviceLabel||""))chg.push("Device: \u201c"+(cfg.deviceLabel||"not set")+"\u201d \u2192 \u201c"+(dv||"not set")+"\u201d");
+  if(!chg.length){namesEditing=false;renderSettings();return;}
+  /* The squad name labels every file and upload this tablet produces, so a
+     change is confirmed rather than taken on the first keystroke. */
+  if(!confirm("Change this tablet's names?\n\n"+chg.join("\n")))return;
+  state.meta.squad=sq;cfg.deviceLabel=dv;save();saveCfg();
+  namesEditing=false;renderSettings();syncSetupSquad();toast("Names updated");
+});
 
 /* --- Online Services controls --- */
 document.getElementById("set-online").addEventListener("change",function(){
@@ -1099,7 +1144,7 @@ function apiPostSquad(txt){
     schema_version:SCHEMA_VERSION,
     squad_key:normMatch(state.meta.squad),
     squad_label:(state.meta.squad||""),
-    match_label:(state.meta.match||""),
+    match_label:(matchDisplay(state.meta.match)||""),
     device_label:(cfg.deviceLabel||""),
     app_version:APP_VERSION,app_build:APP_BUILD,
     entry_count:state.entries.filter(function(e){return e.active;}).length
@@ -1219,7 +1264,7 @@ function openSquadPicker(){
   if(!syncOn())return;
   if(!state.meta.match){toast("Set the match date on Setup first");return;}
   document.getElementById("gearScrim").classList.remove("open");
-  document.getElementById("squad-match").textContent=(state.meta.match||"")+" \u00b7 "+typeLabel();
+  document.getElementById("squad-match").textContent=matchDisplay(state.meta.match)+" \u00b7 "+typeLabel();
   document.getElementById("squadList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
   document.getElementById("rsquadScrim").classList.add("open");
   apiListSquads().then(function(list){
@@ -1364,7 +1409,7 @@ function toggleCompileNames(i){
 function openCompile(){
   if(!state.meta.match){toast("Set the match date on Setup first — it has to match the squads you're compiling");return;}
   compileRows=[];
-  document.getElementById("compile-match").textContent=(state.meta.match||"")+" · "+typeLabel();
+  document.getElementById("compile-match").textContent=matchDisplay(state.meta.match)+" · "+typeLabel();
   document.getElementById("compileScrim").classList.add("open");
   renderCompile();
   if(syncOn())loadCompileServer();
@@ -1504,6 +1549,8 @@ function renderSetup(){
   var t=state.meta.matchType||"outdoor",locked=!!state.meta.started;
   document.querySelectorAll("#setupType button").forEach(function(b){b.classList.toggle("on",b.dataset.type===t);b.disabled=locked;});
   document.getElementById("f-match").value=state.meta.match||"";
+  var fms=document.getElementById("f-match-shown");
+  if(fms)fms.textContent=state.meta.match?matchDisplay(state.meta.match):"Not set — pick tonight's date.";
   document.getElementById("f-squad-device").value=state.meta.squad||"";
   var active=state.entries.filter(function(e){return e.active;}).length;
   document.getElementById("setupCount").textContent=active?(active+" checked in — add more or start the match"):"No shooters checked in yet — add them now, or after starting.";
@@ -1564,7 +1611,8 @@ function renderRosterIndoor(active,q){
   list.querySelectorAll(".entry").forEach(function(r){r.addEventListener("click",function(){state.selected=r.dataset.id;show("score");});});
 }
 document.getElementById("set-squad").addEventListener("input",function(){state.meta.squad=this.value.trim();save();syncSetupSquad();});
-document.getElementById("f-match").addEventListener("input",function(){state.meta.match=this.value.trim();save();});
+document.getElementById("f-match").addEventListener("input",function(){state.meta.match=this.value;save();
+  var h=document.getElementById("f-match-shown");if(h)h.textContent=state.meta.match?matchDisplay(state.meta.match):"Not set — pick tonight\u2019s date.";});
 document.getElementById("f-match").addEventListener("change",checkPendingMatch);
 document.getElementById("rosterSearch").addEventListener("input",renderRoster);
 
@@ -2119,8 +2167,7 @@ function editMatchInfo(){
 }
 function renderResults(){
   var mi=document.getElementById("resultsMatchInfo");
-  mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(state.meta.match||"—")+'<button class="linklike" id="editMatchBtn">edit</button>';
-  var emb=document.getElementById("editMatchBtn");if(emb)emb.addEventListener("click",editMatchInfo);
+  mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(matchDisplay(state.meta.match)||"—");
   var fsb=document.getElementById("finishSquadBtn");
   if(fsb)fsb.textContent=syncOn()?"\u2b06 Upload this squad's results":"\ud83d\udcbe Save this squad's results";
   if((state.meta.matchType||"outdoor")==="indoor")return renderResultsIndoor();
@@ -2194,7 +2241,11 @@ function updateBackupInfo(){
   var lb=state.meta.lastBackup,txt=lb?('Saved '+hm(lb)):'Not saved yet';
   if(syncOn())txt+=state.meta.lastUpload?(' · uploaded '+hm(state.meta.lastUpload)):' · not uploaded';
   var ls=state.meta.lastShared;if(ls)txt+=' · sent '+hm(ls);
-  el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span>'+esc(txt)+'</span>';
+  if(state.meta.compiledAt){
+    var cn=(state.meta.compiled||[]).length;
+    txt+='\n Compiled from '+cn+' squad'+(cn===1?'':'s')+' · '+hm(state.meta.compiledAt);
+  }
+  el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span style="white-space:pre-line">'+esc(txt)+'</span>';
   var ub=document.getElementById("set-undo");
   if(ub){var t=undoTop();
     if(t){ub.style.display="";ub.textContent="↶ Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
@@ -2551,6 +2602,10 @@ function csvIndoor(){
 }
 document.getElementById("set-compile").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");openCompile();
+});
+document.getElementById("set-match").addEventListener("change",function(){
+  state.meta.match=this.value;save();checkPendingMatch();
+  renderSettings();syncSetupSquad();renderRoster();
 });
 document.getElementById("set-csv").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");
