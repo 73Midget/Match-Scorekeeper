@@ -40,6 +40,39 @@
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
+  /* ---- Sunlight: maximum contrast. Glare raises the black level far more than
+     the white, so mid-greys and hairline borders vanish first — those are what
+     these overrides remove. ---- */
+  body.sun{
+    --paper:#fff; --card:#fff; --ink:#000; --steel:#000; --steel-soft:#000;
+    --line:#000; --orange:#c23a00; --orange-deep:#a03000;
+    --green:#00602e; --gold:#7a5c00; --red:#b00000;
+    --shadow:none;
+  }
+  body.sun .card,body.sun .stage,body.sun input,body.sun select,body.sun textarea,
+  body.sun .tap,body.sun .btn,body.sun .timeinp,body.sun .padfield,body.sun .padgrid button{border-width:2px}
+  body.sun .muted,body.sun .sethint,body.sun .dv,body.sun .sub{color:#000}
+  body.sun .btn.ghost{background:#fff;border-color:#000;color:#000}
+
+  /* ---- Night: warm and deliberately dim. Maximum contrast is the wrong goal in
+     the dark — a white screen wrecks night vision for the RO and everyone near
+     them, and they look up at the line constantly. ---- */
+  body.night{
+    --paper:#12140f; --card:#1a1d16; --ink:#ded8c6; --steel:#948f7e; --steel-soft:#7d7a6c;
+    --line:#3a3d31; --orange:#d1541c; --orange-deep:#b04415;
+    --green:#6f9e7a; --gold:#a8862c; --red:#b3503f;
+    --shadow:none;
+  }
+  body.night input,body.night select,body.night textarea,body.night .tap,
+  body.night .timeinp,body.night .padfield,body.night .padgrid button,
+  body.night .btn.ghost{background:#23261d;color:var(--ink);border-color:var(--line)}
+  body.night .sheet,body.night .card{background:var(--card)}
+  body.night .rdonly{background:#1a1d16;color:var(--steel)}
+  body.night .goodbox{background:#1c261f;border-color:#3f5a46;color:#8fc0a0}
+  body.night .warnbox{background:#2a1c19;border-color:#5a3a33;color:#e0917f}
+  body.night .donebanner{background:#1c261f;border-color:#3f5a46;color:#8fc0a0}
+  body.night table.tg th{background:#23261d}
+
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   /* iOS zooms toward an element on a double-tap. Fast repeated taps on buttons
      (number pad, tap-to-count, stage controls) register as double-taps, so
@@ -65,7 +98,7 @@
   .card .bd{padding:12px 14px}
   label.fld{display:block;margin:0 0 10px}
   label.fld > span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin:0 0 4px;font-weight:700}
-  input[type=text],input[type=email],input[type=search],select,input[list]{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  input[type=text],input[type=email],input[type=search],input[type=date],select,input[list]{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
   input:focus,select:focus,button:focus-visible{outline:3px solid rgba(232,84,30,.4);outline-offset:1px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   button{font-family:var(--sans);cursor:pointer;border:none;border-radius:9px}
@@ -277,6 +310,9 @@
   .crow .exp{background:none;border:none;color:var(--orange-deep);font-size:11px;font-weight:800;text-decoration:underline;padding:4px 0 0;cursor:pointer}
   .crow .names{font-size:11px;color:var(--ink);background:#f6f4ee;border-radius:8px;padding:7px 9px;margin-top:6px;line-height:1.6}
   .subhd{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+  /* the picker icon is the tap target on a tablet — make it worth aiming at */
+  input[type=date]{min-height:48px}
+  input[type=date]::-webkit-calendar-picker-indicator{width:28px;height:28px;padding:6px;margin-left:4px;cursor:pointer}
   .sethint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 0}
   .togrow{display:flex;align-items:center;gap:10px;padding:2px 0 8px}
   .togrow input{width:22px;height:22px;flex:0 0 auto;margin:0}
@@ -315,7 +351,7 @@
           <button type="button" data-type="indoor">Indoor</button>
         </div>
       </div>
-      <label class="fld"><span>Match date</span><input type="date" id="f-match"></label>
+      <label class="fld"><span>Match date</span><input type="date" id="f-match" min="2020-01-01"></label>
       <div class="sethint" id="f-match-shown"></div>
       <label class="fld" style="margin:0"><span>Squad / relay on this tablet</span>
         <input type="text" id="f-squad-device" class="rdonly" placeholder="not set" autocomplete="off" readonly></label>
@@ -462,6 +498,13 @@
       </div>
       <div class="sethint">The squad name labels this tablet's results and files. The device name
         identifies this tablet itself, and stays the same from match to match.</div>
+      <div class="subhd" style="margin-top:14px">Screen</div>
+      <div class="typeseg" id="set-screen">
+        <button type="button" data-s="">Default</button>
+        <button type="button" data-s="sun">Sunlight</button>
+        <button type="button" data-s="night">Night</button>
+      </div>
+      <div class="sethint">Sunlight raises contrast for scoring outdoors. Night dims everything so it doesn't spoil your eyes on a dark range.</div>
       <div class="sethint" id="set-version" style="margin-top:8px;font-weight:700"></div>
     </div>
   </div>
@@ -469,7 +512,7 @@
   <div class="setgrp">
     <h4>Match Data</h4>
     <div class="card pad" style="margin-bottom:8px">
-      <label class="fld" style="margin:0"><span>Match date</span><input type="date" id="set-match"></label>
+      <label class="fld" style="margin:0"><span>Match date</span><input type="date" id="set-match" min="2020-01-01"></label>
       <div class="sethint" id="set-match-hint"></div>
     </div>
     <div class="btnrow"><button class="btn ghost sm" id="set-roster">💾 Save shooter list</button><button class="btn ghost sm" id="set-archive">💾 Save match archive</button></div>
@@ -649,7 +692,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-02-b";
+var APP_BUILD="2026-09-02-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -693,6 +736,19 @@ function todayStr(){var d=new Date();
 /* The match date is stored canonically (YYYY-MM-DD) so every tablet produces
    an identical match key — "9/1/2026" and "09/01/2026" used to be two matches.
    Display and the server-side label stay human-readable. */
+/* type="date" still accepts typing on a desktop, and the browser will happily
+   take year 275760. Anything outside a sane window is a typo, not a match. */
+function dateMax(){var d=new Date();d.setFullYear(d.getFullYear()+2);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function validMatchDate(v){
+  var m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return false;
+  /* the pattern alone accepts 2026-13-01 and 2026-02-31 — round-trip through a
+     Date to confirm it's a day that actually exists */
+  var y=+m[1],mo=+m[2],d=+m[3],dt=new Date(y,mo-1,d);
+  if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d)return false;
+  return v>="2020-01-01"&&v<=dateMax();
+}
 function matchDisplay(v){
   v=String(v||"");
   var m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -812,7 +868,7 @@ function rosterOnly(src){var e=blankEntry();
    server upload — so anything stored there travels off the device. This key
    holds settings that belong to the tablet and must never leave it. */
 var CFG_KEY="gssf_scorekeeper_cfg";
-var cfg={deviceLabel:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0,pending:null};
+var cfg={deviceLabel:"",screen:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0,pending:null};
 function loadCfg(){try{var raw=localStorage.getItem(CFG_KEY);if(raw)cfg=Object.assign(cfg,JSON.parse(raw)||{});}catch(e){}}
 function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}}
 
@@ -875,6 +931,17 @@ function renderSync(){
   renderPending();
 }
 
+function applyScreen(){
+  document.body.classList.remove("sun","night");
+  if(cfg.screen)document.body.classList.add(cfg.screen);
+  var tc=document.querySelector('meta[name=theme-color]');
+  if(tc)tc.setAttribute("content",cfg.screen==="night"?"#000":(cfg.screen==="sun"?"#000":"#16181d"));
+  document.querySelectorAll("#set-screen button").forEach(function(b){
+    b.classList.toggle("on",(b.dataset.s||"")===(cfg.screen||""));});
+}
+document.querySelectorAll("#set-screen button").forEach(function(b){
+  b.addEventListener("click",function(){cfg.screen=b.dataset.s||"";saveCfg();applyScreen();});
+});
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
 var namesEditing=false;
 function renderSettings(){
@@ -884,6 +951,7 @@ function renderSettings(){
   document.getElementById("set-device-shown").textContent=cfg.deviceLabel||"not set";
   document.getElementById("names-view").style.display=namesEditing?"none":"";
   document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
+  applyScreen();
   document.getElementById("set-match").value=state.meta.match||"";
   document.getElementById("set-match-hint").textContent=state.meta.match
     ?matchDisplay(state.meta.match):"Not set — pick tonight's date.";
@@ -1619,7 +1687,12 @@ function renderRosterIndoor(active,q){
   list.querySelectorAll(".entry").forEach(function(r){r.addEventListener("click",function(){state.selected=r.dataset.id;show("score");});});
 }
 document.getElementById("set-squad").addEventListener("input",function(){state.meta.squad=this.value.trim();save();syncSetupSquad();});
-document.getElementById("f-match").addEventListener("input",function(){state.meta.match=this.value;save();
+document.getElementById("f-match").addEventListener("change",function(){
+  if(this.value&&!validMatchDate(this.value)){
+    toast("That date doesn't look right — pick a date from the calendar.");
+    this.value=state.meta.match||"";return;
+  }
+  state.meta.match=this.value;save();checkPendingMatch();
   var h=document.getElementById("f-match-shown");if(h)h.textContent=state.meta.match?matchDisplay(state.meta.match):"Not set — pick tonight\u2019s date.";});
 document.getElementById("f-match").addEventListener("change",checkPendingMatch);
 document.getElementById("rosterSearch").addEventListener("input",renderRoster);
@@ -2612,6 +2685,10 @@ document.getElementById("set-compile").addEventListener("click",function(){
   document.getElementById("gearScrim").classList.remove("open");openCompile();
 });
 document.getElementById("set-match").addEventListener("change",function(){
+  if(this.value&&!validMatchDate(this.value)){
+    toast("That date doesn't look right — pick a date from the calendar.");
+    this.value=state.meta.match||"";return;
+  }
   state.meta.match=this.value;save();checkPendingMatch();
   renderSettings();syncSetupSquad();renderRoster();
 });
@@ -3001,7 +3078,13 @@ setInterval(function(){
   if(now-last>REMIND_MS && now-lastRemind>REMIND_MS){lastRemind=now;toast("Back up your scores ▸ tap here",function(){doBackup();});}
 },60000);
 
-loadCfg();load();markSaved(true);
+loadCfg();applyScreen();load();markSaved(true);
+["f-match","set-match"].forEach(function(id){
+  var el=document.getElementById(id);if(!el)return;
+  el.max=dateMax();
+  /* the icon is a small target on a tablet — let the whole field open the picker */
+  el.addEventListener("click",function(){try{if(el.showPicker)el.showPicker();}catch(e){}});
+});
 if(state.meta.started===undefined)state.meta.started=state.entries.some(function(e){return e.active||hasAny(e);});  /* mid-match reload skips Setup */
 applyPhase();renderPending();
 show(state.meta.started?"roster":"setup");
