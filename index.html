@@ -634,12 +634,12 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-08-29-j";
+var APP_BUILD="2026-09-01-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
 var REMIND_MS=10*60*1000;
-var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION}};
+var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION,compiled:[]}};
 var mem=null,lastRemind=0;
 var SC={
   tbl:'border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;margin:0 0 22px',
@@ -1252,6 +1252,16 @@ function restoreSquad(deviceId,revision,row){
 document.getElementById("set-getsquad").addEventListener("click",openSquadPicker);
 document.getElementById("rsquadClose").addEventListener("click",function(){document.getElementById("rsquadScrim").classList.remove("open");});
 document.getElementById("rsquadScrim").addEventListener("click",function(ev){if(ev.target.id==="rsquadScrim")ev.currentTarget.classList.remove("open");});
+/* --- what has already been compiled in ------------------------------------
+   Stored as {device,revision} pairs — the same unit phase 5 sends as
+   merged_squads. Marking by device alone would claim revisions we never saw.
+   Lives in meta so it survives a reload, rides along in backups, and is rolled
+   back by undo. */
+function compiledSet(){if(!Array.isArray(state.meta.compiled))state.meta.compiled=[];return state.meta.compiled;}
+function compiledKey(dev,rev){return String(dev)+"@"+String(rev||"");}
+function isCompiled(dev,rev){var k=compiledKey(dev,rev);return compiledSet().some(function(c){return compiledKey(c.device,c.revision)===k;});}
+function markCompiled(dev,rev){if(!dev||isCompiled(dev,rev))return;compiledSet().push({device:dev,revision:rev,at:Date.now()});}
+
 /* --- compile screen (§10) ----------------------------------------------
    One list, mixed sources: server uploads and local files side by side, one
    Compile. A club with no server sees the same screen with only file rows.
@@ -1278,14 +1288,27 @@ function renderCompile(){
       return '<div class="crow"><input type="checkbox" data-i="'+i+'"'+(r.selected?" checked":"")+'>'
         +'<div class="cbody"><div class="nm">'+esc(r.squad||"(no squad name)")
         +'<span class="src'+(r.kind==="file"?" file":"")+'">'+(r.kind==="file"?"file":"server")+'</span>'
-        +(dup?' <span class="cibadge warn">2 tablets</span>':'')+'</div>'
+        +(dup?' <span class="cibadge warn">2 tablets</span>':'')
+        +(r.done?' <span class="cibadge">already compiled</span>':'')+'</div>'
         +'<div class="dv">'+esc(r.device||(r.kind==="file"?"from a file":"unnamed tablet"))
         +' · '+(r.count||0)+' shooters'+(r.at?' · '+esc(whenText(r.at)):'')+'</div>'
         +'<button class="exp" data-x="'+i+'">'+(r.open?"Hide shooters":"Show shooters")+'</button>'
         +(r.open?'<div class="names">'+(r.names?esc(r.names.join(", ")):"Loading…")+'</div>':'')
         +'</div></div>';}).join("");
     el.querySelectorAll("input[type=checkbox]").forEach(function(cb){
-      cb.addEventListener("change",function(){compileRows[+cb.dataset.i].selected=cb.checked;renderCompileWarn();});});
+      cb.addEventListener("change",function(){
+        var row=compileRows[+cb.dataset.i];
+        /* Re-including a squad that's already been compiled replays the server's
+           copy over anything corrected since — the merge can't tell a correction
+           from another tablet's different score, and keeps both. */
+        if(cb.checked&&row.done&&!confirm(
+          "“"+(row.squad||"This squad")+"” has already been compiled into these results.\n\n"+
+          "Including it again will re-import the server's copy. If you've corrected any of its "+
+          "scores since, you'll end up with the shooter listed twice — once corrected, once not.\n\n"+
+          "Include it anyway?")){
+          cb.checked=false;row.selected=false;renderCompileWarn();return;
+        }
+        row.selected=cb.checked;renderCompileWarn();});});
     el.querySelectorAll(".exp").forEach(function(b){
       b.addEventListener("click",function(){toggleCompileNames(+b.dataset.x);});});
   }
@@ -1334,9 +1357,12 @@ function loadCompileServer(){
     /* "compiled" is a result, not a squad (§10.1) */
     list.filter(function(s){return s.device_id!=="compiled";}).forEach(function(s){
       if(compileRows.some(function(r){return r.kind==="server"&&r.device_id===s.device_id;}))return;
+      var done=isCompiled(s.device_id,s.revision);
       compileRows.push({kind:"server",device_id:s.device_id,revision:s.revision,
         squad:s.squad_label||"",device:s.device_label||"",count:s.entry_count||0,
-        at:s.uploaded_at,selected:true,payload:null,names:null,open:false});   /* default selected (§10.2) */
+        at:s.uploaded_at,selected:!done,done:done,payload:null,names:null,open:false});
+        /* new squads default selected (§10.2); ones already compiled default OFF so a
+           re-compile can't overwrite corrections made since */
     });
     renderCompile();
   }).catch(function(err){
@@ -1354,6 +1380,8 @@ function doCompile(){
     var payloads=list.filter(Boolean);
     if(!payloads.length){toast("Couldn't load the selected squads");return;}
     var r=mergePayloads(payloads,{undoLabel:"Compiled "+payloads.length+" squad"+(payloads.length===1?"":"s")});
+    sel.forEach(function(row){if(row.kind==="server")markCompiled(row.device_id,row.revision);});
+    state.meta.compiledAt=Date.now();save();
     document.getElementById("compileScrim").classList.remove("open");
     showMergeSummary(r);show("results");
   });
@@ -1606,7 +1634,8 @@ document.getElementById("set-newmatch").addEventListener("click",function(){
   undoPush("Start new match");
   var seen={};state.entries=state.entries.filter(function(e){if(seen[e.personId])return false;seen[e.personId]=true;return true;});  /* collapse extra rounds → one per person */
   state.entries.forEach(function(e){clearAll(e);e.active=false;e.status="normal";e.checkinSeq=0;});
-  state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;save();
+  state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;
+  state.meta.compiled=[];state.meta.compiledAt=null;state.meta.lastUpload=null;save();
   document.getElementById("checkinScrim").classList.remove("open");
   applyPhase();show("setup");toast("New match — pick type & check in");
 });
@@ -1703,7 +1732,7 @@ function openStageConfirm(e,key){
     +'<div class="confbreak">'+fmt(raw)+' time&nbsp;&nbsp;+&nbsp;&nbsp;'+fmt(pen)+' penalties</div>'
     +(review?'<div class="confnote">This stage is completed and locked. Unlock it to make changes.</div>':'');
   var acc=document.getElementById("confirmAccept"),rej=document.getElementById("confirmReject");
-  if(review){acc.textContent="Keep completed";rej.textContent="Unlock &amp; edit";}
+  if(review){acc.textContent="Keep completed";rej.textContent="Unlock & edit";}
   else{acc.textContent="Accept";rej.textContent="Reject &amp; edit";}
   document.getElementById("confirmScrim").classList.add("open");
 }
@@ -1823,7 +1852,7 @@ function openRoundConfirm(r){if(!r)return;
                     :'<div class="confbig">'+st+'<small>this round</small></div>')
     +(review?'<div class="confnote">This round is locked. Unlock it to make changes.</div>':'');
   var acc=document.getElementById("confirmAccept"),rej=document.getElementById("confirmReject");
-  if(review){acc.textContent="Keep locked";rej.innerHTML="Unlock &amp; edit";}
+  if(review){acc.textContent="Keep locked";rej.textContent="Unlock & edit";}
   else{acc.textContent="Lock round";rej.textContent="Back";}
   document.getElementById("confirmScrim").classList.add("open");
 }
@@ -2757,6 +2786,11 @@ function showMergeSummary(r){
   var h='<div class="mstat"><div class="box"><b>'+added+'</b><span>added</span></div><div class="box"><b>'+updated+'</b><span>updated</span></div><div class="box"><b>'+state.entries.length+'</b><span>total</span></div></div>';
   var sk=Object.keys(bySquad);
   if(sk.length)h+='<div class="muted" style="margin-bottom:10px">From squads: '+sk.map(function(s){return esc(s)+' ('+bySquad[s]+')';}).join(", ")+'.</div>';
+  if(state.meta.compiledAt){
+    var n=compiledSet().length;
+    h+='<div class="goodbox"><b>Results compiled from '+n+' squad'+(n===1?'':'s')+'</b> \u00b7 '
+      +esc(new Date(state.meta.compiledAt).toLocaleString())+'</div>';
+  }
   if(already)h+='<div class="goodbox"><b>'+already+' already merged</b> — skipped, because those scores were identical to what this tablet already had. Merging the same file twice is safe.</div>';
   if(errors)h+='<div class="warnbox">'+errors+' file(s) couldn’t be read and were skipped.</div>';
   if(refused)h+='<div class="warnbox"><b>'+refused+' file(s) skipped</b> — wrong match type (indoor vs outdoor) for this match. Merge only backups of the same type.</div>';
