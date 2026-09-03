@@ -301,6 +301,14 @@
   .filepick{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:9px;line-height:1.4}
   .filepick b{display:block;font-size:15px;font-weight:800;letter-spacing:.01em}
   .filepick span{display:block;font-size:11px;font-weight:600;opacity:.82;margin-top:3px;text-transform:none;letter-spacing:0}
+  /* stacked buttons in Tools are peers — same width, same height, regardless
+     of label length. .btn.sm is width:auto, which sized them to their text. */
+  #gearScrim .setgrp>.btn,#gearScrim .setgrp>.card .btn{width:100%;padding:12px 14px;font-size:13px}
+  /* the match date is checked at a glance before compiling — it shouldn't read
+     like a footnote */
+  #set-match-row{border-bottom:none;padding:2px 0 4px;font-size:15px}
+  #set-match-row .k{color:var(--ink);font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  #set-match-row .v{font-family:var(--sans);font-size:19px;font-weight:800;color:var(--ink)}
   .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
              font-size:11px;line-height:1.6;color:var(--steel-soft);text-align:center}
   .setcredit b{color:var(--steel);font-weight:800}
@@ -551,7 +559,7 @@
   <div class="setgrp">
     <h4>This Match</h4>
     <div class="card pad" style="margin-bottom:8px">
-      <div class="kv"><span class="k">Match date</span><span class="v" id="set-match-shown">not set</span></div>
+      <div class="kv" id="set-match-row"><span class="k">Match date</span><span class="v" id="set-match-shown">not set</span></div>
       <div style="height:8px"></div>
       <button class="btn ghost sm" id="set-match-edit">Update match date</button>
       <label class="fld" id="set-match-box" style="display:none;margin-top:10px"><span>Pick the date</span>
@@ -725,7 +733,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-03-b";
+var APP_BUILD="2026-09-03-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
