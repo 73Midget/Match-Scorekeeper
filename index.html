@@ -725,7 +725,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-03-a";
+var APP_BUILD="2026-09-03-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1649,6 +1649,106 @@ function loadCompileServer(){
       +' You can still add squad files below.</div>';
   });
 }
+/* --- publish (§4.7, §4.9, §4.10) ---------------------------------------
+   Three steps, each reported separately: roster first (it can't be
+   reconstructed), then the compiled archive (re-pushable any time), then the
+   late-upload check. Retry RESUMES rather than restarts — the archive string
+   is generated once and kept, so a re-send hits the server's content-hash
+   dedup instead of creating a second revision of the same compile. */
+function apiPostCompiled(txt){
+  var body={
+    match_key:matchKey(state.meta.match,state.meta.matchType),
+    device_id:"compiled",
+    match_type:(state.meta.matchType||"outdoor"),
+    payload:txt,schema_version:SCHEMA_VERSION,
+    squad_key:"compiled",squad_label:"Compiled results",
+    match_label:(matchDisplay(state.meta.match)||""),
+    device_label:(cfg.deviceLabel||"")+" (compiled)",
+    app_version:APP_VERSION,app_build:APP_BUILD,
+    entry_count:state.entries.filter(function(e){return e.active;}).length
+  };
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads",{
+    method:"POST",headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,body:j};});});
+}
+function apiUnmerged(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads/unmerged",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squads)||[];});
+}
+function publishState(){
+  if(!state.meta.publish)state.meta.publish={rosterDone:false,archiveDone:false,archiveText:null};
+  return state.meta.publish;
+}
+/* merged_squads carries the exact revision compiled from — marking by device
+   alone would claim a newer revision nobody has seen (§4.8). */
+function mergedSquads(){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  return (state.meta.compiled||[]).filter(function(c){return c.device&&c.revision;})
+    .map(function(c){return {match_key:mk,device_id:c.device,revision:c.revision};});
+}
+function publishResults(report){
+  var ps=publishState(),lines=[];
+  if(!syncOn()){report(null);return Promise.resolve();}
+  /* the archive string is made once and kept, so a resumed retry is byte-identical */
+  if(!ps.archiveText)ps.archiveText=JSON.stringify(payload(),null,2);
+  var step1=ps.rosterDone?Promise.resolve("skip"):pushRosterWithMerges();
+  return step1.then(function(r){
+    if(r!=="skip"){
+      ps.rosterDone=true;save();
+      lines.push("Shooter list published as #"+cfg.rosterRevision+".");
+      var want=mergedSquads().length,got=(r&&r.marked_squads);
+      if(typeof got==="number"&&got<want)
+        lines.push("\u26a0 "+got+" of "+want+" squads were marked as compiled — one may have re-uploaded since.");
+    }
+    if(ps.archiveDone)return null;
+    return apiPostCompiled(ps.archiveText).then(function(a){
+      if(a.status!==201&&a.status!==200)throw "archive";
+      ps.archiveDone=true;save();lines.push("Match archive uploaded.");
+    });
+  }).then(function(){
+    return apiUnmerged().then(function(list){
+      var mk=matchKey(state.meta.match,state.meta.matchType);
+      var mine=list.filter(function(u){return u.match_key===mk;});
+      if(mine.length)lines.push("\u26a0 "+mine.length+" squad"+(mine.length===1?"":"s")+" uploaded for this match but not compiled: "
+        +mine.map(function(u){return (u.squad_label||"unnamed")+" ("+whenText(u.uploaded_at)+")";}).join(", "));
+      else lines.push("No late uploads.");
+    }).catch(function(){lines.push("Couldn't check for late uploads.");});
+  }).then(function(){report({ok:true,lines:lines});})
+  .catch(function(err){
+    report({ok:false,lines:lines,
+      err:(err===AUTH_ERR)?"The server rejected this tablet's setup code."
+        :(err==="archive")?"The shooter list published, but the match archive didn't upload."
+        :"Couldn't reach the server."});
+  });
+}
+function pushRosterWithMerges(){
+  var p=rosterPayload(),txt=JSON.stringify(p);
+  var body={payload:txt,schema_version:SCHEMA_VERSION,
+    base_revision:(cfg.rosterRevision?cfg.rosterRevision:null),
+    entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
+    author:cfg.deviceLabel||"Unnamed tablet",merged_squads:mergedSquads()};
+  return apiPutRoster(body).then(function(r){
+    if(r.status===201){cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();return r.body;}
+    if(r.status===409){
+      return apiGetRoster().then(function(cur){
+        if(!cur){cfg.rosterRevision=0;saveCfg();}
+        else{
+          var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
+          mergePayloads([d],{skipMatchGuard:true});cfg.rosterRevision=cur.revision;saveCfg();
+        }
+        return pushRosterWithMerges();
+      });
+    }
+    if(r.status===401)throw AUTH_ERR;
+    throw "The server rejected the shooter list ("+r.status+").";
+  });
+}
 function doCompile(){
   var sel=compileRows.filter(function(r){return r.selected;});
   if(!sel.length){
@@ -1669,9 +1769,20 @@ function doCompile(){
     sel.forEach(function(row){if(row.kind==="server")markCompiled(row.device_id,row.revision);});
     state.meta.compiledAt=Date.now();
     state.meta.started=true;    /* compiling means the match is underway here — show the tabs */
+    state.meta.publish=null;    /* a new compile publishes afresh */
     save();applyPhase();
     document.getElementById("compileScrim").classList.remove("open");
     showMergeSummary(r);show("results");
+    /* The merge is local and already done. Publishing is separate, and a
+       network failure must never make a completed compile look failed. */
+    if(syncOn()){
+      toast("Compiled \u00b7 publishing\u2026");
+      publishResults(function(res){
+        if(!res)return;
+        appendMergeSummary(res);
+        toast(res.ok?"Published":"Compiled \u2014 not published, see the summary");
+      });
+    }
   });
 }
 document.getElementById("compileBtn").addEventListener("click",openCompile);
@@ -3149,6 +3260,24 @@ function showMergeSummary(r){
   var ub=document.getElementById("mergeUndo");if(ub)ub.style.display=undoTop()?"":"none";
   document.getElementById("mergeScrim").classList.add("open");
   toast("Merged: +"+added+" added, "+updated+" updated"+(already?", "+already+" already had":""));
+}
+/* adds the publish outcome to the summary already on screen */
+function appendMergeSummary(res){
+  var el=document.getElementById("mergeBody");if(!el)return;
+  var h='<div class="'+(res.ok?"goodbox":"warnbox")+'" style="margin-top:10px">';
+  h+='<b>'+(res.ok?"Published to the club server":"Compiled, but not fully published")+'</b><br>';
+  h+=res.lines.map(esc).join("<br>");
+  if(!res.ok){
+    h+='<br>'+esc(res.err)+'<br>The results are on this tablet \u2014 you can still view, print and email them.';
+    h+='<div style="height:8px"></div><button class="btn ghost sm" id="retryPublish">Try publishing again</button>';
+  }
+  h+='</div>';
+  el.innerHTML+=h;
+  var rp=document.getElementById("retryPublish");
+  if(rp)rp.addEventListener("click",function(){
+    rp.disabled=true;rp.textContent="Publishing\u2026";
+    publishResults(function(r2){appendMergeSummary(r2);});
+  });
 }
 document.getElementById("mergeUndo").addEventListener("click",doUndo);
 document.getElementById("saveArchiveBtn").addEventListener("click",saveArchive);
