@@ -255,6 +255,9 @@
   nav.tabs button .ic{font-size:19px;line-height:1}
   nav.tabs button.on{color:var(--orange)}
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
+  /* sheets opened from inside another sheet must stack above it, regardless of
+     where they sit in the document */
+  #fileScrim,#histScrim{z-index:60}
   .scrim.open{display:flex}
   .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
   .sheet h3{margin:0 0 6px;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
@@ -295,6 +298,9 @@
   #gearScrim .btn.ghost:active{background:var(--line)}
   #gearScrim .btn.danger{background:var(--red);border:1.5px solid var(--red);color:#fff;font-weight:800}
   #gearScrim .card{border:1px solid var(--line)}
+  .filepick{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:9px;line-height:1.4}
+  .filepick b{display:block;font-size:15px;font-weight:800;letter-spacing:.01em}
+  .filepick span{display:block;font-size:11px;font-weight:600;opacity:.82;margin-top:3px;text-transform:none;letter-spacing:0}
   .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
              font-size:11px;line-height:1.6;color:var(--steel-soft);text-align:center}
   .setcredit b{color:var(--steel);font-weight:800}
@@ -488,12 +494,9 @@
 <div class="scrim" id="fileScrim"><div class="sheet">
   <h3>Save a file</h3>
   <p class="muted" style="margin:0 0 10px">These save to this tablet's Downloads folder.</p>
-  <button class="btn ghost" id="file-archive" style="margin-bottom:6px">Match archive</button>
-  <div class="sethint" style="margin:-2px 2px 10px">This match with all scores — your record of the night.</div>
-  <button class="btn ghost" id="file-roster" style="margin-bottom:6px">Shooter list</button>
-  <div class="sethint" style="margin:-2px 2px 10px">Names only, no scores — the file other tablets restore.</div>
-  <button class="btn ghost" id="file-csv" style="margin-bottom:6px">Results spreadsheet (CSV)</button>
-  <div class="sethint" style="margin:-2px 2px 10px">One row per score, for a spreadsheet.</div>
+  <button class="btn dark filepick" id="file-archive"><b>📦 Match archive</b><span>This match with all scores — your record of the night</span></button>
+  <button class="btn green filepick" id="file-roster"><b>👥 Shooter list</b><span>Names only, no scores — the file other tablets restore</span></button>
+  <button class="btn filepick" id="file-csv"><b>📊 Results spreadsheet</b><span>One row per score, as a CSV</span></button>
   <div style="height:6px"></div>
   <button class="btn ghost" id="fileClose">Cancel</button>
 </div></div>
@@ -722,7 +725,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-02-e";
+var APP_BUILD="2026-09-03-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
