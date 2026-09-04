@@ -285,6 +285,7 @@
              padding:5px 9px;border-radius:999px;margin-left:auto;flex:0 0 auto;cursor:pointer;white-space:nowrap;max-width:46%;
              overflow:hidden;text-overflow:ellipsis}
   .pendbadge+.sub{margin-left:8px}
+  .gearbtn svg{display:block;margin:0 auto}
   .gearbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:17px;line-height:1;
            width:34px;height:34px;border-radius:9px;margin-left:10px;flex:0 0 auto;cursor:pointer}
   .gearbtn:active{background:rgba(255,255,255,.26)}
@@ -354,7 +355,7 @@
 <header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
   <button class="pendbadge" id="pendingBadge" style="display:none"></button>
   <span class="sub" id="saved">not saved yet</span>
-  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools">⚙</button></div></header>
+  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/><path fill="currentColor" d="M19.4 13a7.7 7.7 0 0 0 0-2l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.2a.5.5 0 0 0-.6-.2l-2.4.9a7.5 7.5 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7.5 7.5 0 0 0-1.7 1l-2.4-.9a.5.5 0 0 0-.6.2L2.5 8.8a.5.5 0 0 0 .1.6L4.6 11a7.7 7.7 0 0 0 0 2l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.2c.1.2.4.3.6.2l2.4-.9c.5.4 1.1.8 1.7 1l.4 2.5c0 .3.2.4.5.4h3.8c.3 0 .5-.1.5-.4l.4-2.5c.6-.2 1.2-.6 1.7-1l2.4.9c.2.1.5 0 .6-.2l1.9-3.2a.5.5 0 0 0-.1-.6L19.4 13z" opacity=".85"/></svg></button></div></header>
 
 <main>
   <section class="view active" id="view-setup">
@@ -370,7 +371,7 @@
       <div class="sethint" id="f-match-shown"></div>
       <label class="fld" style="margin:0"><span>Squad / relay on this tablet</span>
         <input type="text" id="f-squad-device" class="rdonly" placeholder="not set" autocomplete="off" readonly></label>
-      <div class="sethint">Set in <b>⚙ Tools</b> — it belongs to the tablet, not to tonight's match.</div>
+      <div class="sethint">Set in <b>Tools</b> — it belongs to the tablet, not to tonight's match.</div>
       <div class="infoline" style="margin:8px 0 0"><span class="dot"></span><span>Scores auto-save to this device after every entry.</span></div>
       <div class="muted" id="setupVer" style="margin-top:6px;font-weight:700"></div>
       <div class="muted" style="margin-top:3px;font-size:11px;line-height:1.5">Match Scorekeeper · for GSSF-style indoor &amp; outdoor matches<br>Created by G. Groiss · Free software under the GNU AGPL v3.0</div>
@@ -378,7 +379,7 @@
     <div class="btnrow"><button class="btn" id="checkinBtnSetup">Check in shooters</button><button class="btn ghost" id="addBtnSetup">+ Add shooter</button></div>
     <div class="countline" id="setupCount"></div>
     <div style="height:6px"></div>
-    <button class="btn green" id="startMatchBtn">▶ Start match</button>
+    <button class="btn green" id="startMatchBtn">› Start match</button>
 
   </section>
 
@@ -401,13 +402,14 @@
     <div class="card" id="leaderboard"></div>
     <div id="indoorExtra"></div>
     <div style="height:14px"></div>
-    <button class="btn green" id="finishSquadBtn">⬆ Upload this squad's results</button>
+    <button class="btn green" id="finishSquadBtn">↑ Upload this squad's results</button>
     <div style="height:8px"></div>
-    <button class="btn dark" id="squadResultsBtn">📊 Squad results &amp; email</button>
+    <button class="btn dark" id="squadResultsBtn">Squad results &amp; email</button>
     <div style="height:8px"></div>
-    <button class="btn" id="sendResultsBtn">📤 Send squad results another way</button>
+    <button class="btn" id="sendResultsBtn">Send squad results another way</button>
     <div style="height:8px"></div>
     <button class="btn ghost sm" id="compileBtn">Compile match results</button>
+    <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -415,9 +417,9 @@
 </main>
 
 <nav class="tabs">
-  <button data-tab="roster" class="on"><span class="ic">☰</span>Roster</button>
-  <button data-tab="score"><span class="ic">◎</span>Score</button>
-  <button data-tab="results"><span class="ic">▤</span>Results</button>
+  <button data-tab="roster" class="on"><span class="ic">≡</span>Roster</button>
+  <button data-tab="score"><span class="ic">●</span>Score</button>
+  <button data-tab="results"><span class="ic">≡</span>Results</button>
 </nav>
 
 <div class="scrim" id="editScrim"><div class="sheet">
@@ -492,7 +494,7 @@
     <input type="search" id="removeSearch" placeholder="Search shooters" style="margin-bottom:10px">
     <div class="card" id="removeList" style="max-height:44vh;overflow:auto"></div>
     <div style="height:10px"></div>
-    <button class="btn green" id="shooters-publish">⬆ Publish as the club's shooter list</button>
+    <button class="btn green" id="shooters-publish">↑ Publish as the club's shooter list</button>
     <div class="sethint">Every tablet that downloads the list will get this one.</div>
   </div>
   <div style="height:12px"></div>
@@ -502,9 +504,9 @@
 <div class="scrim" id="fileScrim"><div class="sheet">
   <h3>Save a file</h3>
   <p class="muted" style="margin:0 0 10px">These save to this tablet's Downloads folder.</p>
-  <button class="btn dark filepick" id="file-archive"><b>📦 Match archive</b><span>This match with all scores — your record of the night</span></button>
-  <button class="btn green filepick" id="file-roster"><b>👥 Shooter list</b><span>Names only, no scores — the file other tablets restore</span></button>
-  <button class="btn filepick" id="file-csv"><b>📊 Results spreadsheet</b><span>One row per score, as a CSV</span></button>
+  <button class="btn dark filepick" id="file-archive"><b>Match archive</b><span>This match with all scores — your record of the night</span></button>
+  <button class="btn green filepick" id="file-roster"><b>Shooter list</b><span>Names only, no scores — the file other tablets restore</span></button>
+  <button class="btn filepick" id="file-csv"><b>Results spreadsheet</b><span>One row per score, as a CSV</span></button>
   <div style="height:6px"></div>
   <button class="btn ghost" id="fileClose">Cancel</button>
 </div></div>
@@ -552,7 +554,7 @@
     <h4>Shooter List</h4>
     <button class="btn" id="set-remove">View &amp; edit shooter list</button>
     <div class="sethint" id="set-roster-sub" style="margin-bottom:8px"></div>
-    <button class="btn green" id="set-getroster" style="display:none">⬇ Get latest list from server</button>
+    <button class="btn green" id="set-getroster" style="display:none">↓ Get latest list from server</button>
     <div class="sethint" id="set-getroster-hint" style="display:none">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
   </div>
 
@@ -568,8 +570,8 @@
     </div>
     <button class="btn green" id="set-compile">Compile match results</button>
     <div class="sethint" style="margin-bottom:8px">Combines every squad's scores into the final results.</div>
-    <button class="btn ghost sm" id="set-getsquad" style="display:none;margin-bottom:8px">⬇ Restore a squad from the server</button>
-    <button class="btn ghost sm" id="set-savefile">💾 Save a file…</button>
+    <button class="btn ghost sm" id="set-getsquad" style="display:none;margin-bottom:8px">↓ Restore a squad from the server</button>
+    <button class="btn ghost sm" id="set-savefile">Save a file…</button>
     <div class="sethint">Match archive, shooter list, or spreadsheet.</div>
   </div>
 
@@ -602,7 +604,7 @@
 
   <div class="setgrp">
     <h4 class="danger">Careful</h4>
-    <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">↶ Undo last change</button>
+    <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">← Undo last change</button>
     <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
     <div class="sethint" style="margin:-4px 2px 8px">Replaces everything on this tablet, scores included.</div>
     <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
@@ -661,15 +663,15 @@
 <div class="scrim" id="squadScrim"><div class="sheet">
   <h3>Squad Results</h3>
   <p class="muted" style="margin:0 0 10px">Rankings by division, then overall. Choose how to share:</p>
-  <button class="btn dark" id="pdfSheetBtn">🖨 Save as PDF <span style="font-weight:600;opacity:.85">— best for email</span></button>
+  <button class="btn dark" id="pdfSheetBtn">Save as PDF <span style="font-weight:600;opacity:.85">— best for email</span></button>
   <p class="muted" style="margin:6px 0 10px;font-size:11px">Opens a print view — pick <b>Save as PDF</b>. A PDF displays correctly for everyone; an emailed HTML file often shows as code.</p>
-  <button class="btn" id="copyTableBtn">⧉ Copy formatted table</button>
+  <button class="btn" id="copyTableBtn">❏ Copy formatted table</button>
   <div style="height:8px"></div>
   <button class="btn green" id="emailBccBtn">✉ Open email to all (BCC)</button>
   <div style="height:8px"></div>
-  <button class="btn" id="copyEmailsBtn">⧉ Copy email list for BCC</button>
+  <button class="btn" id="copyEmailsBtn">❏ Copy email list for BCC</button>
   <div style="height:8px"></div>
-  <button class="btn ghost sm" id="dlSheetBtn">⤓ Download HTML copy (optional)</button>
+  <button class="btn ghost sm" id="dlSheetBtn">↓ Download HTML copy (optional)</button>
   <p class="muted" style="margin:10px 0 6px">On a computer: tap Copy, then paste into Gmail/Outlook for a real table. Preview:</p>
   <div class="tablepreview" id="tablePreview"></div>
   <button class="btn ghost" id="squadClose">Close</button>
@@ -679,7 +681,7 @@
   <h3>Email List for BCC</h3>
   <p class="muted" style="margin:0 0 8px">Everyone in these results, plus anyone marked <b>RO</b>. Copy and paste into your email’s BCC field.</p>
   <textarea id="emailListBox" readonly style="width:100%;height:120px;font-family:var(--mono);font-size:12px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fbfaf6"></textarea>
-  <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="emailListClose">Close</button><button class="btn" id="emailListCopy">⧉ Copy</button></div>
+  <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="emailListClose">Close</button><button class="btn" id="emailListCopy">❏ Copy</button></div>
 </div></div>
 
 
@@ -688,9 +690,9 @@
   <h3>Merge Summary</h3>
   <div id="mergeBody"></div>
   <div style="height:12px"></div>
-  <div class="btnrow"><button class="btn" id="saveArchiveBtn">💾 Save match archive</button><button class="btn" id="saveRosterBtn">💾 Save shooter list</button></div>
+  <div class="btnrow"><button class="btn" id="saveArchiveBtn">Save match archive</button><button class="btn" id="saveRosterBtn">Save shooter list</button></div>
   <div class="muted" style="margin:6px 0 10px;font-size:11px;line-height:1.5"><b>Archive</b> = this match with scores, for your records. <b>Shooter list</b> = names only, no scores — this is the file the other tablets restore before the next match.</div>
-  <div class="btnrow"><button class="btn ghost" id="mergeUndo" style="display:none">↶ Undo this merge</button><button class="btn ghost" id="mergeClose">Close</button></div>
+  <div class="btnrow"><button class="btn ghost" id="mergeUndo" style="display:none">← Undo this merge</button><button class="btn ghost" id="mergeClose">Close</button></div>
 </div></div>
 
 <div class="scrim" id="confirmScrim"><div class="sheet" style="max-width:440px">
@@ -706,7 +708,7 @@
     <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
     <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
     <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
-    <button type="button" data-k="clear">C</button><button type="button" data-k="0">0</button><button type="button" data-k="back">⌫</button>
+    <button type="button" data-k="clear">C</button><button type="button" data-k="0">0</button><button type="button" data-k="back">←</button>
   </div>
   <div class="btnrow"><button class="btn ghost" id="padCancel">Cancel</button><button class="btn green" id="padSave">Save</button></div>
 </div></div>
@@ -733,7 +735,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-03-c";
+var APP_BUILD="2026-09-04-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1545,6 +1547,13 @@ document.getElementById("rsquadScrim").addEventListener("click",function(ev){if(
 function compiledSet(){if(!Array.isArray(state.meta.compiled))state.meta.compiled=[];return state.meta.compiled;}
 function compiledKey(dev,rev){return String(dev)+"@"+String(rev||"");}
 function isCompiled(dev,rev){var k=compiledKey(dev,rev);return compiledSet().some(function(c){return compiledKey(c.device,c.revision)===k;});}
+/* device was compiled, but at an older revision — it has re-uploaded since */
+function reuploadedSince(dev,rev){
+  if(isCompiled(dev,rev))return 0;
+  var prev=compiledSet().filter(function(c){return c.device===dev;});
+  if(!prev.length)return 0;
+  return prev[prev.length-1].revision||0;
+}
 function markCompiled(dev,rev){if(!dev||isCompiled(dev,rev))return;compiledSet().push({device:dev,revision:rev,at:Date.now()});}
 
 /* --- compile screen (§10) ----------------------------------------------
@@ -1574,7 +1583,8 @@ function renderCompile(){
         +'<div class="cbody"><div class="nm">'+esc(r.squad||"(no squad name)")
         +'<span class="src'+(r.kind==="file"?" file":"")+'">'+(r.kind==="file"?"file":"server")+'</span>'
         +(dup?' <span class="cibadge warn">2 tablets</span>':'')
-        +(r.done?' <span class="cibadge">already compiled</span>':'')+'</div>'
+        +(r.done?' <span class="cibadge">already compiled</span>':'')
+        +(r.redo?' <span class="cibadge warn">re-uploaded since you compiled</span>':'')+'</div>'
         +'<div class="dv">'+esc(r.device||(r.kind==="file"?"from a file":"unnamed tablet"))
         +' · '+(r.count||0)+' shooters'+(r.at?' · '+esc(whenText(r.at)):'')+'</div>'
         +'<button class="exp" data-x="'+i+'">'+(r.open?"Hide shooters":"Show shooters")+'</button>'
@@ -1586,11 +1596,20 @@ function renderCompile(){
         /* Re-including a squad that's already been compiled replays the server's
            copy over anything corrected since — the merge can't tell a correction
            from another tablet's different score, and keeps both. */
-        if(cb.checked&&row.done&&!confirm(
-          "“"+(row.squad||"This squad")+"” has already been compiled into these results.\n\n"+
-          "Including it again will re-import the server's copy. If you've corrected any of its "+
-          "scores since, you'll end up with the shooter listed twice — once corrected, once not.\n\n"+
-          "Include it anyway?")){
+        /* Two different situations, opposite causes, same trap: re-importing
+           replays the server's copy over anything corrected locally. */
+        var msg=row.done
+          ? "\u201c"+(row.squad||"This squad")+"\u201d has already been compiled into these results.\n\n"
+            +"Including it again re-imports the server's copy. If you have corrected any of its scores "
+            +"since, you will end up with the shooter listed twice \u2014 once corrected, once not.\n\n"
+            +"To fix a score or division, edit it on the Roster instead. You do not need to compile again.\n\n"
+            +"Include it anyway?"
+          : "\u201c"+(row.squad||"This squad")+"\u201d uploaded again after you compiled it.\n\n"
+            +"Including it re-imports the WHOLE squad, not only what changed \u2014 anything you have "
+            +"corrected here will end up listed twice.\n\n"
+            +"Safer: make the change on this tablet's Roster instead.\n\n"
+            +"Include it anyway?";
+        if(cb.checked&&(row.done||row.redo)&&!confirm(msg)){
           cb.checked=false;row.selected=false;renderCompileWarn();return;
         }
         row.selected=cb.checked;renderCompileWarn();});});
@@ -1642,10 +1661,10 @@ function loadCompileServer(){
     /* "compiled" is a result, not a squad (§10.1) */
     list.filter(function(s){return s.device_id!=="compiled";}).forEach(function(s){
       if(compileRows.some(function(r){return r.kind==="server"&&r.device_id===s.device_id;}))return;
-      var done=isCompiled(s.device_id,s.revision);
+      var done=isCompiled(s.device_id,s.revision),redo=reuploadedSince(s.device_id,s.revision);
       compileRows.push({kind:"server",device_id:s.device_id,revision:s.revision,
         squad:s.squad_label||"",device:s.device_label||"",count:s.entry_count||0,
-        at:s.uploaded_at,selected:!done,done:done,payload:null,names:null,open:false});
+        at:s.uploaded_at,selected:!done&&!redo,done:done,redo:redo,payload:null,names:null,open:false});
         /* new squads default selected (§10.2); ones already compiled default OFF so a
            re-compile can't overwrite corrections made since */
     });
@@ -1699,6 +1718,22 @@ function mergedSquads(){
   var mk=matchKey(state.meta.match,state.meta.matchType);
   return (state.meta.compiled||[]).filter(function(c){return c.device&&c.revision;})
     .map(function(c){return {match_key:mk,device_id:c.device,revision:c.revision};});
+}
+/* results changed since the last publish — the kept archive is now stale */
+function invalidatePublished(){
+  if(state.meta.publish){state.meta.publish=null;save();}
+}
+function republishResults(){
+  if(!syncOn()||!state.meta.compiledAt)return;
+  if(!confirm("Publish the corrected results?\n\nThis updates the club shooter list and the match archive on the server."))return;
+  invalidatePublished();
+  toast("Publishing\u2026");
+  publishResults(function(res){
+    if(!res)return;
+    toast(res.ok?"Published":(res.err||"Couldn't publish"));
+    if(!res.ok&&res.lines.length)alert(res.lines.join("\n")+"\n\n"+res.err+"\n\nThe results are on this tablet — you can still view, print and email them.");
+    updateBackupInfo();
+  });
 }
 function publishResults(report){
   var ps=publishState(),lines=[];
@@ -1765,7 +1800,7 @@ function doCompile(){
       toast("Nothing selected — “"+(missed[0].squad||"one squad")+"” hasn't been compiled yet. Tick it to include it.");
     }else{
       var n=compiledSet().length;
-      toast("Nothing new to compile — these results already include "+n+" squad"+(n===1?"":"s")+". Check the results, then upload the shooter list if you've made corrections.");
+      toast("Nothing new to compile — these results already include "+n+" squad"+(n===1?"":"s")+". To fix a score, edit it on the Roster, then use \u201cPublish corrected results\u201d.");
     }
     return;
   }
@@ -1794,6 +1829,7 @@ function doCompile(){
   });
 }
 document.getElementById("compileBtn").addEventListener("click",openCompile);
+document.getElementById("republishBtn").addEventListener("click",republishResults);
 document.getElementById("compile-go").addEventListener("click",doCompile);
 document.getElementById("compile-refresh").addEventListener("click",function(){if(syncOn())loadCompileServer();else renderCompile();});
 document.getElementById("compile-addfiles").addEventListener("click",function(){document.getElementById("mergeFile").click();});
@@ -1914,7 +1950,7 @@ function renderRoster(){
   document.getElementById("matchBanner").innerHTML='<span class="pill'+(mt==="indoor"?' indoor':'')+'">'+typeLabel()+'</span><span>'+esc(state.meta.match||"—")+'</span>';
   var q=(document.getElementById("rosterSearch").value||"").toLowerCase();
   var active=state.entries.filter(function(e){return e.active;});
-  if(!active.length){document.getElementById("rosterCount").textContent="0 checked in";document.getElementById("rosterList").innerHTML='<div class="empty"><div class="ico">☰</div>No shooters checked in.<br>Tap “Check in shooters” to pick tonight’s squad.</div>';return;}
+  if(!active.length){document.getElementById("rosterCount").textContent="0 checked in";document.getElementById("rosterList").innerHTML='<div class="empty"><div class="ico">≡</div>No shooters checked in.<br>Tap “Check in shooters” to pick tonight’s squad.</div>';return;}
   if(mt==="indoor")return renderRosterIndoor(active,q);
   var shown=active.filter(function(e){return !q||(e.name||"").toLowerCase().indexOf(q)>=0;}).sort(function(a,b){return ((a.checkinSeq||0)-(b.checkinSeq||0))||((a.name||"").localeCompare(b.name||""));});
   document.getElementById("rosterCount").textContent=active.length+" checked in"+(state.entries.length>active.length?(" · "+state.entries.length+" on file"):"");
@@ -2078,6 +2114,22 @@ document.getElementById("set-newmatch").addEventListener("click",function(){
 /* score */
 /* Outdoor: a shooter may enter several divisions, each a separate scored entry.
    Show their other entries so it's obvious they exist and can be jumped to. */
+/* Removes ONE of a shooter's division entries. Person-level removal lives in
+   the shooter list; this is the "they shouldn't be in Rimfire" case. */
+function dropDivision(id){
+  var r=byId(id);if(!r)return;
+  var mine=state.entries.filter(function(x){return x.personId===r.personId&&x.active;});
+  if(mine.length<2){toast("That's their only division — remove the shooter from Tools instead");return;}
+  var msg="Remove "+(r.name||"this shooter")+" from "+(r.division||"this division")+"?";
+  if(hasAny(r))msg+="\n\n\u26a0 This entry has a score of "+fmt(total(r))+". That will be removed too.";
+  msg+="\n\nTheir other divisions are not affected.";
+  if(!confirm(msg))return;
+  undoPush("Removed a division for "+(r.name||"a shooter"));
+  var others=mine.filter(function(x){return x.id!==r.id;});
+  state.entries=state.entries.filter(function(x){return x.id!==r.id;});
+  if(state.selected===r.id)state.selected=others[0]?others[0].id:null;
+  save();renderScore();renderRoster();toast("Division removed");
+}
 function otherDivisionsBlock(e){
   var mine=state.entries.filter(function(r){return r.personId===e.personId&&r.active;})
     .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
@@ -2085,16 +2137,17 @@ function otherDivisionsBlock(e){
   return '<div class="card pad" style="margin-bottom:8px"><div class="muted" style="font-weight:800;margin-bottom:6px">'
     +esc(firstName(e.name))+'’s divisions this match</div>'
     +mine.map(function(r){var cur=(r.id===e.id);
-      return '<div class="lbrow'+(cur?' gold':'')+'" data-jump="'+r.id+'" style="cursor:pointer">'
-        +'<div class="meta"><div class="nm">'+esc(r.division||"—")+(r.gun?' · '+esc(r.gun):'')+'</div>'
+      return '<div class="lbrow'+(cur?' gold':'')+'">'
+        +'<div class="meta" data-jump="'+r.id+'" style="cursor:pointer"><div class="nm">'+esc(r.division||"—")+(r.gun?' · '+esc(r.gun):'')+'</div>'
         +'<div class="dv">'+(cur?'currently scoring':'tap to switch')+'</div></div>'
-        +'<div class="sc">'+(hasAny(r)?fmt(total(r)):'—')+'<small>'+(hasAny(r)?'total':'not shot')+'</small></div></div>';}).join("")
+        +'<div class="sc">'+(hasAny(r)?fmt(total(r)):'—')+'<small>'+(hasAny(r)?'total':'not shot')+'</small></div>'
+        +'<button class="linklike" data-dropdiv="'+r.id+'" title="Remove this division">remove</button></div>';}).join("")
     +'</div>';
 }
 function renderScore(){
   var body=document.getElementById("scoreBody"),e=byId(state.selected);
   if((state.meta.matchType||"outdoor")==="indoor")return renderScoreIndoor();
-  if(!e){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">◎</div>Pick a competitor from the Roster to score them.</div>';return;}
+  if(!e){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">●</div>Pick a competitor from the Roster to score them.</div>';return;}
   body.innerHTML=
     '<div class="totalcard"><div class="who"><div class="nm">'+esc(e.name||"(unnamed)")+' <span id="statusBadge"></span></div>'
       +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')
@@ -2145,6 +2198,8 @@ function renderScore(){
   if(adb)adb.addEventListener("click",function(){openRoundModal("add",null);});
   body.querySelectorAll("[data-jump]").forEach(function(row){
     row.addEventListener("click",function(){state.selected=row.dataset.jump;renderScore();window.scrollTo(0,0);});});
+  body.querySelectorAll("[data-dropdiv]").forEach(function(b){
+    b.addEventListener("click",function(ev){ev.stopPropagation();dropDivision(b.dataset.dropdiv);});});
   updateScoreUI(e);updateStatusUI(e);
 }
 function updateStatusUI(e){
@@ -2196,7 +2251,7 @@ function roundComplete(r){return !!(r.done||statusOf(r)!=="normal");}
 function personRounds(pid){return state.entries.filter(function(r){return r.personId===pid&&r.active;});}
 function renderScoreIndoor(){
   var body=document.getElementById("scoreBody"),sel=byId(state.selected);
-  if(!sel){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">◎</div>Pick a shooter from the Roster to score them.</div>';return;}
+  if(!sel){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">●</div>Pick a shooter from the Roster to score them.</div>';return;}
   var pid=sel.personId,rounds=personRounds(pid);if(!rounds.length)rounds=[sel];
   var best=bestRound(rounds),last=rounds[rounds.length-1],canAdd=roundComplete(last);
   var h='<h2 class="section">'+esc(sel.name||"(unnamed)")+'</h2>';
@@ -2514,6 +2569,8 @@ function editMatchInfo(){
 function renderResults(){
   var mi=document.getElementById("resultsMatchInfo");
   mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(matchDisplay(state.meta.match)||"—");
+  var rpb=document.getElementById("republishBtn");
+  if(rpb)rpb.style.display=(syncOn()&&state.meta.compiledAt)?"":"none";
   var fsb=document.getElementById("finishSquadBtn");
   if(fsb)fsb.textContent=syncOn()?"\u2b06 Upload this squad's results":"\ud83d\udcbe Save this squad's results";
   if((state.meta.matchType||"outdoor")==="indoor")return renderResultsIndoor();
@@ -2530,7 +2587,7 @@ function renderResults(){
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
   var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard");
-  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">▤</div>No scored entries yet.</div>';}
+  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored entries yet.</div>';}
   else lb.innerHTML=ord.map(function(o){var e=o.e,fin=o.place!=="DNF"&&o.place!=="DQ";
     return '<div class="lbrow'+(o.place==="1"?' gold':'')+'"><div class="rk'+(fin?'':' st')+'">'+o.place+'</div>'
     +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+'</div><div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
@@ -2561,7 +2618,7 @@ function renderResultsIndoor(){
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
   var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
-  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">▤</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
+  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
   lb.innerHTML=ord.map(lbRowIndoor).join("");
   var xh="";
   if(state.filterDiv==="All"&&state.filterSquad==="All"){
@@ -2594,7 +2651,7 @@ function updateBackupInfo(){
   el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span style="white-space:pre-line">'+esc(txt)+'</span>';
   var ub=document.getElementById("set-undo");
   if(ub){var t=undoTop();
-    if(t){ub.style.display="";ub.textContent="↶ Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
+    if(t){ub.style.display="";ub.textContent="← Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
     else ub.style.display="none";}
 }
 
@@ -2781,7 +2838,7 @@ function composeResultsHTML(autoprint){
     +'.noprint{margin:0 0 16px;padding:12px 14px;background:#f4f1ea;border:1px solid #d9d4c8;border-radius:8px}'
     +'.noprint button{background:#e8541e;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:800;cursor:pointer}'
     +'.noprint p{margin:8px 0 0;font-size:12px;color:#555;line-height:1.5}</style></head><body>'
-    +'<div class="noprint"><button onclick="window.print()">🖨 Save as PDF / Print</button>'
+    +'<div class="noprint"><button onclick="window.print()">Save as PDF / Print</button>'
     +'<p>Tap the button, then choose <b>Save as PDF</b> (or “Save to Files”). Email that PDF so everyone can open it on any device. This bar does not appear in the saved PDF.</p></div>'
     +buildTablesHTML()
     +'<div style="margin-top:18px;font-size:11px;color:#888">Generated by Match Scorekeeper · created by G. Groiss · GNU AGPL v3.0</div>'
@@ -3260,8 +3317,8 @@ function showMergeSummary(r){
     +'This match is “'+esc(state.meta.match||"—")+'”, but '+(wrongMatch.length===1?'that file is':'those files are')+' from '
     +wrongMatch.map(function(m){return '“'+esc(m)+'”';}).join(", ")+'.<br>'
     +'Merging it would have written those scores onto this match. If the label is just wrong, fix the match name on Results and try again.</div>';
-  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and remove the wrong one with ⚙ Tools ▸ Remove a shooter.</div>';
-  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Remove the wrong one with ⚙ Tools ▸ Remove a shooter (or keep both if they really are different people with the same name):<br>'
+  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and remove the wrong one with Tools › Remove a shooter.</div>';
+  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Remove the wrong one with Tools › Remove a shooter (or keep both if they really are different people with the same name):<br>'
     +dups.map(function(g){return '• '+esc(g.name)+' — '+g.people+' separate records ('+g.divisions.map(esc).join(", ")+')';}).join("<br>")+'</div>';
   else h+='<div class="muted" style="margin-bottom:6px">No duplicate shooters detected.</div>';
   document.getElementById("mergeBody").innerHTML=h;
@@ -3368,7 +3425,7 @@ window.addEventListener("pagehide",save);
 setInterval(function(){
   if(!state.meta.remind)return;if(!state.entries.some(hasAny))return;
   var last=state.meta.lastBackup||0,now=Date.now();
-  if(now-last>REMIND_MS && now-lastRemind>REMIND_MS){lastRemind=now;toast("Back up your scores ▸ tap here",function(){doBackup();});}
+  if(now-last>REMIND_MS && now-lastRemind>REMIND_MS){lastRemind=now;toast("Back up your scores › tap here",function(){doBackup();});}
 },60000);
 
 loadCfg();applyScreen();load();markSaved(true);
