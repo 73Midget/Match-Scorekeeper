@@ -53,6 +53,7 @@
   body.sun .tap,body.sun .btn,body.sun .timeinp,body.sun .padfield,body.sun .padgrid button{border-width:2px}
   body.sun .muted,body.sun .sethint,body.sun .dv,body.sun .sub{color:#000}
   body.sun .btn.ghost{background:#fff;border-color:#000;color:#000}
+  body.sun ::placeholder{color:#000;opacity:.72}
 
   /* ---- Night: warm and deliberately dim. Maximum contrast is the wrong goal in
      the dark — a white screen wrecks night vision for the RO and everyone near
@@ -72,6 +73,7 @@
   body.night .warnbox{background:#2a1c19;border-color:#5a3a33;color:#e0917f}
   body.night .donebanner{background:#1c261f;border-color:#3f5a46;color:#8fc0a0}
   body.night table.tg th{background:#23261d}
+  body.night ::placeholder{color:var(--steel);opacity:1}
 
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   /* iOS zooms toward an element on a double-tap. Fast repeated taps on buttons
@@ -257,7 +259,8 @@
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
   /* sheets opened from inside another sheet must stack above it, regardless of
      where they sit in the document */
-  #fileScrim,#histScrim{z-index:60}
+  #fileScrim,#histScrim,#fixScrim,#pastScrim{z-index:60}
+  #pastViewScrim{z-index:70}
   .scrim.open{display:flex}
   .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
   .sheet h3{margin:0 0 6px;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
@@ -286,9 +289,15 @@
              overflow:hidden;text-overflow:ellipsis}
   .pendbadge+.sub{margin-left:8px}
   .gearbtn svg{display:block;margin:0 auto}
-  .gearbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);color:#fff;font-size:17px;line-height:1;
-           width:34px;height:34px;border-radius:9px;margin-left:10px;flex:0 0 auto;cursor:pointer}
-  .gearbtn:active{background:rgba(255,255,255,.26)}
+  /* The one control that opens everything else, so it carries a word as well as
+     an icon — the icon uses only rect/circle/rotate because arc path commands
+     misrender on older WebKit and Android WebView. */
+  .gearbtn{background:#fff;border:none;color:var(--ink);border-radius:9px;margin-left:10px;flex:0 0 auto;
+           cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;
+           font:inherit;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+  .gearbtn svg{display:block;flex:0 0 auto}
+  .gearbtn:active{background:var(--line)}
+  body.night .gearbtn{background:var(--ink);color:#12140f}
   .setgrp{margin:0 0 18px}
   .setgrp>h4.danger{background:#8a2a1a;border-left-color:var(--red)}
   .setgrp>h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:800;
@@ -355,7 +364,7 @@
 <header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
   <button class="pendbadge" id="pendingBadge" style="display:none"></button>
   <span class="sub" id="saved">not saved yet</span>
-  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/><path fill="currentColor" d="M19.4 13a7.7 7.7 0 0 0 0-2l2-1.6a.5.5 0 0 0 .1-.6l-1.9-3.2a.5.5 0 0 0-.6-.2l-2.4.9a7.5 7.5 0 0 0-1.7-1l-.4-2.5a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4l-.4 2.5a7.5 7.5 0 0 0-1.7 1l-2.4-.9a.5.5 0 0 0-.6.2L2.5 8.8a.5.5 0 0 0 .1.6L4.6 11a7.7 7.7 0 0 0 0 2l-2 1.6a.5.5 0 0 0-.1.6l1.9 3.2c.1.2.4.3.6.2l2.4-.9c.5.4 1.1.8 1.7 1l.4 2.5c0 .3.2.4.5.4h3.8c.3 0 .5-.1.5-.4l.4-2.5c.6-.2 1.2-.6 1.7-1l2.4.9c.2.1.5 0 .6-.2l1.9-3.2a.5.5 0 0 0-.1-.6L19.4 13z" opacity=".85"/></svg></button></div></header>
+  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div></header>
 
 <main>
   <section class="view active" id="view-setup">
@@ -404,11 +413,9 @@
     <div style="height:14px"></div>
     <button class="btn green" id="finishSquadBtn">↑ Upload this squad's results</button>
     <div style="height:8px"></div>
-    <button class="btn dark" id="squadResultsBtn">Squad results &amp; email</button>
+    <button class="btn dark" id="squadResultsBtn">Results &amp; email</button>
     <div style="height:8px"></div>
-    <button class="btn" id="sendResultsBtn">Send squad results another way</button>
-    <div style="height:8px"></div>
-    <button class="btn ghost sm" id="compileBtn">Compile match results</button>
+        <button class="btn ghost sm" id="compileBtn">Compile match results</button>
     <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
@@ -501,6 +508,62 @@
   <button class="btn ghost" id="removeClose">Close</button>
 </div></div>
 
+<div class="scrim" id="pastScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Past matches</h3>
+  <p class="muted" style="margin:0 0 8px">Matches on the club server. Viewing one doesn't affect the match on this tablet.</p>
+  <div class="card" id="pastList" style="max-height:56vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="pastClose">Close</button>
+</div></div>
+
+<div class="scrim" id="pastViewScrim"><div class="sheet" style="max-height:94vh">
+  <h3 id="pastViewTitle">Results</h3>
+  <div class="card pad" id="pastViewBody" style="max-height:62vh;overflow:auto"></div>
+  <div style="height:10px"></div>
+  <button class="btn ghost sm" id="pastPrint" style="margin-bottom:8px">Save as PDF</button>
+  <button class="btn ghost" id="pastViewClose">Close</button>
+</div></div>
+
+<div class="scrim" id="fixScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Fixing a mistake</h3>
+  <p class="muted" style="margin:0 0 10px">Wrong score, wrong division, wrong gun — find where you are in the list below.</p>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Best practice</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Collect every tablet before compiling. Once the match is compiled, corrections should happen on the compiling tablet only — squad tablets should stop uploading.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Before that squad uploaded</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">The score is only on that squad's tablet. Fix it there on the Roster, then upload as normal.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Uploaded, but the match isn't compiled yet</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Fix it on that squad's tablet and upload again. Uploading twice is fine — whoever compiles picks up the newer one automatically.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">After the match is compiled</div>
+    <p style="margin:0 0 6px;font-size:13px;line-height:1.6">Fix it here, on this tablet, from the <b>Roster</b>. The results and the PDF update straight away.</p>
+    <p style="margin:0;font-size:13px;line-height:1.6">Then tap <b>Publish corrected results</b> so the server matches. <b>Don't</b> tick squads on the compile screen again — that re-imports the old copy and lists the shooter twice.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">A squad RO fixed it on their own tablet after compiling</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Their squad shows as <b>re-uploaded since you compiled</b>. Including it re-imports the whole squad and duplicates anything you corrected here. Make the change on this tablet instead.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Shooter in the wrong division</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">If they're listed under two divisions, open their score sheet and tap <b>remove</b> beside the wrong one. To remove a shooter entirely, use <b>Tools ▸ View &amp; edit shooter list</b>.</p>
+  </div>
+
+  <div class="warnbox" style="margin-bottom:10px"><b>Undo</b> in Tools reverses the last few big changes, but it steps back to a moment in time — anything scored since is lost too. Use it straight away or not at all.</div>
+
+  <button class="btn ghost" id="fixClose">Close</button>
+</div></div>
+
 <div class="scrim" id="fileScrim"><div class="sheet">
   <h3>Save a file</h3>
   <p class="muted" style="margin:0 0 10px">These save to this tablet's Downloads folder.</p>
@@ -570,6 +633,7 @@
     </div>
     <button class="btn green" id="set-compile">Compile match results</button>
     <div class="sethint" style="margin-bottom:8px">Combines every squad's scores into the final results.</div>
+    <button class="btn ghost sm" id="set-past" style="display:none;margin-bottom:8px">Past matches on the server</button>
     <button class="btn ghost sm" id="set-getsquad" style="display:none;margin-bottom:8px">↓ Restore a squad from the server</button>
     <button class="btn ghost sm" id="set-savefile">Save a file…</button>
     <div class="sethint">Match archive, shooter list, or spreadsheet.</div>
@@ -735,7 +799,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-04-a";
+var APP_BUILD="2026-09-04-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -759,7 +823,7 @@ var SC={
    outdoor uses them; indoor needs none. */
 var MATCH_TYPES={
   outdoor:{
-    key:"outdoor", label:"Outdoor", lowerWins:true,
+    key:"outdoor", label:"Outdoor", lowerWins:true, shareTies:true,   /* identical total time shares a place */
     ensure:function(e){return ensureOutdoor(e);},
     total:function(e){return stageFive(e)+stageGlockm(e)+statePlates(e);},
     better:function(a,b){return total(a)-total(b);},                                 /* lowest time wins */
@@ -998,7 +1062,7 @@ function renderSettings(){
   /* Online controls appear only when they can do something — the group shrinks
      rather than substituting a button that isn't really the same action. */
   var on=syncOn();
-  ["set-getroster","set-getroster-hint","set-getsquad"].forEach(function(id){
+  ["set-getroster","set-getroster-hint","set-getsquad","set-past"].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
   var people={};state.entries.forEach(function(e){people[e.personId]=1;});
   var n=Object.keys(people).length;
@@ -1537,6 +1601,7 @@ function restoreSquad(deviceId,revision,row){
   });
 }
 document.getElementById("set-getsquad").addEventListener("click",openSquadPicker);
+document.getElementById("set-past").addEventListener("click",openPastMatches);
 document.getElementById("rsquadClose").addEventListener("click",function(){document.getElementById("rsquadScrim").classList.remove("open");});
 document.getElementById("rsquadScrim").addEventListener("click",function(ev){if(ev.target.id==="rsquadScrim")ev.currentTarget.classList.remove("open");});
 /* --- what has already been compiled in ------------------------------------
@@ -1618,6 +1683,11 @@ function renderCompile(){
   }
   renderCompileWarn();
 }
+/* Once everything is in, this screen's job is finished — say so, rather than
+   presenting the same tickable list, which reads as an invitation. */
+function compileAllDone(){
+  return compileRows.length>0&&compileRows.every(function(r){return r.done;});
+}
 function renderCompileWarn(){
   var w=document.getElementById("compile-warn"),counts={};
   compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();if(k)counts[k]=(counts[k]||0)+1;});
@@ -1626,6 +1696,10 @@ function renderCompileWarn(){
   if(dups.length)h+='<div class="warnbox" style="margin-top:10px"><b>Two tablets used the same squad name.</b> '
     +'Check whether these are different squads that were both labelled the same — compile both — or a replacement tablet taking over, in which case compile one. '
     +'Tap <b>Show shooters</b> on each: overlapping names mean a replacement, different names mean two squads.</div>';
+  if(compileAllDone())
+    h+='<div class="goodbox" style="margin-top:10px"><b>Every squad here is already compiled.</b> '
+      +'Nothing more to do on this screen. To fix a score or division, edit it on the Roster, then use '
+      +'<b>Publish corrected results</b>.</div>';
   var n=compileRows.filter(function(r){return r.selected;}).length;
   h+='<div class="sethint" style="margin-top:8px">'+n+' of '+compileRows.length+' selected.</div>';
   w.innerHTML=h;
@@ -1698,6 +1772,27 @@ function apiPostCompiled(txt){
     method:"POST",headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
     body:JSON.stringify(body)
   }).then(function(res){return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,body:j};});});
+}
+function apiListMatches(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return [];
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.matches)||[];});
+}
+/* fetch a specific match's compiled archive — key passed in, not read from state */
+function apiGetCompiled(mk){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"
+    +encodeURIComponent(mk)+"/squads/compiled",{headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return null;
+    if(!res.ok)throw "Those results couldn't be downloaded ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squad)||null;});
 }
 function apiUnmerged(){
   return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads/unmerged",
@@ -2801,6 +2896,14 @@ function bestTableIndoor(){
   h+='</tbody></table>';
   return h;
 }
+/* Render a DIFFERENT match's results without disturbing the live one. The
+   builders and their helpers read `state` throughout; try/finally guarantees the
+   live match is restored even if rendering throws. Never call save() in here. */
+function withMatchState(entries,meta,fn){
+  var se=state.entries,sm=state.meta;
+  try{state.entries=entries;state.meta=meta;return fn();}
+  finally{state.entries=se;state.meta=sm;}
+}
 function buildTablesHTMLIndoor(){
   var match=esc(state.meta.match||"GSSF Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
@@ -3008,6 +3111,67 @@ document.getElementById("set-compile").addEventListener("click",function(){
 });
 document.getElementById("set-savefile").addEventListener("click",function(){
   document.getElementById("fileScrim").classList.add("open");});
+document.getElementById("fixClose").addEventListener("click",function(){
+  document.getElementById("fixScrim").classList.remove("open");});
+document.getElementById("fixScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="fixScrim")ev.currentTarget.classList.remove("open");});
+/* --- past matches ------------------------------------------------------
+   Viewing is strictly read-only: the archive is rendered through a temporary
+   state swap and the live match is restored afterwards, so nothing here can
+   touch a match in progress. */
+var pastPrintHTML="";
+function openPastMatches(){
+  if(!syncOn())return;
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("pastList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("pastScrim").classList.add("open");
+  apiListMatches().then(function(list){
+    var el=document.getElementById("pastList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No matches on the server yet.</div>';return;}
+    el.innerHTML=list.map(function(m){
+      return '<div class="cirow" data-mk="'+esc(m.match_key)+'" data-lbl="'+esc(m.match_label||"")+'">'
+        +'<div class="meta"><div class="nm">'+esc(m.match_label||"(no date)")
+        +' <span class="cibadge">'+esc(m.match_type||"")+'</span></div>'
+        +'<div class="dv">'+(m.squad_count||0)+' squad'+((m.squad_count===1)?'':'s')
+        +(m.has_compiled?'':' \u00b7 not compiled')+'</div></div>'
+        +'<span class="cistat '+(m.has_compiled?'on':'')+'">'+(m.has_compiled?'View':'\u2014')+'</span></div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      row.addEventListener("click",function(){viewPastMatch(row.dataset.mk,row.dataset.lbl);});});
+  }).catch(function(err){
+    document.getElementById("pastList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function viewPastMatch(mk,label){
+  toast("Loading results\u2026");
+  apiGetCompiled(mk).then(function(sq){
+    if(!sq||!sq.payload){toast("No compiled results for that match");return;}
+    var d;try{d=JSON.parse(sq.payload);}catch(e){throw "Those results couldn't be read.";}
+    if(!d||!d.entries)throw "Those results were empty.";
+    var mt=backupType(d),meta=d.meta||{};
+    meta=JSON.parse(JSON.stringify(meta));meta.matchType=mt;
+    var entries=d.entries.map(function(e){return ensureShape(JSON.parse(JSON.stringify(e)),mt);});
+    var html=withMatchState(entries,meta,function(){return buildTablesHTML();});
+    pastPrintHTML=html;
+    document.getElementById("pastViewTitle").textContent=(label||"Results")+" \u00b7 "+(mt==="indoor"?"Indoor":"Outdoor");
+    document.getElementById("pastViewBody").innerHTML=html;
+    document.getElementById("pastViewScrim").classList.add("open");
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected \u2014 check Tools":(typeof err==="string"?err:"Couldn't load those results."));
+  });
+}
+document.getElementById("pastClose").addEventListener("click",function(){document.getElementById("pastScrim").classList.remove("open");});
+document.getElementById("pastScrim").addEventListener("click",function(ev){if(ev.target.id==="pastScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("pastViewClose").addEventListener("click",function(){document.getElementById("pastViewScrim").classList.remove("open");});
+document.getElementById("pastViewScrim").addEventListener("click",function(ev){if(ev.target.id==="pastViewScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("pastPrint").addEventListener("click",function(){
+  if(!pastPrintHTML)return;
+  var w=window.open("","_blank");
+  if(!w){toast("Allow pop-ups to save a PDF");return;}
+  w.document.write("<!DOCTYPE html><html><head><meta charset=utf-8><title>Results</title></head><body>"+pastPrintHTML+"</body></html>");
+  w.document.close();setTimeout(function(){w.print();},250);
+});
+function openFixGuide(){document.getElementById("fixScrim").classList.add("open");}
 document.getElementById("fileClose").addEventListener("click",function(){
   document.getElementById("fileScrim").classList.remove("open");});
 document.getElementById("fileScrim").addEventListener("click",function(ev){
@@ -3119,7 +3283,6 @@ function sendResults(){
   state.meta.lastShared=Date.now();save();updateBackupInfo();
   toast("File saved — attach it to an email or drop it in Drive");
 }
-document.getElementById("sendResultsBtn").addEventListener("click",sendResults);
 document.getElementById("set-restore").addEventListener("click",function(){document.getElementById("gearScrim").classList.remove("open");document.getElementById("restoreFile").click();});
 document.getElementById("restoreFile").addEventListener("change",function(ev){var f=ev.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d.entries)throw 0;
@@ -3337,7 +3500,12 @@ function appendMergeSummary(res){
     h+='<div style="height:8px"></div><button class="btn ghost sm" id="retryPublish">Try publishing again</button>';
   }
   h+='</div>';
+  h+='<div class="note" style="margin-top:10px">Spotted a mistake? Fix it on the <b>Roster</b>, then tap '
+   +'<b>Publish corrected results</b>. Don\u2019t tick squads here again \u2014 that re-imports the old copy.'
+   +'<div style="height:8px"></div><button class="btn ghost sm" id="openFix">How do I fix a mistake?</button></div>';
   el.innerHTML+=h;
+  var fx=document.getElementById("openFix");
+  if(fx)fx.addEventListener("click",openFixGuide);
   var rp=document.getElementById("retryPublish");
   if(rp)rp.addEventListener("click",function(){
     rp.disabled=true;rp.textContent="Publishing\u2026";
