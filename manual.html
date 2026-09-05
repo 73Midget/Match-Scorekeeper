@@ -74,7 +74,8 @@
 
 <p class="lead">This app keeps score for a squad on one tablet, with no internet needed. Each tablet
 holds its own squad; at the end of the match the squads are combined on one device to produce the
-final results.</p>
+final results. A club can optionally connect the tablets to a server, which makes sharing the
+shooter list and collecting squad results easier — but nothing requires it.</p>
 
 <div class="toc">
   <h3>Contents</h3>
@@ -82,34 +83,37 @@ final results.</p>
     <li><a href="#s1">How It Works</a></li>
     <li><a href="#s2">Installing</a></li>
     <li><a href="#s3">Updating</a></li>
-    <li><a href="#s4">Checking the Version</a></li>
+    <li><a href="#s4">The Tools Screen</a></li>
     <li><a href="#s5">Match Setup</a></li>
     <li><a href="#s6">Shooters &amp; Check-In</a></li>
     <li><a href="#s7">Scoring — Outdoor</a></li>
     <li><a href="#s8">Scoring — Indoor</a></li>
     <li><a href="#s9">DNF &amp; DQ</a></li>
     <li><a href="#s10">Reading Results</a></li>
-    <li><a href="#s11">Sharing Results</a></li>
-    <li><a href="#s12">Backups, Undo &amp; Recovery</a></li>
-    <li><a href="#s13">Combining Squads (Merge)</a></li>
-    <li><a href="#s14">End-of-Match Workflow</a></li>
-    <li><a href="#s15">Scoring Rules Reference</a></li>
-    <li><a href="#s16">Troubleshooting &amp; FAQ</a></li>
+    <li><a href="#s11">Finishing Your Squad</a></li>
+    <li><a href="#s12">Online Services</a></li>
+    <li><a href="#s13">The Shooter List</a></li>
+    <li><a href="#s14">Compiling the Match</a></li>
+    <li><a href="#s15">Fixing a Mistake</a></li>
+    <li><a href="#s16">Backups, Undo &amp; Recovery</a></li>
+    <li><a href="#s17">End-of-Match Workflow</a></li>
+    <li><a href="#s18">Screen Modes</a></li>
+    <li><a href="#s19">Scoring Rules Reference</a></li>
+    <li><a href="#s20">Troubleshooting &amp; FAQ</a></li>
   </ol>
 </div>
 
 <h2 id="s1">1 · How It Works</h2>
-
-<p>Match Scorekeeper runs entirely on the device. Nothing is uploaded, no account is needed, and no
-signal is required once it's installed.</p>
 
 <ul>
   <li><b>One tablet = one squad.</b> Each RO scores their own squad on their own device.</li>
   <li><b>Everything saves as you go.</b> Look for the <b>✓ saved</b> time at the top right. Locking
       the screen or closing the app doesn't lose anything.</li>
   <li><b>Indoor or outdoor.</b> The match type is chosen at the start and stays fixed for that match.</li>
-  <li><b>Squads combine at the end.</b> Each RO sends their file to one person, who merges them all
-      and produces the results.</li>
+  <li><b>Squads combine at the end.</b> One person collects every squad and compiles the results.</li>
+  <li><b>Online is optional.</b> Without a server, the app makes no network calls at all and every
+      feature described here still works — squads are passed between tablets as files. With a
+      server, squads upload and the results compile automatically.</li>
 </ul>
 
 <div class="note">
@@ -119,345 +123,466 @@ signal is required once it's installed.</p>
 
 <h2 id="s2">2 · Installing</h2>
 
-<p>There's no app store download. You open the address below once in a browser, then add it to the
-home screen. After that it has its own icon and works completely offline.</p>
+<p>There's no app store download. Open the address below once in a browser, then add it to the home
+screen. After that it has its own icon and works completely offline.</p>
 
 <a class="url" href="https://gpl-scorekeeper.netlify.app">gpl-scorekeeper.netlify.app</a>
 
 <h3>iPad or iPhone</h3>
 <ol>
-  <li>Open the address in <b>Safari</b>. This must be Safari — Chrome on an iPad can't install apps.</li>
-  <li>Tap <b>Share</b> (the square with an arrow pointing up).</li>
-  <li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+  <li>Open the address in <b>Safari</b> — this must be Safari.</li>
+  <li>Tap <b>Share</b>, scroll down, tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
   <li>Close Safari and open the new bullseye icon.</li>
   <li><b>While you still have internet</b>, let it finish loading once.</li>
 </ol>
 
-<h3>Android tablet or phone</h3>
+<h3>Android</h3>
 <ol>
   <li>Open the address in <b>Chrome</b>.</li>
-  <li>Tap <b>Install</b> if offered, or menu <b>⋮</b> → <b>Install app</b> / <b>Add to Home screen</b>.</li>
+  <li>Tap <b>Install</b>, or menu <b>⋮</b> → <b>Install app</b>.</li>
   <li>Open it from the new icon and let it finish loading once while online.</li>
 </ol>
 
-<h3>Windows PC or Mac laptop</h3>
+<h3>Windows or Mac</h3>
 <ul>
-  <li><b>Simplest:</b> open the address and bookmark it.</li>
-  <li><b>As an app window:</b> in Edge or Chrome, click the install icon in the address bar. On a Mac
-      in Safari, use <b>File → Add to Dock</b>.</li>
-  <li>Firefox can't install it as an app, but the website works normally.</li>
+  <li>Open the address and bookmark it, or install it as an app window from the address bar.</li>
+  <li>On a Mac in Safari, use <b>File → Add to Dock</b>.</li>
 </ul>
-
-<div class="tip">
-  <b>First load needs internet — after that, none.</b> Open it once on wifi so it can store itself on
-  the device. From then on it opens and scores with no signal at all.
-</div>
 
 <div class="warn">
   <b>Always open it from the home screen icon, never from the browser.</b> The icon version and the
-  browser version keep <b>separate</b> saved data — score a squad in the browser by mistake and those
-  scores won't be in the app. On iPads there's a second reason: the browser version can quietly
-  discard its data after about a week unused, while the home screen version doesn't.
+  browser version keep <b>separate</b> saved data. On iPads there's a second reason: the browser
+  version can quietly discard its data after about a week unused.
   <br><br>
-  For the same reason, <b>never use "Clear History" or "Clear browsing data"</b> on a match tablet.
+  For the same reason, <b>never use "Clear History"</b> on a match tablet.
 </div>
 
 <h2 id="s3">3 · Updating</h2>
 
-<p><b>Updates install themselves.</b> Nothing to download, no app store to check.</p>
-
-<ol>
-  <li><b>Fully close the app</b> — don't just switch away. On a tablet, swipe it off the recent-apps list.</li>
-  <li><b>Open it again while you have internet.</b> The new version loads.</li>
-  <li>Check <b>Match Setup</b> — it shows the version and build. Every tablet should show the same one.</li>
-</ol>
+<p><b>Updates install themselves.</b> Fully close the app — swipe it off the recent-apps list — then
+open it again while you have internet. Check <b>Tools</b>: it shows the version and build, and
+every tablet at a match should show the same one.</p>
 
 <div class="note">
-  <b>Updates never install mid-match.</b> If a new version is released while you're scoring, it waits
-  until the next time the app is fully closed and reopened.
+  <b>Updates never install mid-match.</b> A new version waits until the app is fully closed and reopened.
 </div>
 
-<h2 id="s4">4 · Checking the Version</h2>
+<h2 id="s4">4 · The Tools Screen</h2>
 
-<p>The version appears in two places: next to the app name in the header, and on the
-<b>Match Setup</b> screen along with the build.</p>
+<p>The <b>Tools</b> button at the top right opens the Tools screen, which holds everything that isn't scoring. It's
+available from every screen, including before a match has started.</p>
+
+<table>
+  <tr><th>Group</th><th>What's in it</th></tr>
+  <tr><td><b>This Tablet</b></td>
+      <td>Squad name, device name, screen mode, version and build. Set once and rarely changed.</td></tr>
+  <tr><td><b>Shooter List</b></td>
+      <td>View and edit the list, and download the club's current one.</td></tr>
+  <tr><td><b>This Match</b></td>
+      <td>Match date, compile results, restore a squad, save a file.</td></tr>
+  <tr><td><b>Connection</b></td>
+      <td>Online services on or off, and the club's setup code.</td></tr>
+  <tr><td><b>Careful</b></td>
+      <td>Undo, restore from a backup, start a new match. The three that change or remove data.</td></tr>
+</table>
 
 <div class="tip">
-  <b>Before every match, confirm all tablets show the same version and build.</b> Mismatched tablets
-  are the most common cause of odd behaviour when combining squads.
+  <b>Squad and device name are locked.</b> They're shown but not directly editable — tap
+  <b>Change squad / device name</b> and confirm. The squad name labels every file and upload this
+  tablet produces, so it shouldn't change on a stray keystroke.
 </div>
 
 <h2 id="s5">5 · Match Setup</h2>
 
-<p>Match Setup is the first screen you see. It's where the match is defined before any scoring begins.</p>
+<p>Match Setup is the first screen you see. It defines the match before any scoring begins.</p>
 
 <ol>
-  <li><b>Match type</b> — choose <b>Outdoor</b> or <b>Indoor</b>.</li>
-  <li><b>Match (date)</b> — the match name or date. This should be <b>the same on every tablet</b>;
-      the app uses it to make sure squad files from different matches never get mixed together.</li>
-  <li><b>Squad / relay on this tablet</b> — e.g. <code>Squad A</code>. Appears in results and in the
-      backup file name.</li>
+  <li><b>Match type</b> — <b>Outdoor</b> or <b>Indoor</b>.</li>
+  <li><b>Match date</b> — pick it from the calendar. <b>Every tablet must have the same date</b>;
+      it's how the app knows which squads belong together.</li>
   <li><b>Check in shooters</b> — see section 6.</li>
-  <li>Tap <b>▶ Start match</b>.</li>
+  <li>Tap <b>› Start match</b>.</li>
 </ol>
 
 <div class="warn">
   <b>The match type locks when you tap Start match.</b> Indoor and outdoor score completely
-  differently, so it can't be switched afterwards. Changing it means starting a new match.
+  differently, so changing it means starting a new match.
 </div>
 
-<p>After starting, the <b>Roster</b>, <b>Score</b> and <b>Results</b> tabs appear along the bottom.
-If you close and reopen the app mid-match, it returns straight to the match — you won't have to go
-through setup again.</p>
+<div class="note">
+  The squad name is shown on Setup but changed in <b>Tools</b>, and so is the match date once the
+  match is under way.
+</div>
 
 <h2 id="s6">6 · Shooters &amp; Check-In</h2>
 
-<p>Tap <b>Check in shooters</b> (on Setup, or on the Roster once the match has started). The list
-shows everyone on file, one row per person, marked <span class="pill in">In</span> or
-<span class="pill out">Out</span> for tonight.</p>
+<p>Tap <b>Check in shooters</b> and pick a name to open their card. Set their <b>division</b> and
+<b>Glock model</b> for tonight, their <b>email</b>, and the <b>RO</b> tick if their address should
+always be included in the results email.</p>
 
-<p>Tap a name to open their card and set:</p>
-<ul>
-  <li><b>Division</b> and <b>Glock model</b> for tonight — these change week to week, so they're set
-      at check-in rather than stored permanently.</li>
-  <li><b>Email</b> — used for sending results afterwards.</li>
-  <li><b>RO</b> — tick this and their email is always included in the results email, even if they
-      didn't shoot.</li>
-</ul>
-
-<p>Use <b>+ Add shooter</b> (or <b>+ Walk-in</b> during a match) for someone not on the list. Latecomers
-can be checked in at any point.</p>
+<p>Use <b>+ Add shooter</b> for someone not on the list. Latecomers can be checked in at any point.</p>
 
 <div class="note">
-  <b>Shooting order is check-in order.</b> The roster is numbered 1, 2, 3… in the order people were
-  checked in.
+  <b>Shooting order is check-in order</b> — the roster is numbered in the order people were checked in.
 </div>
 
 <div class="tip">
-  <b>Correcting a name or email fixes it everywhere.</b> If a shooter is entered in more than one
-  division, editing their details updates all of their entries at once. Division and Glock model stay
-  separate for each one.
+  <b>Rimfire and the G44.</b> Rimfire is shot with a G44, so picking one offers to set the other. If
+  a shooter ends up with a mismatched pair — from an import, or an edit made elsewhere — a
+  <b>check division/gun</b> badge appears next to them on the roster and score screen. It doesn't
+  block anything; it's a reminder.
 </div>
 
 <h3>Shooting more than one division</h3>
-<p>A shooter can enter more than one division in the same match — for example Stock, then Unlimited,
-then Rimfire, each with its own Glock. Each one is scored and ranked separately. In the check-in list
-they still appear as a single person, showing how many entries they have.</p>
+<p>A shooter can enter more than one division in the same match, each with its own Glock. Each entry
+is scored and ranked separately, but they still appear as one person in the check-in list. On an
+outdoor score sheet, use <b>+ Add another division</b>.</p>
 
 <h2 id="s7">7 · Scoring — Outdoor</h2>
 
-<p>From the <b>Roster</b>, tap a shooter to open their score sheet. The three stages are listed with
-a running match total at the top.</p>
+<p>From the <b>Roster</b>, tap a shooter to open their score sheet.</p>
 
 <h3>Entering times</h3>
 <p>Tap a <b>String</b> box and the number pad appears. Type the digits and the decimal fills in from
-the right — <code>1673</code> becomes <code>16.73</code>. Tap <b>Save</b>.</p>
-
-<div class="note">
-  <b>On a laptop</b> you can type the numbers directly on the keyboard, press <b>Enter</b> to save or
-  <b>Esc</b> to cancel. The pad is used everywhere so scoring behaves identically on every device.
-</div>
+the right — <code>1673</code> becomes <code>16.73</code>. On a laptop you can type on the keyboard,
+press <b>Enter</b> to save or <b>Esc</b> to cancel.</p>
 
 <h3>Entering hits</h3>
 <ul>
   <li><b>Tap</b> a zone box (A, C, D, miss) to add one hit.</li>
-  <li><b>Long-press</b> a box to reset it to zero.</li>
-  <li>The app refuses taps past the limit for that target and shakes the box.</li>
+  <li><b>Long-press</b> to reset it to zero.</li>
+  <li>Taps past the limit for that target are refused.</li>
 </ul>
 
 <h3>Confirming a stage</h3>
-<p>Tap <b>✓ Confirm stage</b>. The stage total is shown for you to <b>Accept</b> or
-<b>Reject &amp; edit</b>. Accepting <b>locks</b> the stage — it turns green and the inputs grey out,
-so it can't be changed by accident. To reopen it, tap <b>Review / edit</b> then <b>Unlock</b>.</p>
-
-<p>On the Roster, each shooter shows three dots — <b>F</b>, <b>M</b>, <b>P</b> — that turn green as
-each stage is confirmed, so you can see at a glance who still has stages outstanding.</p>
+<p>Tap <b>✓ Confirm stage</b>, check the total, and <b>Accept</b>. The stage locks — green banner,
+greyed inputs — until you tap <b>Review / edit</b> then <b>Unlock &amp; edit</b>.</p>
 
 <div class="warn">
-  <b>Glock the Plates must account for all 6 plates on every string.</b> Hits plus plates left
-  standing has to total 6, or the app won't let you confirm the stage and will tell you which string
-  is short. A plate left standing that isn't recorded would silently cost the shooter its 10-second
-  penalty.
+  <b>Everything has to add up before a stage will confirm.</b>
+  <ul style="margin:6px 0 0">
+    <li><b>Paper targets:</b> A + C + D + misses must equal 6 on every target (3 for Major Sub and
+        Pocket Glock).</li>
+    <li><b>Glock'M steel:</b> hits plus poppers left standing must total 3 — one per string.</li>
+    <li><b>Glock the Plates:</b> hits plus plates left standing must total 6 on every string.</li>
+  </ul>
+  The app names the target or string that's short. This catches the mistake that matters — a target
+  or popper left unrecorded, which silently drops a penalty.
 </div>
 
 <h2 id="s8">8 · Scoring — Indoor</h2>
 
-<p>Indoor matches are scored by <b>score and X count</b>, not by time. From the Roster, tap a shooter
-to open their rounds.</p>
+<p>Indoor matches are scored by <b>score and X count</b>, not by time. Tap a shooter to open their rounds.</p>
 
-<h3>A round</h3>
-<p>Each round records:</p>
-<ul>
-  <li><b>Score</b> — 0 to 500</li>
-  <li><b>X</b> — 0 to 50</li>
-</ul>
-<p>Tap either box to open the number pad, enter the number, tap <b>Save</b>. The app won't accept a
-score above 500 or an X count above 50.</p>
-
-<h3>Confirming a round</h3>
-<p>Tap <b>✓ Confirm round</b>, check the score shown, and <b>Lock</b> it. A locked round greys out;
-tap <b>Review / edit</b> to reopen it. A round can't be locked with no score unless it's marked DNF
-or DQ.</p>
+<p>Each round records a <b>score</b> (0–500) and an <b>X count</b> (0–50). Tap either box to open the
+number pad. Tap <b>✓ Confirm round</b> and <b>Lock</b> when it's done.</p>
 
 <h3>Shooting more rounds</h3>
-<p>A shooter fires at least one round and may choose to shoot more. Each round can use a different
-Glock and division, but the gun stays the same within a round.</p>
-
-<ol>
-  <li>Finish and confirm the current round.</li>
-  <li>Tap <b>+ Add another round</b> — it stays greyed out until the current round is confirmed.</li>
-  <li>Choose the division and Glock for the new round.</li>
-</ol>
-
-<p>Before a round is locked you can also tap <b>change</b> next to the division to correct the gun or
-division for that round.</p>
+<p>A shooter fires at least one round and may shoot more, each with a different Glock and division.
+Finish and confirm the current round, then tap <b>+ Add another round</b> — it stays greyed out until
+the current one is confirmed. Before a round is locked you can also tap <b>change</b> to correct its
+gun or division.</p>
 
 <div class="tip">
   <b>Every round is ranked on its own.</b> A shooter who fires three rounds appears three times in
-  the results — once per round — and the results also show a per-shooter summary and their best round.
+  the results, and the results also show a per-shooter summary and their best round.
 </div>
 
 <h2 id="s9">9 · DNF &amp; DQ</h2>
 
-<p>On the score sheet, set <b>Status</b> to <span class="pill dnf">DNF</span> (did not finish) or
-<span class="pill dq">DQ</span> (disqualified). Tap the same button again to clear it back to
-Finished.</p>
-
-<ul>
-  <li>Outdoor: the status applies to that shooter's entry.</li>
-  <li>Indoor: the status applies to <b>that round</b>, so a shooter can complete one round and DNF another.</li>
-</ul>
-
-<p>DNF and DQ entries are listed at the bottom of the results rather than given a place, and they're
-excluded from best-score calculations.</p>
+<p>On the score sheet, set <b>Status</b> to <span class="pill dnf">DNF</span> or
+<span class="pill dq">DQ</span>. Tap again to clear it. Outdoor applies it to the shooter's entry;
+indoor applies it to that round, so a shooter can complete one round and DNF another. Both are listed
+at the bottom of the results rather than given a place.</p>
 
 <h2 id="s10">10 · Reading Results</h2>
 
-<p>The <b>Results</b> tab ranks everyone. Filter chips at the top narrow the list by division and, if
-more than one squad is present, by squad. The match name is shown at the top with an
-<b>edit</b> link if it needs correcting.</p>
+<p>The <b>Results</b> tab ranks everyone, with filter chips for division and squad.</p>
 
 <h3>Outdoor</h3>
-<p><b>Lowest total wins.</b> Each row shows the shooter, division, Glock and their match total.</p>
+<p><b>Lowest total wins.</b> Each row shows the shooter, division, Glock and match total. Identical
+totals share a place — two shooters tied for first are both shown as first, and the next shooter is
+third.</p>
 
 <h3>Indoor</h3>
-<p><b>Highest score wins; X count breaks ties.</b> If two rounds have the same score <i>and</i> the
-same X count, they share a place. Results also include:</p>
-<ul>
-  <li><b>Best per division</b> — the top round in each division.</li>
-  <li><b>Per shooter</b> — one line per person listing all their rounds, with their best highlighted.</li>
-</ul>
+<p><b>Highest score wins; X count breaks ties.</b> Identical score and X share a place. Results also
+include <b>best per division</b> and a <b>per-shooter</b> summary listing all their rounds.</p>
 
-<h2 id="s11">11 · Sharing Results</h2>
+<div class="note">
+  Under the buttons you'll see when this squad was last saved, uploaded, and — on the compiling
+  tablet — how many squads the results were compiled from.
+</div>
+
+<h2 id="s11">11 · Finishing Your Squad</h2>
+
+<p>When your squad is done, tap the button at the top of <b>Results</b>:</p>
 
 <table>
   <tr><th>Button</th><th>What it does</th></tr>
-  <tr><td><b>📤 Send squad results</b></td>
-      <td>Hands this tablet's scores to whoever is compiling the match, using the device's own share
-          sheet — AirDrop, email, Messages, Drive. This is the normal way to finish a squad.</td></tr>
-  <tr><td><b>🖨 Save as PDF</b></td>
-      <td>The full results as a PDF. Best format for emailing out.</td></tr>
-  <tr><td><b>✉ Email individual scorecards</b></td>
-      <td>Opens an email per shooter with their own scores and placing.</td></tr>
-  <tr><td><b>📊 Squad results &amp; email</b></td>
-      <td>Preview of the results tables, plus the email tools.</td></tr>
-  <tr><td><b>⧉ Copy email list for BCC</b></td>
-      <td>Everyone's address, comma-separated, ready to paste into BCC.</td></tr>
-  <tr><td><b>Export CSV</b></td>
-      <td>Spreadsheet file of all scores.</td></tr>
+  <tr><td><b>Upload this squad's results</b><br><span class="muted">(online)</span></td>
+      <td>Saves a file to this tablet <b>and</b> uploads it to the club server.</td></tr>
+  <tr><td><b>Save this squad's results</b><br><span class="muted">(offline)</span></td>
+      <td>Saves a file to this tablet. Hand it to whoever is compiling.</td></tr>
 </table>
 
 <div class="tip">
-  <b>Sending is always a copy.</b> It never changes or clears anything on the tablet, and the file is
-  identical to a Backup — so sending your squad also backs it up.
+  <b>It always saves locally first.</b> If the upload fails, the file is still on the tablet and a
+  yellow badge appears at the top of the screen. Tap the badge to try again once you have signal.
 </div>
 
-<h2 id="s12">12 · Backups, Undo &amp; Recovery</h2>
+<p>The other buttons on Results are for producing and sending the finished results — the PDF, the
+email list, and the CSV — and for compiling the match if you're the one doing that.</p>
 
-<h3>Backup</h3>
-<p><b>Results ▸ Backup</b> saves a <code>.json</code> file to the device's Downloads folder. The
-Results screen shows when the last backup was taken.</p>
+<h2 id="s12">12 · Online Services</h2>
+
+<p>Optional. A club can run a small server so tablets can share the shooter list and collect squad
+results without passing files around. <b>The app works fully offline without it</b>, and with no
+server configured it makes no network calls at all.</p>
+
+<h3>Setting a tablet up</h3>
+<ol>
+  <li><b>Tools › Connection</b>, tick <b>Enable online services</b>.</li>
+  <li>Paste the club's <b>setup code</b> and tap <b>Check &amp; save</b>.</li>
+  <li>The app checks it against the server and shows the club's name, so you can confirm you were
+      given the right one.</li>
+</ol>
+
+<div class="warn">
+  <b>Treat the setup code like a password.</b> It lets any tablet upload to your club. Don't email it
+  around or leave it on screen. You can scan it from a QR code with the tablet's camera app and paste
+  it in.
+</div>
+
+<div class="note">
+  Unticking <b>Enable online services</b> keeps the setup code — it's a temporary offline switch, not
+  a wipe. <b>Replace setup code</b> is how you change clubs or fix a bad code.
+</div>
+
+<h3>What it gives you</h3>
+<ul>
+  <li><b>Get the shooter list</b> before a match instead of restoring a file on every tablet.</li>
+  <li><b>Upload each squad</b> at the end, so the compiler doesn't have to collect files.</li>
+  <li><b>Recover a dead tablet</b> — its last upload is on the server.</li>
+  <li><b>Publish automatically</b> when the match is compiled.</li>
+  <li><b>Look up past matches</b> — see below.</li>
+</ul>
+
+<h3>Past matches</h3>
+<p><b>Tools › Past matches on the server</b> lists the club's earlier matches with their date, type
+and how many squads they had. Pick one to read its final results, and save a PDF if you need one.</p>
+
+<div class="note">
+  Viewing a past match doesn't touch the match on this tablet — you can look one up part-way through
+  a live match safely. Matches that were never compiled are shown but can't be opened, since there
+  are no final results to read.
+</div>
+
+<h2 id="s13">13 · The Shooter List</h2>
+
+<p><b>Tools › View &amp; edit shooter list</b> shows everyone on this tablet, one row per person,
+with search. From here you can add a shooter, remove one, and publish the list to the club.</p>
+
+<h3>Removing someone</h3>
+<p>Removing takes out that person and <b>all</b> of their entries, so a shooter with several
+divisions doesn't leave orphans behind. If they have scores in this match, you're warned first.
+<b>Undo</b> in Tools reverses it.</p>
+
+<h3>Publishing</h3>
+<p>Publishing makes <b>this tablet's list</b> the club's list. Every tablet that downloads it
+afterwards gets this one.</p>
+
+<div class="warn">
+  <b>Only publish from a tablet that has the full picture.</b> That means either the match director
+  curating the list before a match, or the tablet that has just compiled the match. A squad tablet
+  part-way through a match only has its own view, and publishing from it would drop shooters other
+  squads added — so the app warns you if you try.
+</div>
+
+<div class="note">
+  You don't normally need to publish by hand at all. <b>Compiling the match publishes for you</b>
+  (section 14), which is how walk-ins added during a match reach the club list.
+</div>
+
+<h3>Earlier versions</h3>
+<p><b>Earlier versions</b> lists every published list with who published it, how many shooters it had,
+and when. If a bad list was published, pick an earlier one and roll back — the old list is loaded and
+published again as a new version. Nothing is deleted, and the history records that a rollback
+happened.</p>
 
 <div class="tip">
-  <b>Back up at the end of every squad</b>, and before merging. It costs seconds and it's the one
-  thing that survives a lost or broken tablet.
+  The shooter count is usually the giveaway: 44, then 41, then 44 makes a mistaken publish obvious
+  at a glance.
 </div>
 
-<h3>Restore</h3>
-<p><b>Results ▸ Restore</b> replaces everything on the tablet with a backup file. Use this to load the
-shooter list onto a tablet before a match.</p>
+<h2 id="s14">14 · Compiling the Match</h2>
+
+<p>One person collects every squad and produces the final results. Tap <b>Compile match results</b>
+on the Results screen, or in <b>Tools › This Match</b> if this tablet hasn't scored a squad itself.</p>
+
+<p>The compile screen lists every squad uploaded for this match. Tick the ones to include and tap
+<b>Compile selected squads</b>. If a squad sent a file instead of uploading, use
+<b>+ Add squad files</b> — file and server squads compile together in one operation.</p>
+
+<h3>What the screen tells you</h3>
+<table>
+  <tr><th>You'll see</th><th>What it means</th></tr>
+  <tr><td><b>already compiled</b></td>
+      <td>That squad is in these results and is unticked by default. Leaving it unticked protects any
+          corrections you've made since.</td></tr>
+  <tr><td><b>2 tablets</b></td>
+      <td>Two tablets used the same squad name. Either two squads were labelled the same — compile
+          both — or a replacement tablet took over, in which case compile one. Tap <b>Show shooters</b>
+          on each: overlapping names mean a replacement.</td></tr>
+  <tr><td><b>new tablet</b></td>
+      <td>That device's first upload for this club. Usually a borrowed tablet.</td></tr>
+  <tr><td>Upload times</td>
+      <td>Shown as <code>7:42 PM (1h ago)</code>. An outlier is worth a look — but it might just mean
+          that squad finished early.</td></tr>
+</table>
+
+<h3>What compiling does</h3>
+<p>Merging happens on the tablet and always finishes. If online services are on, the app then:</p>
+<ol>
+  <li><b>Publishes the shooter list</b>, including any walk-ins the squads added.</li>
+  <li><b>Uploads the match archive</b> so the finished results are on the server.</li>
+  <li><b>Checks for late uploads</b> — a squad that arrived after you started compiling.</li>
+</ol>
+
+<div class="tip">
+  <b>A failed upload never spoils a good compile.</b> If the server can't be reached, the summary says
+  what did and didn't happen, and the results are still on the tablet to view, print and email. A
+  <b>Try publishing again</b> button picks up where it left off rather than starting over.
+</div>
+
+<h3>Corrections after compiling</h3>
+<p>Spotted a wrong division or a mistyped time? Go to the Roster, fix it, and compile again. The
+already-compiled squads stay unticked, so your correction stands and nothing is re-imported.</p>
+
+<h2 id="s15">15 · Fixing a Mistake</h2>
+
+<div class="tip">
+  <b>The single best habit: collect every tablet before compiling anything.</b> Almost every problem
+  in this section comes from a score being corrected on one tablet after the match was compiled on
+  another. Once the match is compiled, corrections belong on the compiling tablet, and squad tablets
+  should stop uploading.
+</div>
+
+<p>The app has a copy of this section built in — from the summary after compiling, tap
+<b>How do I fix a mistake?</b></p>
+
+<h3>Before that squad has uploaded</h3>
+<p>The score only exists on that squad's tablet. Fix it there on the Roster, then upload as normal.</p>
+
+<h3>Uploaded, but the match isn't compiled yet</h3>
+<p>Fix it on that squad's tablet and upload again. Uploading twice is fine — whoever compiles picks
+up the newer copy automatically. "I already uploaded" is not a point of no return.</p>
+
+<h3>After the match has been compiled</h3>
+<ol>
+  <li>On the <b>compiling</b> tablet, go to the Roster and fix it.</li>
+  <li>The results and the PDF update immediately — save a fresh PDF from <b>Results &amp; email</b>.</li>
+  <li>Tap <b>Publish corrected results</b> so the server matches.</li>
+</ol>
+
+<div class="warn">
+  <b>Don't tick squads on the compile screen again.</b> That re-imports the server's copy of the
+  squad, which still has the old value — you'd end up with the shooter listed twice, once corrected
+  and once not. Editing on the Roster is all that's needed.
+</div>
+
+<h3>A squad RO fixed it on their own tablet after you compiled</h3>
+<p>Their squad appears on the compile screen flagged <b>re-uploaded since you compiled</b> and is left
+unticked. Including it re-imports the <b>whole</b> squad, not just what changed, so anything you
+corrected on the compiling tablet would be duplicated. Make the change on the compiling tablet instead.</p>
+
+<h3>A shooter is in the wrong division</h3>
+<p>If they're listed under two divisions and one is wrong, open their score sheet and tap
+<b>remove</b> beside the wrong division on the "divisions this match" card. Their other divisions
+aren't affected.</p>
+<p>To remove a shooter altogether, use <b>Tools › View &amp; edit shooter list</b>.</p>
 
 <h3>Undo</h3>
-<p>The app remembers the <b>last three</b> major changes — merging, restoring, and starting a new
-match. If something goes wrong, tap <b>↶ Undo</b> on the Results screen (or on the merge summary).
-It tells you exactly what it will undo and asks to confirm.</p>
+<div class="warn">
+  <b>Undo steps back to a moment in time</b>, not just the one action. Anything scored since is lost
+  too. Use it straight after a mistake or not at all.
+</div>
+
+<h2 id="s16">16 · Backups, Undo &amp; Recovery</h2>
+
+<p><b>Tools › Save a file…</b> offers three things:</p>
+<table>
+  <tr><td><b>Match archive</b></td><td>This match with all scores — your record of the night.</td></tr>
+  <tr><td><b>Shooter list</b></td><td>Names only, no scores — the file other tablets restore.</td></tr>
+  <tr><td><b>Results spreadsheet</b></td><td>One row per score, as a CSV.</td></tr>
+</table>
+
+<p><b>Restore from a backup file</b> (under <b>Careful</b>) replaces everything on the tablet,
+scores included. <b>Undo</b> reverses the last few major changes — compiling, restoring, removing a
+shooter, or starting a new match.</p>
 
 <div class="warn">
   <b>Undo steps back to a moment in time.</b> Anything scored after that point is lost too. Use it
   straight after a mistake, not later in the match.
 </div>
 
-<h2 id="s13">13 · Combining Squads (Merge)</h2>
+<h3>If a tablet dies</h3>
+<p>Its last upload is on the server. On a replacement tablet, set the same match date and type, then
+<b>Tools › Restore a squad from the server</b> and pick that squad by name. The tablet takes over
+that squad and you can carry on scoring.</p>
 
-<p>One person collects the squad files and merges them into a single set of results.</p>
-
-<ol>
-  <li>Save all the squad files onto the compiling device.</li>
-  <li><b>Results ▸ Merge squad files</b>.</li>
-  <li>Select <b>all</b> of them at once.</li>
-  <li>Read the merge summary.</li>
-</ol>
-
-<p>The summary reports how many shooters were added and updated, which squads they came from, and
-flags anything needing attention.</p>
-
-<h3>What the app protects you from</h3>
-<table>
-  <tr><th>Message</th><th>Meaning</th></tr>
-  <tr><td><b>Already merged</b></td>
-      <td>Those scores were identical to what the tablet already had, so nothing was duplicated.
-          Merging the same file twice is safe.</td></tr>
-  <tr><td><b>Different match</b></td>
-      <td>The file's match name doesn't match this one — it was skipped so old scores can't be written
-          into this match. Fix the match name if the label is simply wrong.</td></tr>
-  <tr><td><b>Wrong match type</b></td>
-      <td>An indoor file was offered to an outdoor match, or the reverse. Skipped.</td></tr>
-  <tr><td><b>Scored differently on two tablets</b></td>
-      <td>The same shooter was scored on two devices with different results. <b>Both were kept</b> so
-          nothing is lost — check them and delete the wrong one from the Roster.</td></tr>
-  <tr><td><b>Duplicate shooters</b></td>
-      <td>The same name exists as two separate people — usually added as a walk-in on two tablets.
-          Delete the wrong one from the Roster. (Keep both if they really are two different people
-          with the same name.)</td></tr>
-</table>
-
-<div class="warn">
-  <b>Fix duplicates before distributing the shooter list.</b> A duplicate person left in place gets
-  copied to every tablet with the next roster file and stays there.
+<div class="tip">
+  <b>This is why uploading matters during the match, not just at the end.</b> A tablet that uploaded
+  at 8:40 can be recovered to 8:40. One that never uploaded can't be recovered at all.
 </div>
 
-<h2 id="s14">14 · End-of-Match Workflow</h2>
+<h2 id="s17">17 · End-of-Match Workflow</h2>
 
-<p>Two backups are made at the end of a match, and they do different jobs. Mixing them up is how last
-week's scores end up in this week's results.</p>
+<div class="tip">
+  <b>Collect the tablets before compiling.</b> It takes a minute and avoids nearly every problem in
+  section 15 — corrections made on a squad tablet after the match was compiled elsewhere are the main
+  source of duplicated shooters.
+</div>
 
+<div class="card">
 <ol>
-  <li><b>Each RO</b> taps <b>📤 Send squad results</b>.</li>
-  <li><b>One person</b> merges them all (section 13).</li>
-  <li>Produce the results — <b>Save as PDF</b>, emails, CSV.</li>
-  <li><b>Backup</b> → keep this file. It's the <b>archive</b> of the match, scores included.</li>
-  <li><b>Start new match</b> → clears scores and check-ins, keeps the shooter list.</li>
-  <li><b>Backup again</b> → this clean file is the <b>shooter list to distribute</b>.</li>
-  <li>Before the next match, every tablet uses <b>Restore</b> on that clean file.</li>
+  <li><b>Each RO</b> taps <b>Upload this squad's results</b> (or saves the file and hands it over).</li>
+  <li><b>One person</b> taps <b>Compile match results</b> and selects every squad.</li>
+  <li>Read the summary — squads compiled, anything flagged, and whether publishing succeeded.</li>
+  <li>Produce the results: <b>Save as PDF</b>, emails, CSV.</li>
+  <li>Spotted a mistake? See section 15 — fix it on the Roster and use <b>Publish corrected results</b>.</li>
+  <li>Later, <b>Start new match</b> when you're finished with the results.</li>
 </ol>
+</div>
 
 <div class="note">
-  <b>Distribute the file from step 6, not step 4.</b> The step 4 file still contains scores.
-  Use <b>Restore</b> (not Merge) so every tablet ends up with an identical list, and have
-  <b>one</b> person do the compiling and distributing — if two people do it, the lists drift apart.
+  <b>Offline it's the same shape</b>, with files instead of uploads: each RO saves their file, the
+  compiler adds them on the compile screen, and afterwards saves a <b>shooter list</b> file for the
+  tablets to restore before the next match.
 </div>
 
-<h2 id="s15">15 · Scoring Rules Reference</h2>
+<div class="warn">
+  <b>Fix duplicate shooters before publishing.</b> If the same walk-in was added on two tablets, the
+  merge summary flags it. Left in place, the duplicate is copied to every tablet with the next
+  shooter list.
+</div>
+
+<h2 id="s18">18 · Screen Modes</h2>
+
+<p><b>Tools › This Tablet › Screen</b> offers three:</p>
+<table>
+  <tr><td><b>Default</b></td><td>Normal indoor and shade conditions.</td></tr>
+  <tr><td><b>Sunlight</b></td><td>Maximum contrast for scoring in direct sun. Thin outlines and grey
+      text are what disappear first in glare, so this removes them.</td></tr>
+  <tr><td><b>Night</b></td><td>Warm and dimmed for a dark range, so the screen doesn't spoil your
+      night vision or anyone else's.</td></tr>
+</table>
+
+<div class="note">
+  The choice belongs to the tablet and is remembered. A tablet that lives in the sun stays in
+  Sunlight mode.
+</div>
+
+<h2 id="s19">19 · Scoring Rules Reference</h2>
 
 <h3>Outdoor — time-plus, lowest total wins</h3>
 <p>Your score is your shooting time plus penalty seconds.</p>
@@ -477,7 +602,7 @@ week's scores end up in this week's results.</p>
 <table>
   <tr><th>Stage</th><th>Strings</th><th>Targets</th><th>Hits/target</th></tr>
   <tr><td>Five to Glock</td><td class="n">3</td><td>5 paper</td><td class="n">6*</td></tr>
-  <tr><td>Glock'M</td><td class="n">3</td><td>4 paper + 3 steel poppers</td><td class="n">6* paper</td></tr>
+  <tr><td>Glock'M</td><td class="n">3</td><td>4 paper + 1 steel popper per string</td><td class="n">6* paper</td></tr>
   <tr><td>Glock the Plates</td><td class="n">4</td><td>6 steel plates</td><td class="n">all fall</td></tr>
 </table>
 <p style="font-size:13px;color:var(--steel)">* Major Sub / Pocket Glock divisions shoot 3 hits per
@@ -500,58 +625,75 @@ ranked separately; a shooter may fire more than one round, each with its own div
 <p>Stock, Civilian, Competition, MOS, Unlimited, Major Sub, Pocket Glock, Subcompact, Heavy Metal,
 Rimfire, Guardian — the same list for indoor and outdoor.</p>
 
-<h2 id="s16">16 · Troubleshooting &amp; FAQ</h2>
+
+
+<h2 id="s20">20 · Troubleshooting &amp; FAQ</h2>
+
+<h4>"A stage won't confirm."</h4>
+<p>Something doesn't add up — a paper target, the steel, or a plates string. The message names which.
+See section 7.</p>
 
 <h4>"The app won't open with no internet."</h4>
 <p>It needs one successful online load first. Get on wifi, open it from the icon, let it finish loading.</p>
 
 <h4>"This tablet shows a different version to the others."</h4>
-<p>Fully close it and reopen while online, then check Match Setup again.</p>
+<p>Fully close it and reopen while online, then check <b>Tools</b> again.</p>
 
-<h4>"There's no Add to Home Screen on my iPad."</h4>
-<p>You're in Chrome. Open the address in Safari instead.</p>
+<h4>"There's a yellow badge at the top of the screen."</h4>
+<p>A squad was saved but not uploaded. Tap the badge to retry once you have signal.</p>
+
+<h4>"The compile screen is empty."</h4>
+<p>Check the match date and type match the squads you're expecting — that's how the app finds them.
+If squads sent files rather than uploading, use <b>+ Add squad files</b>.</p>
+
+<h4>"A squad I already compiled is unticked."</h4>
+<p>That's deliberate — it's already in the results, and leaving it unticked protects any corrections
+you've made since. Tick it only if you genuinely want to re-import the server's copy.</p>
+
+<h4>"It says the shooter list published but the archive didn't."</h4>
+<p>The shooter list is safe. Tap <b>Try publishing again</b> — it resumes rather than starting over.
+The results are on the tablet either way and can be printed and emailed.</p>
 
 <h4>"Tapping a name or email box doesn't bring up the keyboard on my iPad."</h4>
-<p>This is an Apple bug affecting installed web apps generally, not this app. Restarting the iPad
-usually clears it. Scoring is unaffected — times, scores and X counts use the app's own number pad.</p>
+<p>An Apple bug affecting installed web apps generally. Restarting the iPad usually clears it.
+Scoring is unaffected — times, scores and X counts use the app's own number pad.</p>
 
 <h4>"My scores have disappeared."</h4>
 <p>Check whether the app was opened in the browser instead of from the home screen icon — those keep
 separate data. Otherwise restore the most recent backup.</p>
 
-<h4>"I can't change a division or gun I picked."</h4>
-<p>They're dropdowns — tap the field and choose again. For an unusual gun pick <b>Other…</b> and type
-it. For an indoor round that's already locked, tap <b>Review / edit</b> first.</p>
-
-<h4>"Merge says a file was skipped."</h4>
-<p>See the table in section 13 — it's usually a file from a different match or the wrong match type.</p>
-
 <h4>"The same shooter is listed twice in the results."</h4>
 <p>Either they entered two divisions (correct — each is ranked separately), or they were added as a
-walk-in on two tablets. The merge summary tells you which. Delete the wrong entry from the Roster.</p>
+walk-in on two tablets. The merge summary tells you which. Remove the wrong one with
+<b>Tools › View &amp; edit shooter list</b>.</p>
 
-<h4>"I merged the wrong file."</h4>
-<p>Tap <b>↶ Undo</b> on the Results screen straight away.</p>
+<h4>"I corrected a score after compiling — how do the results get to the server?"</h4>
+<p>Tap <b>Publish corrected results</b> on the Results screen. It updates the shooter list and the
+match archive on the server. See section 15.</p>
 
-<h4>"A shooter dropped out or was disqualified."</h4>
-<p>Open their score sheet and set Status to DNF or DQ.</p>
+<h4>"A squad says re-uploaded since you compiled."</h4>
+<p>That squad's RO changed something on their tablet and uploaded again after you compiled. Don't
+tick it — including it re-imports the whole squad and duplicates anything you've corrected. Make the
+change on the compiling tablet instead.</p>
+
+<h4>"I published the wrong shooter list."</h4>
+<p><b>Tools › View &amp; edit shooter list › Earlier versions</b>, pick the good one, roll back.</p>
 
 <h4>"Did I lose scores when the screen locked?"</h4>
 <p>No. Everything auto-saves. Reopen the app and carry on.</p>
 
 <div class="cheat">
   <h3>Quick Cheat Sheet</h3>
-  <p><b>Before the match:</b> confirm the version matches the other tablets → Match Setup: pick
-  Indoor/Outdoor, set the match date and squad → check in shooters in shooting order →
-  <b>Start match</b>.</p>
-  <p><b>Scoring outdoor:</b> tap a shooter → tap a string box, enter the time on the pad → tap zones
-  for hits (long-press to reset) → <b>Confirm stage ▸ Accept</b> → next shooter.</p>
-  <p><b>Scoring indoor:</b> tap a shooter → tap Score and X, enter on the pad →
-  <b>Confirm round ▸ Lock</b> → <b>+ Add another round</b> if they're shooting again.</p>
-  <p><b>End of your squad:</b> <b>Results ▸ 📤 Send squad results</b> → also <b>Backup</b> for safety.</p>
-  <p><b>Compiling (one person):</b> collect all squad files → <b>Results ▸ Merge squad files</b> →
-  select all → read the summary → <b>Save as PDF</b> and email → <b>Backup</b> (archive) →
-  <b>Start new match</b> → <b>Backup</b> again (shooter list to distribute).</p>
+  <p><b>Before the match:</b> check every tablet shows the same version → <b>Tools</b>: set squad
+  name, get the latest shooter list → Setup: pick Indoor/Outdoor and the match date → check shooters
+  in → <b>Start match</b>.</p>
+  <p><b>Scoring outdoor:</b> tap a shooter → tap a string box, enter the time → tap zones for hits →
+  <b>Confirm stage › Accept</b>.</p>
+  <p><b>Scoring indoor:</b> tap a shooter → enter Score and X → <b>Confirm round › Lock</b> →
+  <b>+ Add another round</b> if they're shooting again.</p>
+  <p><b>End of your squad:</b> <b>Results › Upload this squad's results</b>.</p>
+  <p><b>Compiling (one person):</b> <b>Compile match results</b> → tick every squad → read the
+  summary → <b>Save as PDF</b> and email. Publishing happens automatically.</p>
 </div>
 
 </main>
