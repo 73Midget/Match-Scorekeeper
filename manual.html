@@ -348,9 +348,18 @@ server configured it makes no network calls at all.</p>
 </ol>
 
 <div class="warn">
-  <b>Treat the setup code like a password.</b> It lets any tablet upload to your club. Don't email it
-  around or leave it on screen. You can scan it from a QR code with the tablet's camera app and paste
-  it in.
+  <b>Treat the setup code like a key to the building.</b> Anyone who has it can upload and download
+  your club's data. Don't post it in a group chat, photograph it, or email it to a list.
+</div>
+
+<h3>If you were given a QR code</h3>
+<p>Some clubs hand the setup code out as a QR code. Scan it with the tablet's own camera app, then
+paste the result into the setup code box.</p>
+
+<div class="note">
+  <b>Older tablets handle text QR codes differently.</b> Some camera apps only act on web links and
+  will do nothing useful with a text code. That's not a fault — just paste the setup code instead.
+  The QR is a shortcut, not the only way.
 </div>
 
 <div class="note">
@@ -360,7 +369,7 @@ server configured it makes no network calls at all.</p>
 
 <h3>What it gives you</h3>
 <ul>
-  <li><b>Get the shooter list</b> before a match instead of restoring a file on every tablet.</li>
+  <li><b>Get latest shooter list</b> before a match, instead of restoring a file on every tablet.</li>
   <li><b>Upload each squad</b> at the end, so the compiler doesn't have to collect files.</li>
   <li><b>Recover a dead tablet</b> — its last upload is on the server.</li>
   <li><b>Publish automatically</b> when the match is compiled.</li>
@@ -494,6 +503,18 @@ up the newer copy automatically. "I already uploaded" is not a point of no retur
 <p>Their squad appears on the compile screen flagged <b>re-uploaded since you compiled</b> and is left
 unticked. Including it re-imports the <b>whole</b> squad, not just what changed, so anything you
 corrected on the compiling tablet would be duplicated. Make the change on the compiling tablet instead.</p>
+
+<div class="note">
+  <b>This is not the same as a replacement tablet.</b> The two look alike on screen but behave
+  differently, because the app goes by <i>which tablet</i> uploaded, not by the squad name.
+  <ul style="margin:6px 0 0">
+    <li><b>Same tablet, uploaded again after you compiled</b> → flagged and unticked, because you
+        already compiled an earlier version of it.</li>
+    <li><b>A different tablet took over that squad</b> → not flagged, and ticked as normal, because
+        the app has never compiled anything from that tablet. You'll see the <b>2 tablets</b> note
+        instead, and you untick the partial one yourself.</li>
+  </ul>
+</div>
 
 <h3>A shooter is in the wrong division</h3>
 <p>If they're listed under two divisions and one is wrong, open their score sheet and tap
