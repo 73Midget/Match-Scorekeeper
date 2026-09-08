@@ -793,12 +793,12 @@
 <script>
 "use strict";
 /* Match Scorekeeper — indoor + outdoor. Autosaves to device on every change. */
-var APP_VERSION="2.0.0";
-/* Build stamp. APP_VERSION stays 2.0.0 until v2 goes live, so this is what
+var APP_VERSION="2.1.0";
+/* Build stamp. APP_VERSION moves only on a release, so this is what
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-06-b";
+var APP_BUILD="2026-09-06-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
