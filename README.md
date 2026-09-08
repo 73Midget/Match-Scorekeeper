@@ -1,13 +1,3 @@
-⚠️ This is the backend branch — beta, not for club use
-
-Work in progress adding optional online services: sharing the shooter list and collecting squad results through a club server. The app still works fully offline; online is opt-in and inert until configured.
-
-Beta build: backend--gpl-scorekeeper.netlify.app — separate storage from the live app, so nothing here can touch real match data.
-
-Club tablets run main, not this branch: gpl-scorekeeper.netlify.app
-
-Progress: settings and device identity ✅ · shooter list up/download ✅ · squad upload ⬜ · compile screen ⬜ · publish ⬜
-
 # Match Scorekeeper
 
 An offline scoring app for GSSF-style indoor and outdoor pistol matches.
@@ -15,14 +5,17 @@ An offline scoring app for GSSF-style indoor and outdoor pistol matches.
 **[gpl-scorekeeper.netlify.app](https://gpl-scorekeeper.netlify.app)**
 
 Built for tablets at the range, where there's often no signal. One tablet scores one squad; at the
-end of the match the squad files are combined on a single device to produce the results.
+end of the match the squads are combined on a single device to produce the results.
 
 - **Outdoor** — time-plus scoring across the three stages, lowest total wins.
 - **Indoor** — score and X count per round, highest wins with X breaking ties.
-- Shooters can enter multiple divisions, each ranked separately.
-- Results by division and overall, with PDF, CSV and per-shooter email scorecards.
-- Squad files merge onto one device, with duplicate detection and undo.
-- Works completely offline. No accounts, no servers — match data never leaves the device.
+- Shooters can enter multiple divisions or rounds, each ranked separately.
+- Every stage has to account for its shots before it will confirm — paper, steel and plates.
+- Results by division and overall, with PDF, CSV and emailed scorecards.
+- Squads combine on one device, with duplicate detection and undo.
+- Screen modes for direct sunlight and for a dark range.
+- **Works completely offline.** No account needed, and with no server configured the app makes no
+  network connections at all.
 
 ## Installing
 
@@ -30,19 +23,37 @@ It's a Progressive Web App — open the link above and add it to your home scree
 iPad/iPhone: Safari → Share → Add to Home Screen. Android: Chrome → Install app. Desktop: bookmark
 it or install from the address bar.
 
-Step-by-step: **[installation_instructions.html](installation_instructions.html)** · Full manual: **[manual.html](manual.html)**
+Step-by-step: **[installation_instructions.html](installation_instructions.html)** ·
+Full manual: **[manual.html](manual.html)**
 
-## Coming soon
+## Optional online services
 
-Optional online functionality, so squads upload their scores at the end of a match and the results
-compile automatically instead of files being passed around by hand. It will stay optional — the app
-will keep working fully offline for clubs that prefer it that way.
+A club can run a small server so tablets share the shooter list and collect squad results without
+passing files around by hand. It is entirely optional — the app is complete without it, and a club
+that never sets one up sees no difference.
+
+With a server configured:
+
+- Every tablet pulls the current shooter list before a match
+- Each squad uploads its results, which also protects against a tablet dying mid-match
+- One tablet compiles the match; publishing the results and the updated shooter list happens as
+  part of the same action
+- Past matches can be looked up from any tablet
+- A published shooter list can be rolled back if a bad one goes out
+
+The server is a separate project, free to run, and each club runs its own:
+**[match-scorekeeper-api](https://github.com/73Midget/match-scorekeeper-api)** — see its `SETUP.md`
+to stand one up and `OPERATIONS.md` for running matches with it.
 
 ## Technical
 
 One plain HTML file — vanilla JavaScript, no frameworks, no build step, no dependencies. The
-manifest, service worker and icons add installability and offline caching on top. Data lives in
-`localStorage`; backups and squad transfers are plain JSON.
+manifest, service worker and icons add installability and offline caching on top. Match data lives
+in `localStorage`; backups and squad transfers are plain JSON.
+
+Server credentials are stored under a separate key and never appear in any exported file.
+
+Hosting and update instructions: **[DEPLOY-GUIDE.html](DEPLOY-GUIDE.html)**
 
 ## License
 
