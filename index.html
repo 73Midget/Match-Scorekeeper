@@ -798,7 +798,7 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-06-a";
+var APP_BUILD="2026-09-06-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -2756,8 +2756,8 @@ function composeEmailIndoor(e){
   var rounds=state.entries.filter(function(r){return r.personId===e.personId&&inResults(r);})
     .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
   if(!rounds.length)rounds=[e];
-  var match=state.meta.match||"GSSF Indoor Match",L=[];
-  L.push("GSSF Indoor Match — Score Report");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Indoor Match",L=[];
+  L.push("Indoor Match — Score Report");L.push("Match: "+match);L.push("");
   L.push("Competitor:  "+(e.name||""));
   if(e.squad)L.push("Squad:       "+e.squad);
   L.push("");L.push("ROUNDS");
@@ -2782,8 +2782,8 @@ function composeEmailIndoor(e){
 function composeEmail(e){
   if((state.meta.matchType||"outdoor")==="indoor")return composeEmailIndoor(e);
   var ov=placeIn(resultEntries(),e),dv=e.division?placeIn(filterEntries(e.division,"All"),e):null;
-  var now=new Date(),match=state.meta.match||"GSSF Outdoor Match",L=[];
-  L.push("GSSF Outdoor Match — Score Report");L.push("Match: "+match);L.push("");
+  var now=new Date(),match=state.meta.match||"Outdoor Match",L=[];
+  L.push("Outdoor Match — Score Report");L.push("Match: "+match);L.push("");
   L.push("Competitor:  "+(e.name||""));
   L.push("Division:    "+(e.division||"—")+(e.category?"  ("+e.category+")":""));
   if(e.gun)L.push("Glock:       "+e.gun);
@@ -2810,7 +2810,7 @@ function sendEmail(e){if(!e.email){toast("No email on file");return;}var m=compo
 document.getElementById("emailClose").addEventListener("click",function(){document.getElementById("emailScrim").classList.remove("open");});
 document.getElementById("emailScrim").addEventListener("click",function(ev){if(ev.target.id==="emailScrim")ev.currentTarget.classList.remove("open");});
 
-/* GSSF-style results tables */
+/* results tables */
 function stageCells(raw,pen,rank){var fin=raw+pen;
   return '<td style="'+SC.tdr+'">'+fmt(raw)+'</td><td style="'+SC.tdr+'">'+(pen>0?pen:0)+'</td><td style="'+SC.tdr+'">'+fmt(fin)+'</td><td style="'+SC.tdr+'">'+rank+'</td>';}
 function detailTable(title,list,secLabel,secFn){
@@ -2904,9 +2904,9 @@ function withMatchState(entries,meta,fn){
   finally{state.entries=se;state.meta=sm;}
 }
 function buildTablesHTMLIndoor(){
-  var match=esc(state.meta.match||"GSSF Indoor Match"),now=new Date();
+  var match=esc(state.meta.match||"Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
-  h+='<div style="font-size:19px;font-weight:bold">GSSF Indoor Match — Final Results</div>';
+  h+='<div style="font-size:19px;font-weight:bold">Indoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
   h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · high score wins, X breaks ties</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
@@ -2920,9 +2920,9 @@ function buildTablesHTMLIndoor(){
 }
 function buildTablesHTML(){
   if((state.meta.matchType||"outdoor")==="indoor")return buildTablesHTMLIndoor();
-  var match=esc(state.meta.match||"GSSF Outdoor Match"),now=new Date();
+  var match=esc(state.meta.match||"Outdoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
-  h+='<div style="font-size:19px;font-weight:bold">GSSF Outdoor Match — Final Results</div>';
+  h+='<div style="font-size:19px;font-weight:bold">Outdoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
   h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · lower total wins</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
@@ -2932,6 +2932,8 @@ function buildTablesHTML(){
   h+='</div>';
   return h;
 }
+var CLOSEMSG='<div style="font:16px Arial;padding:28px;line-height:1.7">Finished with the results.'
+  +'<br><br>Use your device\u2019s back gesture to return to Match Scorekeeper.</div>';
 function composeResultsHTML(autoprint){
   var title=esc(state.meta.match||("GSSF "+typeLabel()+" Match Results"));
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -2939,12 +2941,17 @@ function composeResultsHTML(autoprint){
     +'@media print{body{padding:0}.noprint{display:none!important}}table{page-break-inside:auto}tr{page-break-inside:avoid}'
     +'.noprint{margin:0 0 16px;padding:12px 14px;background:#f4f1ea;border:1px solid #d9d4c8;border-radius:8px}'
     +'.noprint button{background:#e8541e;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:800;cursor:pointer}'
+    +'.noprint button.close{background:#16181d;margin-left:8px}'
     +'.noprint p{margin:8px 0 0;font-size:12px;color:#555;line-height:1.5}</style></head><body>'
     +'<div class="noprint"><button onclick="window.print()">Save as PDF / Print</button>'
-    +'<p>Tap the button, then choose <b>Save as PDF</b> (or “Save to Files”). Email that PDF so everyone can open it on any device. This bar does not appear in the saved PDF.</p></div>'
+    +' <button class="close" onclick="closeMe()">Close</button>'
+    +'<p>Tap <b>Save as PDF / Print</b>, then choose <b>Save as PDF</b> (or “Save to Files”). Email that PDF so everyone can open it on any device. This bar does not appear in the saved PDF.</p>'
+    +'<p>Tap <b>Close</b> when you are done to go back to the app.</p></div>'
     +buildTablesHTML()
     +'<div style="margin-top:18px;font-size:11px;color:#888">Generated by Match Scorekeeper · created by G. Groiss · GNU AGPL v3.0</div>'
-    +(autoprint?'<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});<\/script>':'')
+    +'<script>function closeMe(){window.close();'
+    +'setTimeout(function(){if(!window.closed){'
+    +'document.body.innerHTML='+JSON.stringify(CLOSEMSG)+';}},300);}<\/script>'
     +'</body></html>';
 }
 function makeResultsPDF(){
@@ -2958,8 +2965,8 @@ function padL(s,n){s=""+s;while(s.length<n)s=" "+s;return s;}
 function ptRow(pl,name,a,b,c,tot){return padL(pl,4)+"  "+padR(name,20)+padL(a,8)+padL(b,8)+padL(c,8)+padL(tot,9);}
 function ptRowIn(pl,name,div,gun,sc,x){return padL(pl,4)+"  "+padR(name,20)+padR(div,14)+padR(gun,8)+padL(sc,7)+padL(x,5);}
 function composeResultsTextIndoor(){
-  var match=state.meta.match||"GSSF Indoor Match",L=[];
-  L.push("GSSF Indoor Match — Final Results");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Indoor Match",L=[];
+  L.push("Indoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRowIn("Pl","Name","Division","Glock","Score","X");
   var divs=byDivision();
   L.push("DIVISION RANKINGS");
@@ -2976,8 +2983,8 @@ function composeResultsTextIndoor(){
 }
 function composeResultsText(){
   if((state.meta.matchType||"outdoor")==="indoor")return composeResultsTextIndoor();
-  var match=state.meta.match||"GSSF Outdoor Match",L=[];
-  L.push("GSSF Outdoor Match — Final Results");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Outdoor Match",L=[];
+  L.push("Outdoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRow("Pl","Name","5toG","GlockM","Plates","Total");
   var divs=byDivision();
   L.push("DIVISION RANKINGS");
@@ -3005,7 +3012,7 @@ document.getElementById("dlSheetBtn").addEventListener("click",function(){
 document.getElementById("emailBccBtn").addEventListener("click",function(){
   var emails=scoreSheetEmails();
   if(!emails.length){toast("No competitor emails on file");return;}
-  var match=state.meta.match||"GSSF Outdoor Match";
+  var match=state.meta.match||"Outdoor Match";
   clickHref("mailto:?bcc="+encodeURIComponent(emails.join(","))+"&subject="+encodeURIComponent(match+" — Final Results")+"&body="+encodeURIComponent(composeResultsText()));
   toast(emails.length+" recipients BCC’d");
 });
@@ -3086,6 +3093,10 @@ document.getElementById("editSave").addEventListener("click",function(){
     updatePerson(e.personId,{name:name,category:cat,phone:phone,email:email,ro:ro});  /* identity → all of this person's runs */
   }
   save();closeEdit();toast("Saved");
+  /* Before the match starts there is no navigation bar, so landing on the
+     Roster leaves no way back. Return to Setup, which is where more shooters
+     get checked in anyway. */
+  if(!state.meta.started){renderSetup();show("setup");return;}
   if(document.getElementById("view-score").classList.contains("active"))renderScore();else show("roster");
 });
 
@@ -3167,7 +3178,18 @@ document.getElementById("pastPrint").addEventListener("click",function(){
   if(!pastPrintHTML)return;
   var w=window.open("","_blank");
   if(!w){toast("Allow pop-ups to save a PDF");return;}
-  w.document.write("<!DOCTYPE html><html><head><meta charset=utf-8><title>Results</title></head><body>"+pastPrintHTML+"</body></html>");
+  w.document.write('<!DOCTYPE html><html><head><meta charset=utf-8><title>Results</title>'
+    +'<style>body{margin:0;padding:20px;font-family:Arial,Helvetica,sans-serif;background:#fff}'
+    +'@media print{.noprint{display:none!important}body{padding:0}}'
+    +'.noprint{margin:0 0 16px;padding:12px 14px;background:#f4f1ea;border:1px solid #d9d4c8;border-radius:8px}'
+    +'.noprint button{background:#e8541e;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:800}'
+    +'.noprint button.close{background:#16181d;margin-left:8px}</style></head><body>'
+    +'<div class="noprint"><button onclick="window.print()">Save as PDF / Print</button>'
+    +' <button class="close" onclick="closeMe()">Close</button></div>'
+    +pastPrintHTML
+    +'<script>function closeMe(){window.close();setTimeout(function(){if(!window.closed){'
+    +'document.body.innerHTML='+JSON.stringify(CLOSEMSG)+';}},300);}<\/script>'
+    +'</body></html>');
   w.document.close();setTimeout(function(){w.print();},250);
 });
 function openFixGuide(){document.getElementById("fixScrim").classList.add("open");}
