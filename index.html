@@ -40,6 +40,41 @@
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
+  /* ---- Sunlight: maximum contrast. Glare raises the black level far more than
+     the white, so mid-greys and hairline borders vanish first — those are what
+     these overrides remove. ---- */
+  body.sun{
+    --paper:#fff; --card:#fff; --ink:#000; --steel:#000; --steel-soft:#000;
+    --line:#000; --orange:#c23a00; --orange-deep:#a03000;
+    --green:#00602e; --gold:#7a5c00; --red:#b00000;
+    --shadow:none;
+  }
+  body.sun .card,body.sun .stage,body.sun input,body.sun select,body.sun textarea,
+  body.sun .tap,body.sun .btn,body.sun .timeinp,body.sun .padfield,body.sun .padgrid button{border-width:2px}
+  body.sun .muted,body.sun .sethint,body.sun .meta .dv,body.sun .sub{color:#000}
+  body.sun .btn.ghost{background:#fff;border-color:#000;color:#000}
+  body.sun ::placeholder{color:#000;opacity:.72}
+
+  /* ---- Night: warm and deliberately dim. Maximum contrast is the wrong goal in
+     the dark — a white screen wrecks night vision for the RO and everyone near
+     them, and they look up at the line constantly. ---- */
+  body.night{
+    --paper:#12140f; --card:#1a1d16; --ink:#ded8c6; --steel:#948f7e; --steel-soft:#7d7a6c;
+    --line:#3a3d31; --orange:#d1541c; --orange-deep:#b04415;
+    --green:#6f9e7a; --gold:#a8862c; --red:#b3503f;
+    --shadow:none;
+  }
+  body.night input,body.night select,body.night textarea,body.night .tap,
+  body.night .timeinp,body.night .padfield,body.night .padgrid button,
+  body.night .btn.ghost{background:#23261d;color:var(--ink);border-color:var(--line)}
+  body.night .sheet,body.night .card{background:var(--card)}
+  body.night .rdonly{background:#1a1d16;color:var(--steel)}
+  body.night .goodbox{background:#1c261f;border-color:#3f5a46;color:#8fc0a0}
+  body.night .warnbox{background:#2a1c19;border-color:#5a3a33;color:#e0917f}
+  body.night .donebanner{background:#1c261f;border-color:#3f5a46;color:#8fc0a0}
+  body.night table.tg th{background:#23261d}
+  body.night ::placeholder{color:var(--steel);opacity:1}
+
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   /* iOS zooms toward an element on a double-tap. Fast repeated taps on buttons
      (number pad, tap-to-count, stage controls) register as double-taps, so
@@ -49,11 +84,12 @@
   html,body{margin:0}
   body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.45;padding-bottom:84px;-webkit-text-size-adjust:100%}
   header{background:var(--ink);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:30;border-bottom:4px solid var(--orange);padding-top:calc(14px + env(safe-area-inset-top))}
-  header .row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  header .row{display:flex;align-items:center;gap:10px}
+  header h1{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   header h1{font-size:15px;margin:0;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
   header h1 b{color:var(--orange)}
   header h1 .ver{font-size:10px;font-weight:700;color:var(--steel-soft);letter-spacing:.06em;margin-left:6px}
-  header .sub{font-family:var(--mono);font-size:11px;color:var(--steel-soft);letter-spacing:.04em;white-space:nowrap}
+  header .sub{font-family:var(--mono);font-size:11px;color:var(--steel-soft);letter-spacing:.04em;white-space:nowrap;flex:0 0 auto;margin-left:auto;text-align:right}
   header .sub b{color:#9fd9b6;font-weight:700}
   main{max-width:680px;margin:0 auto;padding:14px 14px 30px}
   .view{display:none}.view.active{display:block}
@@ -64,7 +100,7 @@
   .card .bd{padding:12px 14px}
   label.fld{display:block;margin:0 0 10px}
   label.fld > span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);margin:0 0 4px;font-weight:700}
-  input[type=text],input[type=email],input[type=search],select,input[list]{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  input[type=text],input[type=email],input[type=search],input[type=date],select,input[list]{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
   input:focus,select:focus,button:focus-visible{outline:3px solid rgba(232,84,30,.4);outline-offset:1px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   button{font-family:var(--sans);cursor:pointer;border:none;border-radius:9px}
@@ -171,7 +207,7 @@
   .filtlab{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-soft);font-weight:800;align-self:center;flex:0 0 auto;padding-right:2px}
   .chip{flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.05em;padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--steel);white-space:nowrap}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-  .chip.sq.on{background:var(--orange);border-color:var(--orange)}
+  .chip.sq.on,.chip.dv.on{background:var(--orange);border-color:var(--orange);color:#fff}
   .lbrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
   .lbrow:last-child{border-bottom:none}
   .lbrow .rk{font-family:var(--mono);font-weight:700;font-size:15px;min-width:34px;text-align:center;color:var(--steel)}
@@ -221,6 +257,10 @@
   nav.tabs button .ic{font-size:19px;line-height:1}
   nav.tabs button.on{color:var(--orange)}
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
+  /* sheets opened from inside another sheet must stack above it, regardless of
+     where they sit in the document */
+  #fileScrim,#histScrim,#fixScrim,#pastScrim{z-index:60}
+  #pastViewScrim{z-index:70}
   .scrim.open{display:flex}
   .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
   .sheet h3{margin:0 0 6px;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
@@ -244,6 +284,72 @@
   .warnbox b{color:var(--red)}
   .goodbox{background:#eef7f2;border:1px solid #bcdccb;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.5}
   .goodbox b{color:var(--green)}
+  .pendbadge{background:var(--gold);color:#231b06;border:none;font-size:10px;font-weight:800;letter-spacing:.03em;
+             padding:5px 9px;border-radius:999px;margin-left:auto;flex:0 0 auto;cursor:pointer;white-space:nowrap;max-width:46%;
+             overflow:hidden;text-overflow:ellipsis}
+  .pendbadge+.sub{margin-left:8px}
+  .gearbtn svg{display:block;margin:0 auto}
+  /* The one control that opens everything else, so it carries a word as well as
+     an icon — the icon uses only rect/circle/rotate because arc path commands
+     misrender on older WebKit and Android WebView. */
+  .gearbtn{background:#fff;border:none;color:var(--ink);border-radius:9px;margin-left:10px;flex:0 0 auto;
+           cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 12px 7px 9px;
+           font:inherit;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+  .gearbtn svg{display:block;flex:0 0 auto}
+  .gearbtn:active{background:var(--line)}
+  body.night .gearbtn{background:var(--ink);color:#12140f}
+  .setgrp{margin:0 0 18px}
+  .setgrp>h4.danger{background:#8a2a1a;border-left-color:var(--red)}
+  .setgrp>h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fff;font-weight:800;
+             margin:0 0 10px;background:var(--ink);padding:8px 12px;border-radius:8px;border-left:5px solid var(--orange)}
+  /* On the sheet background a white button with a pale border disappears.
+     Give settings buttons a visible edge so they read as tappable. */
+  #gearScrim .btn.ghost{background:#fff;border:1.5px solid var(--steel-soft);color:var(--ink);font-weight:800}
+  #gearScrim .btn.ghost:active{background:var(--line)}
+  #gearScrim .btn.danger{background:var(--red);border:1.5px solid var(--red);color:#fff;font-weight:800}
+  #gearScrim .card{border:1px solid var(--line)}
+  .filepick{display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:9px;line-height:1.4}
+  .filepick b{display:block;font-size:15px;font-weight:800;letter-spacing:.01em}
+  .filepick span{display:block;font-size:11px;font-weight:600;opacity:.82;margin-top:3px;text-transform:none;letter-spacing:0}
+  /* stacked buttons in Tools are peers — same width, same height, regardless
+     of label length. .btn.sm is width:auto, which sized them to their text. */
+  #gearScrim .setgrp>.btn,#gearScrim .setgrp>.card .btn{width:100%;padding:12px 14px;font-size:13px}
+  /* the match date is checked at a glance before compiling — it shouldn't read
+     like a footnote */
+  #set-match-row{border-bottom:none;padding:2px 0 4px;font-size:15px}
+  #set-match-row .k{color:var(--ink);font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  #set-match-row .v{font-family:var(--sans);font-size:19px;font-weight:800;color:var(--ink)}
+  .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
+             font-size:11px;line-height:1.6;color:var(--steel-soft);text-align:center}
+  .setcredit b{color:var(--steel);font-weight:800}
+  .setgrp .card{margin-bottom:8px}
+  .rdonly{background:#efece3;color:var(--steel)}
+  .crow{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .crow:last-child{border-bottom:none}
+  .crow input[type=checkbox]{width:22px;height:22px;flex:0 0 auto;margin:2px 0 0}
+  .crow .cbody{flex:1;min-width:0}
+  .crow .nm{font-weight:800;font-size:14px}
+  .crow .dv{font-size:11px;color:var(--steel);margin-top:2px;line-height:1.5}
+  .crow .src{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--steel);color:#fff;margin-left:6px}
+  .crow .src.file{background:var(--orange-deep)}
+  .crow .exp{background:none;border:none;color:var(--orange-deep);font-size:11px;font-weight:800;text-decoration:underline;padding:4px 0 0;cursor:pointer}
+  .crow .names{font-size:11px;color:var(--ink);background:#f6f4ee;border-radius:8px;padding:7px 9px;margin-top:6px;line-height:1.6}
+  .subhd{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+  /* the picker icon is the tap target on a tablet — make it worth aiming at */
+  input[type=date]{min-height:48px}
+  input[type=date]::-webkit-calendar-picker-indicator{width:28px;height:28px;padding:6px;margin-left:4px;cursor:pointer}
+  .sethint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 0}
+  .togrow{display:flex;align-items:center;gap:10px;padding:2px 0 8px}
+  .togrow input{width:22px;height:22px;flex:0 0 auto;margin:0}
+  .togrow label{font-size:14px;font-weight:800;color:var(--ink)}
+  .kv{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .kv:last-of-type{border-bottom:none}
+  .kv .k{color:var(--steel);font-weight:700;flex:0 0 auto}
+  .kv .v{font-family:var(--mono);color:var(--ink);text-align:right;word-break:break-all}
+  .syncstat{font-size:12px;font-weight:700;padding:7px 10px;border-radius:8px;margin:8px 0 0}
+  .syncstat.ok{background:#eef7f2;color:var(--green)}
+  .syncstat.bad{background:#fdf2f0;color:var(--red)}
+  .syncstat.idle{background:#efece3;color:var(--steel)}
   .steps{counter-reset:s;list-style:none;padding:0;margin:0 0 12px}
   .steps li{position:relative;padding:0 0 10px 30px;font-size:13px;color:var(--ink);line-height:1.5}
   .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
@@ -255,7 +361,10 @@
 </style>
 </head>
 <body>
-<header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1><span class="sub" id="saved">not saved yet</span></div></header>
+<header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
+  <button class="pendbadge" id="pendingBadge" style="display:none"></button>
+  <span class="sub" id="saved">not saved yet</span>
+  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div></header>
 
 <main>
   <section class="view active" id="view-setup">
@@ -267,9 +376,11 @@
           <button type="button" data-type="indoor">Indoor</button>
         </div>
       </div>
-      <label class="fld"><span>Match (date)</span><input type="text" id="f-match" placeholder="6/16/2026" autocomplete="off"></label>
+      <label class="fld"><span>Match date</span><input type="date" id="f-match" min="2020-01-01"></label>
+      <div class="sethint" id="f-match-shown"></div>
       <label class="fld" style="margin:0"><span>Squad / relay on this tablet</span>
-        <input type="text" id="f-squad-device" placeholder="e.g. Squad A" autocomplete="off"></label>
+        <input type="text" id="f-squad-device" class="rdonly" placeholder="not set" autocomplete="off" readonly></label>
+      <div class="sethint">Set in <b>Tools</b> — it belongs to the tablet, not to tonight's match.</div>
       <div class="infoline" style="margin:8px 0 0"><span class="dot"></span><span>Scores auto-save to this device after every entry.</span></div>
       <div class="muted" id="setupVer" style="margin-top:6px;font-weight:700"></div>
       <div class="muted" style="margin-top:3px;font-size:11px;line-height:1.5">Match Scorekeeper · for GSSF-style indoor &amp; outdoor matches<br>Created by G. Groiss · Free software under the GNU AGPL v3.0</div>
@@ -277,9 +388,8 @@
     <div class="btnrow"><button class="btn" id="checkinBtnSetup">Check in shooters</button><button class="btn ghost" id="addBtnSetup">+ Add shooter</button></div>
     <div class="countline" id="setupCount"></div>
     <div style="height:6px"></div>
-    <button class="btn green" id="startMatchBtn">▶ Start match</button>
-    <div style="height:10px"></div>
-    <button class="btn ghost sm" id="setupRosterBtn">💾 Save shooter list for the other tablets</button>
+    <button class="btn green" id="startMatchBtn">› Start match</button>
+
   </section>
 
   <section class="view" id="view-roster">
@@ -301,15 +411,12 @@
     <div class="card" id="leaderboard"></div>
     <div id="indoorExtra"></div>
     <div style="height:14px"></div>
-    <button class="btn green" id="emailAllBtn">✉ Email individual scorecards</button>
+    <button class="btn green" id="finishSquadBtn">↑ Upload this squad's results</button>
     <div style="height:8px"></div>
-    <button class="btn dark" id="squadResultsBtn">📊 Squad results &amp; email</button>
+    <button class="btn dark" id="squadResultsBtn">Results &amp; email</button>
     <div style="height:8px"></div>
-    <button class="btn" id="sendResultsBtn">📤 Send squad results</button>
-    <div style="height:8px"></div>
-    <div class="btnrow"><button class="btn ghost sm" id="csvBtn">Export CSV</button><button class="btn ghost sm" id="backupBtn">Backup</button></div>
-    <div class="btnrow"><button class="btn ghost sm" id="mergeBtn">Merge squad files</button><button class="btn ghost sm" id="restoreBtn">Restore</button></div>
-    <button class="btn ghost sm" id="undoBtn" style="display:none">↶ Undo last change</button>
+        <button class="btn ghost sm" id="compileBtn">Compile match results</button>
+    <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -317,9 +424,9 @@
 </main>
 
 <nav class="tabs">
-  <button data-tab="roster" class="on"><span class="ic">☰</span>Roster</button>
-  <button data-tab="score"><span class="ic">◎</span>Score</button>
-  <button data-tab="results"><span class="ic">▤</span>Results</button>
+  <button data-tab="roster" class="on"><span class="ic">≡</span>Roster</button>
+  <button data-tab="score"><span class="ic">●</span>Score</button>
+  <button data-tab="results"><span class="ic">≡</span>Results</button>
 </nav>
 
 <div class="scrim" id="editScrim"><div class="sheet">
@@ -363,7 +470,213 @@
     <button class="btn" id="editSave">Save</button>
   </div>
   <div style="height:10px"></div>
-  <button class="btn danger" id="editDelete" style="display:none">Delete competitor</button>
+</div></div>
+
+<div class="scrim" id="compileScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Compile match results</h3>
+  <p class="muted" style="margin:0 0 8px">Squads for <b id="compile-match"></b>. Tick the ones to include, then Compile.</p>
+  <div class="card" id="compileList" style="max-height:46vh;overflow:auto"></div>
+  <div id="compile-warn"></div>
+  <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="compile-addfiles">+ Add squad files</button><button class="btn ghost sm" id="compile-refresh">&#8635; Refresh</button></div>
+  <div style="height:8px"></div>
+  <button class="btn green" id="compile-go">Compile selected squads</button>
+  <div style="height:8px"></div>
+  <button class="btn ghost" id="compileClose">Close</button>
+</div></div>
+
+<div class="scrim" id="rsquadScrim"><div class="sheet">
+  <h3>Restore a squad from the server</h3>
+  <p class="muted" style="margin:0 0 8px">Uploads for <b id="squad-match"></b>. Pick the squad to load onto this tablet — you don't need to know which tablet uploaded it.</p>
+  <div class="card" id="squadList" style="max-height:52vh;overflow:auto"></div>
+  <div class="warnbox" style="margin-top:10px">This replaces everything on this tablet with the squad you pick.</div>
+  <button class="btn ghost" id="rsquadClose">Close</button>
+</div></div>
+
+<div class="scrim" id="removeScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Shooter list</h3>
+  <p class="muted" id="shooters-sub" style="margin:0 0 8px"></p>
+  <div id="shooters-empty" style="display:none"></div>
+  <div id="shooters-main">
+    <div class="btnrow" style="margin-bottom:8px"><button class="btn ghost sm" id="shooters-add">+ Add shooter</button><button class="btn ghost sm" id="shooters-history">Earlier versions</button></div>
+    <input type="search" id="removeSearch" placeholder="Search shooters" style="margin-bottom:10px">
+    <div class="card" id="removeList" style="max-height:44vh;overflow:auto"></div>
+    <div style="height:10px"></div>
+    <button class="btn green" id="shooters-publish">↑ Publish as the club's shooter list</button>
+    <div class="sethint">Every tablet that downloads the list will get this one.</div>
+  </div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="removeClose">Close</button>
+</div></div>
+
+<div class="scrim" id="pastScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Past matches</h3>
+  <p class="muted" style="margin:0 0 8px">Matches on the club server. Viewing one doesn't affect the match on this tablet.</p>
+  <div class="card" id="pastList" style="max-height:56vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="pastClose">Close</button>
+</div></div>
+
+<div class="scrim" id="pastViewScrim"><div class="sheet" style="max-height:94vh">
+  <h3 id="pastViewTitle">Results</h3>
+  <div class="card pad" id="pastViewBody" style="max-height:62vh;overflow:auto"></div>
+  <div style="height:10px"></div>
+  <button class="btn ghost sm" id="pastPrint" style="margin-bottom:8px">Save as PDF</button>
+  <button class="btn ghost" id="pastViewClose">Close</button>
+</div></div>
+
+<div class="scrim" id="fixScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Fixing a mistake</h3>
+  <p class="muted" style="margin:0 0 10px">Wrong score, wrong division, wrong gun — find where you are in the list below.</p>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Best practice</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Collect every tablet before compiling. Once the match is compiled, corrections should happen on the compiling tablet only — squad tablets should stop uploading.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Before that squad uploaded</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">The score is only on that squad's tablet. Fix it there on the Roster, then upload as normal.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Uploaded, but the match isn't compiled yet</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Fix it on that squad's tablet and upload again. Uploading twice is fine — whoever compiles picks up the newer one automatically.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">After the match is compiled</div>
+    <p style="margin:0 0 6px;font-size:13px;line-height:1.6">Fix it here, on this tablet, from the <b>Roster</b>. The results and the PDF update straight away.</p>
+    <p style="margin:0;font-size:13px;line-height:1.6">Then tap <b>Publish corrected results</b> so the server matches. <b>Don't</b> tick squads on the compile screen again — that re-imports the old copy and lists the shooter twice.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">A squad RO fixed it on their own tablet after compiling</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">Their squad shows as <b>re-uploaded since you compiled</b>. Including it re-imports the whole squad and duplicates anything you corrected here. Make the change on this tablet instead.</p>
+  </div>
+
+  <div class="card pad" style="margin-bottom:8px">
+    <div class="subhd" style="margin-top:0">Shooter in the wrong division</div>
+    <p style="margin:0;font-size:13px;line-height:1.6">If they're listed under two divisions, open their score sheet and tap <b>remove</b> beside the wrong one. To remove a shooter entirely, use <b>Tools ▸ View &amp; edit shooter list</b>.</p>
+  </div>
+
+  <div class="warnbox" style="margin-bottom:10px"><b>Undo</b> in Tools reverses the last few big changes, but it steps back to a moment in time — anything scored since is lost too. Use it straight away or not at all.</div>
+
+  <button class="btn ghost" id="fixClose">Close</button>
+</div></div>
+
+<div class="scrim" id="fileScrim"><div class="sheet">
+  <h3>Save a file</h3>
+  <p class="muted" style="margin:0 0 10px">These save to this tablet's Downloads folder.</p>
+  <button class="btn dark filepick" id="file-archive"><b>Match archive</b><span>This match with all scores — your record of the night</span></button>
+  <button class="btn green filepick" id="file-roster"><b>Shooter list</b><span>Names only, no scores — the file other tablets restore</span></button>
+  <button class="btn filepick" id="file-csv"><b>Results spreadsheet</b><span>One row per score, as a CSV</span></button>
+  <div style="height:6px"></div>
+  <button class="btn ghost" id="fileClose">Cancel</button>
+</div></div>
+
+<div class="scrim" id="histScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Earlier shooter lists</h3>
+  <p class="muted" style="margin:0 0 8px">Published versions of the club's list, newest first. Rolling back publishes the old list again as a new version — nothing is deleted.</p>
+  <div class="card" id="histList" style="max-height:56vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="histClose">Close</button>
+</div></div>
+
+<div class="scrim" id="gearScrim"><div class="sheet" style="max-height:94vh">
+  <h3>Tools</h3>
+
+  <div class="setgrp">
+    <h4>This Tablet</h4>
+    <div class="card pad">
+      <div id="names-view">
+        <div class="kv"><span class="k">Squad / relay</span><span class="v" id="set-squad-shown">not set</span></div>
+        <div class="kv"><span class="k">Device name</span><span class="v" id="set-device-shown">not set</span></div>
+        <div style="height:8px"></div>
+        <button class="btn ghost sm" id="names-edit">Change squad / device name</button>
+      </div>
+      <div id="names-edit-box" style="display:none">
+        <label class="fld"><span>Squad / relay on this tablet</span>
+          <input type="text" id="set-squad" placeholder="e.g. Squad A" autocomplete="off"></label>
+        <label class="fld" style="margin:0"><span>Device name</span>
+          <input type="text" id="set-device" placeholder="e.g. Club Tablet 2" autocomplete="off"></label>
+        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="names-cancel">Cancel</button><button class="btn green sm" id="names-save">Save names</button></div>
+      </div>
+      <div class="sethint">The squad name labels this tablet's results and files. The device name identifies this tablet itself, and stays the same from match to match.</div>
+      <div class="subhd" style="margin-top:14px">Screen</div>
+      <div class="typeseg" id="set-screen">
+        <button type="button" data-s="">Default</button>
+        <button type="button" data-s="sun">Sunlight</button>
+        <button type="button" data-s="night">Night</button>
+      </div>
+      <div class="sethint">Sunlight raises contrast for scoring outdoors. Night dims everything so it doesn't spoil your eyes on a dark range.</div>
+      <div class="sethint" id="set-version" style="margin-top:8px;font-weight:700"></div>
+    </div>
+  </div>
+
+  <div class="setgrp">
+    <h4>Shooter List</h4>
+    <button class="btn" id="set-remove">View &amp; edit shooter list</button>
+    <div class="sethint" id="set-roster-sub" style="margin-bottom:8px"></div>
+    <button class="btn green" id="set-getroster" style="display:none">↓ Get latest shooter list</button>
+    <div class="sethint" id="set-getroster-hint" style="display:none">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
+  </div>
+
+  <div class="setgrp">
+    <h4>This Match</h4>
+    <div class="card pad" style="margin-bottom:8px">
+      <div class="kv" id="set-match-row"><span class="k">Match date</span><span class="v" id="set-match-shown">not set</span></div>
+      <div style="height:8px"></div>
+      <button class="btn ghost sm" id="set-match-edit">Update match date</button>
+      <label class="fld" id="set-match-box" style="display:none;margin-top:10px"><span>Pick the date</span>
+        <input type="date" id="set-match" min="2020-01-01"></label>
+      <div class="sethint" id="set-match-hint"></div>
+    </div>
+    <button class="btn green" id="set-compile">Compile match results</button>
+    <div class="sethint" style="margin-bottom:8px">Combines every squad's scores into the final results.</div>
+    <button class="btn ghost sm" id="set-past" style="display:none;margin-bottom:8px">Past matches on the server</button>
+    <button class="btn ghost sm" id="set-getsquad" style="display:none;margin-bottom:8px">↓ Restore a squad from the server</button>
+    <button class="btn ghost sm" id="set-savefile">Save a file…</button>
+    <div class="sethint">Match archive, shooter list, or spreadsheet.</div>
+  </div>
+
+  <div class="setgrp">
+    <h4>Connection</h4>
+    <div class="card pad">
+      <div class="togrow"><input type="checkbox" id="set-online"><label for="set-online">Enable online services</label></div>
+      <div class="sethint" id="set-online-hint">Optional. The app works fully offline without this — online only makes sharing the shooter list and collecting squad results easier.</div>
+
+      <div id="sync-setup" style="display:none">
+        <label class="fld" style="margin-top:10px"><span>Setup code</span>
+          <textarea id="set-blob" rows="3" placeholder="Paste the setup code from your club" autocomplete="off" style="width:100%;font-family:var(--mono);font-size:12px;padding:9px;border:1px solid var(--line);border-radius:9px;background:#fff"></textarea></label>
+        <div class="sethint"><b>Treat this code like a key to the building.</b> Anyone who has it can upload and download your club's data. Don't post it in a group chat, photograph it, or email it to a list.</div>
+        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="set-blob-cancel">Cancel</button><button class="btn green sm" id="set-blob-save">Check &amp; save</button></div>
+      </div>
+
+      <div id="sync-info" style="display:none">
+        <div class="kv" id="sync-clubname-row"><span class="k">Club name</span><span class="v" id="sync-clubname"></span></div>
+        <div class="kv"><span class="k">Club ID</span><span class="v" id="sync-club"></span></div>
+        <div class="kv"><span class="k">Server</span><span class="v" id="sync-url"></span></div>
+        <div class="kv"><span class="k">Code</span><span class="v">••••••••••••</span></div>
+        <div class="kv"><span class="k">Shooter list</span><span class="v" id="sync-rev">—</span></div>
+        <div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="set-blob-edit">Replace setup code</button><button class="btn ghost sm" id="set-test">Test connection</button></div>
+      </div>
+
+      <div class="syncstat idle" id="sync-status" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="setgrp">
+    <h4 class="danger">Careful</h4>
+    <button class="btn ghost sm" id="set-undo" style="display:none;margin-bottom:8px">← Undo last change</button>
+    <button class="btn ghost sm" id="set-restore" style="margin-bottom:8px">Restore from a backup file</button>
+    <div class="sethint" style="margin:-4px 2px 8px">Replaces everything on this tablet, scores included.</div>
+    <button class="btn danger" id="set-newmatch">Start new match — clear all scores &amp; check-ins</button>
+  </div>
+
+  <div class="setcredit">Match Scorekeeper · <b>created by G. Groiss</b><br>
+    Free software under the GNU AGPL v3.0</div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="gearClose">Close</button>
 </div></div>
 
 <div class="scrim" id="checkinScrim"><div class="sheet">
@@ -374,7 +687,7 @@
   <div style="height:10px"></div>
   <button class="btn" id="checkinAddNew">+ Add new shooter</button>
   <div style="height:14px"></div>
-  <button class="btn danger" id="newMatchBtn">Start new match — clear all scores &amp; check-ins</button>
+
   <div style="height:8px"></div>
   <button class="btn ghost" id="checkinClose">Done</button>
 </div></div>
@@ -413,15 +726,15 @@
 <div class="scrim" id="squadScrim"><div class="sheet">
   <h3>Squad Results</h3>
   <p class="muted" style="margin:0 0 10px">Rankings by division, then overall. Choose how to share:</p>
-  <button class="btn dark" id="pdfSheetBtn">🖨 Save as PDF <span style="font-weight:600;opacity:.85">— best for email</span></button>
+  <button class="btn dark" id="pdfSheetBtn">Save as PDF <span style="font-weight:600;opacity:.85">— best for email</span></button>
   <p class="muted" style="margin:6px 0 10px;font-size:11px">Opens a print view — pick <b>Save as PDF</b>. A PDF displays correctly for everyone; an emailed HTML file often shows as code.</p>
-  <button class="btn" id="copyTableBtn">⧉ Copy formatted table</button>
+  <button class="btn" id="copyTableBtn">❏ Copy formatted table</button>
   <div style="height:8px"></div>
   <button class="btn green" id="emailBccBtn">✉ Open email to all (BCC)</button>
   <div style="height:8px"></div>
-  <button class="btn" id="copyEmailsBtn">⧉ Copy email list for BCC</button>
+  <button class="btn" id="copyEmailsBtn">❏ Copy email list for BCC</button>
   <div style="height:8px"></div>
-  <button class="btn ghost sm" id="dlSheetBtn">⤓ Download HTML copy (optional)</button>
+  <button class="btn ghost sm" id="dlSheetBtn">↓ Download HTML copy (optional)</button>
   <p class="muted" style="margin:10px 0 6px">On a computer: tap Copy, then paste into Gmail/Outlook for a real table. Preview:</p>
   <div class="tablepreview" id="tablePreview"></div>
   <button class="btn ghost" id="squadClose">Close</button>
@@ -431,73 +744,18 @@
   <h3>Email List for BCC</h3>
   <p class="muted" style="margin:0 0 8px">Everyone in these results, plus anyone marked <b>RO</b>. Copy and paste into your email’s BCC field.</p>
   <textarea id="emailListBox" readonly style="width:100%;height:120px;font-family:var(--mono);font-size:12px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fbfaf6"></textarea>
-  <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="emailListClose">Close</button><button class="btn" id="emailListCopy">⧉ Copy</button></div>
+  <div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="emailListClose">Close</button><button class="btn" id="emailListCopy">❏ Copy</button></div>
 </div></div>
 
-<div class="scrim" id="mergeHelpScrim"><div class="sheet">
-  <h3>Merge Squad Results — Step by Step</h3>
-  <p class="muted" style="margin:0 0 14px"><b>What this does:</b> Combines all squad backup files from tonight into one master list with all scores and shooters. You only do this once, on one tablet, at the end of the match.</p>
-  
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">BEFORE YOU START — Each Squad Must Backup</div>
-    <p class="muted" style="margin:0">On <b>every scorekeeper's tablet</b> (Squad A, B, C, etc.):</p>
-    <ol class="steps" style="margin:6px 0 0">
-      <li>Open the <b>Results</b> tab</li>
-      <li>Tap <b>Backup</b> (orange button)</li>
-      <li>A file like <i>match-backup-SquadA-….json</i> downloads to your Downloads folder</li>
-      <li style="margin-bottom:0"><b>If using shared Google Drive:</b> Open the Google Drive app, tap <b>+</b> to upload, select that backup file, and save it to the shared RO folder</li>
-    </ol>
-  </div>
 
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">NOW MERGE — On This Tablet Only</div>
-    <ol class="steps">
-      <li><b>Get all backup files.</b> If they're on Google Drive, open the Google Drive app, find each squad's backup file, and download them to this tablet's Downloads folder. (Or ask each squad RO to email/text you their backup file and save it to Downloads.)</li>
-      <li><b>Stay on this screen.</b> You're ready to merge.</li>
-      <li><b>Tap "Choose files"</b> below.</li>
-      <li><b>Select EVERY squad's backup file at once.</b> When the file picker opens, tap or click each backup file. On a tablet, tap one, then tap the others while holding. On a computer, hold Ctrl/Cmd and click each file. Make sure you see all files highlighted before tapping "Open" or "Done".</li>
-      <li><b>Wait for merge to finish.</b> A message will appear showing how many shooters were added, updated, and if there are any conflicts.</li>
-      <li><b>Read the summary carefully.</b> Look for:
-        <ul style="margin:4px 0;padding-left:20px">
-          <li><b>Added:</b> new shooters from other squads ✓ good</li>
-          <li><b>Updated:</b> shooters already on this tablet who got scores from other squad files</li>
-          <li><b>Conflicts:</b> same person scored on two different tablets. App kept both; check Roster and delete the duplicate.</li>
-        </ul>
-      </li>
-      <li style="margin-bottom:0"><b>If conflicts flagged:</b> Go back to the <b>Roster</b> tab and look for duplicate names. Keep the entry with scores, delete the empty one.</li>
-    </ol>
-  </div>
-
-  <div style="background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px">
-    <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px">AFTER MERGE — Verify &amp; Share Results</div>
-    <ol class="steps">
-      <li>Go to the <b>Results</b> tab. You should see shooters from all squads ranked together.</li>
-      <li>Scroll through and spot-check: Are all squads represented? Are the rankings correct?</li>
-      <li><b>Share results:</b> Tap <b>📊 Squad results &amp; email</b> to email scorecards, download the HTML sheet, or copy a formatted table.</li>
-      <li style="margin-bottom:0"><b>Final backup:</b> Tap <b>Backup</b> one more time so you have a complete record of everything merged.</li>
-    </ol>
-  </div>
-
-  <div class="help"><b>Important notes:</b><br>
-  • Each squad RO taps Backup on <b>their own</b> tablet first — not you<br>
-  • You only tap "Choose files" and select all of them at once<br>
-  • <b>Never</b> use "Restore" unless recovering from a failed backup — it erases your current data<br>
-  • "Merge" only adds; it never erases scores already on this tablet<br>
-  • If someone new checked in late on another squad, they'll automatically appear here</div>
-
-  <div style="height:12px"></div>
-  <button class="btn" id="mergeChoose">Choose files to merge</button>
-  <div style="height:8px"></div>
-  <button class="btn ghost" id="mergeHelpCancel">Cancel</button>
-</div></div>
 
 <div class="scrim" id="mergeScrim"><div class="sheet">
   <h3>Merge Summary</h3>
   <div id="mergeBody"></div>
   <div style="height:12px"></div>
-  <div class="btnrow"><button class="btn" id="saveArchiveBtn">💾 Save match archive</button><button class="btn" id="saveRosterBtn">💾 Save shooter list</button></div>
+  <div class="btnrow"><button class="btn" id="saveArchiveBtn">Save match archive</button><button class="btn" id="saveRosterBtn">Save shooter list</button></div>
   <div class="muted" style="margin:6px 0 10px;font-size:11px;line-height:1.5"><b>Archive</b> = this match with scores, for your records. <b>Shooter list</b> = names only, no scores — this is the file the other tablets restore before the next match.</div>
-  <div class="btnrow"><button class="btn ghost" id="mergeUndo" style="display:none">↶ Undo this merge</button><button class="btn ghost" id="mergeClose">Close</button></div>
+  <div class="btnrow"><button class="btn ghost" id="mergeUndo" style="display:none">← Undo this merge</button><button class="btn ghost" id="mergeClose">Close</button></div>
 </div></div>
 
 <div class="scrim" id="confirmScrim"><div class="sheet" style="max-width:440px">
@@ -513,7 +771,7 @@
     <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
     <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
     <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
-    <button type="button" data-k="clear">C</button><button type="button" data-k="0">0</button><button type="button" data-k="back">⌫</button>
+    <button type="button" data-k="clear">C</button><button type="button" data-k="0">0</button><button type="button" data-k="back">←</button>
   </div>
   <div class="btnrow"><button class="btn ghost" id="padCancel">Cancel</button><button class="btn green" id="padSave">Save</button></div>
 </div></div>
@@ -540,12 +798,12 @@ var APP_VERSION="2.0.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-07-26-g";
+var APP_BUILD="2026-09-06-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
 var REMIND_MS=10*60*1000;
-var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION}};
+var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION,compiled:[]}};
 var mem=null,lastRemind=0;
 var SC={
   tbl:'border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;margin:0 0 22px',
@@ -564,7 +822,7 @@ var SC={
    outdoor uses them; indoor needs none. */
 var MATCH_TYPES={
   outdoor:{
-    key:"outdoor", label:"Outdoor", lowerWins:true,
+    key:"outdoor", label:"Outdoor", lowerWins:true, shareTies:true,   /* identical total time shares a place */
     ensure:function(e){return ensureOutdoor(e);},
     total:function(e){return stageFive(e)+stageGlockm(e)+statePlates(e);},
     better:function(a,b){return total(a)-total(b);},                                 /* lowest time wins */
@@ -579,7 +837,30 @@ var MATCH_TYPES={
   }
 };
 function MT(e){var t=(e&&e.type)||(state.meta&&state.meta.matchType)||"outdoor";return MATCH_TYPES[t]||MATCH_TYPES.outdoor;}
-function todayStr(){return new Date().toLocaleDateString();}
+function todayStr(){var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+/* The match date is stored canonically (YYYY-MM-DD) so every tablet produces
+   an identical match key — "9/1/2026" and "09/01/2026" used to be two matches.
+   Display and the server-side label stay human-readable. */
+/* type="date" still accepts typing on a desktop, and the browser will happily
+   take year 275760. Anything outside a sane window is a typo, not a match. */
+function dateMax(){var d=new Date();d.setFullYear(d.getFullYear()+2);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function validMatchDate(v){
+  var m=String(v||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return false;
+  /* the pattern alone accepts 2026-13-01 and 2026-02-31 — round-trip through a
+     Date to confirm it's a day that actually exists */
+  var y=+m[1],mo=+m[2],d=+m[3],dt=new Date(y,mo-1,d);
+  if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d)return false;
+  return v>="2020-01-01"&&v<=dateMax();
+}
+function matchDisplay(v){
+  v=String(v||"");
+  var m=v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m)return v;                                   /* older free-text values shown as-is */
+  return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString();
+}
 function mkTargets(n){var a=[];for(var i=0;i<n;i++)a.push({a:0,c:0,d:0,miss:0});return a;}
 function uid(p){return (p||"e")+Date.now()+Math.floor(Math.random()*100000);}
 function blankEntry(type){
@@ -687,6 +968,967 @@ function rosterOnly(src){var e=blankEntry();
   e.division=src.division||"";e.gun=src.gun||"";e.category=src.category||"";
   e.active=false;e.checkinSeq=0;e.squad="";e.status="normal";   /* on file, not checked into tonight yet */
   return e;}
+/* --- device configuration ----------------------------------------------
+   Deliberately NOT in state.meta. state.meta is exported wholesale by
+   payload() into every backup, every shared squad file and (later) every
+   server upload — so anything stored there travels off the device. This key
+   holds settings that belong to the tablet and must never leave it. */
+var CFG_KEY="gssf_scorekeeper_cfg";
+var cfg={deviceLabel:"",screen:"",online:false,serverUrl:"",clubId:"",secret:"",deviceId:"",dataClubId:"",clubName:"",rosterRevision:0,pending:null};
+function loadCfg(){try{var raw=localStorage.getItem(CFG_KEY);if(raw)cfg=Object.assign(cfg,JSON.parse(raw)||{});}catch(e){}}
+function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg));}catch(e){}}
+
+/* --- sync configuration ------------------------------------------------
+   syncConfigured(): credentials present. syncOn(): configured AND enabled.
+   Every network call is gated on syncOn() — with no serverUrl the app makes
+   no requests at all (§2.2). */
+var syncEditing=false;
+function syncConfigured(){return !!(cfg.serverUrl&&cfg.clubId&&cfg.secret);}
+function syncOn(){return syncConfigured()&&!!cfg.online;}
+function newDeviceId(){
+  try{if(typeof crypto!=="undefined"&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}
+  return "d"+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+}
+/* Decode the base64 setup blob into {url,club,secret}, or throw a message fit
+   to show the user. A truncated paste must fail here at setup, not with a 401
+   at the range (§2.1). */
+function parseBlob(txt){
+  var o;
+  try{o=JSON.parse(atob(String(txt||"").trim()));}
+  catch(e){throw "That doesn't look like a valid setup code. Check it was copied in full.";}
+  if(!o||typeof o!=="object")throw "That doesn't look like a valid setup code.";
+  ["url","club","secret"].forEach(function(k){
+    if(typeof o[k]!=="string"||!o[k].trim())
+      throw "The setup code is incomplete \u2014 it's missing the "+k+". Check it was copied in full.";
+  });
+  return {url:o.url.trim().replace(/\/+$/,""),club:o.club.trim(),secret:o.secret.trim()};
+}
+/* Validate a configuration against the server; resolves with the club name. */
+function apiPing(c){
+  var url=c.url+"/v1/clubs/"+encodeURIComponent(c.club)+"/ping";
+  return fetch(url,{headers:{"Authorization":"Bearer "+c.secret}}).then(function(res){
+    if(res.status===401)throw "The server rejected this setup code. Check you were sent the right one.";
+    if(!res.ok)throw "The server answered with an error ("+res.status+"). Try again shortly.";
+    return res.json();
+  }).then(function(j){return (j&&j.club_name)||"";});   /* blank is legal — caller falls back to the id */
+}
+function syncStatus(kind,msg){
+  var el=document.getElementById("sync-status");if(!el)return;
+  if(!msg){el.style.display="none";return;}
+  el.style.display="";el.className="syncstat "+kind;el.textContent=msg;
+}
+function renderSync(){
+  var conf=syncConfigured(),showSetup=(!conf||syncEditing)&&cfg.online;
+  document.getElementById("set-online").checked=!!cfg.online;
+  document.getElementById("sync-info").style.display=(conf&&!syncEditing&&cfg.online)?"":"none";
+  document.getElementById("sync-setup").style.display=showSetup?"":"none";
+  document.getElementById("set-online-hint").style.display=cfg.online?"none":"";
+  if(conf){
+    document.getElementById("sync-url").textContent=cfg.serverUrl.replace(/^https?:\/\//,"");
+    document.getElementById("sync-club").textContent=cfg.clubId;
+    document.getElementById("sync-clubname-row").style.display=cfg.clubName?"":"none";
+    document.getElementById("sync-clubname").textContent=cfg.clubName||"";
+    document.getElementById("sync-rev").textContent=cfg.rosterRevision?("#"+cfg.rosterRevision):"not downloaded";
+  }
+  if(!cfg.online&&conf)syncStatus("idle","Off. Your setup code is kept \u2014 tick the box to use it again.");
+  else if(!cfg.online)syncStatus("","");
+  else if(showSetup)syncStatus("idle","Paste your club's setup code to finish.");
+  else syncStatus("ok","Connected"+(cfg.clubName?" to "+cfg.clubName:""));
+  renderPending();
+}
+
+function applyScreen(){
+  document.body.classList.remove("sun","night");
+  if(cfg.screen)document.body.classList.add(cfg.screen);
+  var tc=document.querySelector('meta[name=theme-color]');
+  if(tc)tc.setAttribute("content",cfg.screen==="night"?"#000":(cfg.screen==="sun"?"#000":"#16181d"));
+  document.querySelectorAll("#set-screen button").forEach(function(b){
+    b.classList.toggle("on",(b.dataset.s||"")===(cfg.screen||""));});
+}
+document.querySelectorAll("#set-screen button").forEach(function(b){
+  b.addEventListener("click",function(){cfg.screen=b.dataset.s||"";saveCfg();applyScreen();});
+});
+function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
+var namesEditing=false,matchEditing=false;
+function renderSettings(){
+  document.getElementById("set-squad").value=state.meta.squad||"";
+  document.getElementById("set-device").value=cfg.deviceLabel||"";
+  document.getElementById("set-squad-shown").textContent=state.meta.squad||"not set";
+  document.getElementById("set-device-shown").textContent=cfg.deviceLabel||"not set";
+  document.getElementById("names-view").style.display=namesEditing?"none":"";
+  document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
+  applyScreen();
+  /* Online controls appear only when they can do something — the group shrinks
+     rather than substituting a button that isn't really the same action. */
+  var on=syncOn();
+  ["set-getroster","set-getroster-hint","set-getsquad","set-past"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  var n=Object.keys(people).length;
+  document.getElementById("set-roster-sub").textContent=
+    (n?(n+" on this tablet"):"none on this tablet")+(on&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"")
+    +" \u00b7 add, remove and publish from here";
+  document.getElementById("set-match").value=state.meta.match||"";
+  document.getElementById("set-match-shown").textContent=state.meta.match?matchDisplay(state.meta.match):"not set";
+  document.getElementById("set-match-box").style.display=matchEditing?"":"none";
+  document.getElementById("set-match-edit").style.display=matchEditing?"none":"";
+  document.getElementById("set-match-hint").textContent=matchEditing?"":"";
+  document.getElementById("set-version").textContent="Version "+APP_VERSION+" · build "+APP_BUILD;
+  renderSync();
+  updateBackupInfo();   /* refreshes the undo button's label and visibility */
+}
+function openSettings(){renderSettings();document.getElementById("gearScrim").classList.add("open");}
+function closeSettings(){document.getElementById("gearScrim").classList.remove("open");syncSetupSquad();}
+document.getElementById("gearBtn").addEventListener("click",openSettings);
+document.getElementById("gearClose").addEventListener("click",closeSettings);
+document.getElementById("gearScrim").addEventListener("click",function(ev){if(ev.target.id==="gearScrim")closeSettings();});
+document.getElementById("set-match-edit").addEventListener("click",function(){
+  matchEditing=true;renderSettings();
+  var el=document.getElementById("set-match");try{if(el.showPicker)el.showPicker();}catch(e){}});
+document.getElementById("names-edit").addEventListener("click",function(){namesEditing=true;renderSettings();});
+document.getElementById("names-cancel").addEventListener("click",function(){namesEditing=false;renderSettings();});
+document.getElementById("names-save").addEventListener("click",function(){
+  var sq=document.getElementById("set-squad").value.trim(),dv=document.getElementById("set-device").value.trim();
+  var chg=[];
+  if(sq!==(state.meta.squad||""))chg.push("Squad: \u201c"+(state.meta.squad||"not set")+"\u201d \u2192 \u201c"+(sq||"not set")+"\u201d");
+  if(dv!==(cfg.deviceLabel||""))chg.push("Device: \u201c"+(cfg.deviceLabel||"not set")+"\u201d \u2192 \u201c"+(dv||"not set")+"\u201d");
+  if(!chg.length){namesEditing=false;renderSettings();return;}
+  /* The squad name labels every file and upload this tablet produces, so a
+     change is confirmed rather than taken on the first keystroke. */
+  if(!confirm("Change this tablet's names?\n\n"+chg.join("\n")))return;
+  state.meta.squad=sq;cfg.deviceLabel=dv;save();saveCfg();
+  namesEditing=false;renderSettings();syncSetupSquad();toast("Names updated");
+});
+
+/* --- Online Services controls --- */
+document.getElementById("set-online").addEventListener("change",function(){
+  cfg.online=!!this.checked;saveCfg();
+  if(cfg.online&&!syncConfigured())syncEditing=true;
+  if(!cfg.online)syncEditing=false;
+  renderSync();
+});
+document.getElementById("set-blob-edit").addEventListener("click",function(){
+  syncEditing=true;document.getElementById("set-blob").value="";renderSync();
+  syncStatus("idle","Paste the new setup code, or Cancel to keep the current one.");
+});
+document.getElementById("set-blob-cancel").addEventListener("click",function(){
+  if(syncConfigured()){syncEditing=false;renderSync();}
+  else{cfg.online=false;saveCfg();syncEditing=false;renderSync();}
+});
+document.getElementById("set-blob-save").addEventListener("click",function(){
+  var raw=document.getElementById("set-blob").value,c;
+  try{c=parseBlob(raw);}catch(msg){syncStatus("bad",msg);return;}
+  syncStatus("idle","Checking\u2026");
+  apiPing(c).then(function(clubName){
+    /* §2.4 — warn if this tablet's data belongs to a different club */
+    if(cfg.dataClubId&&cfg.dataClubId!==c.club&&state.entries.length){
+      if(!confirm("This tablet's data was created under a different club.\n\nIts matches and roster have not been uploaded to the new one. Upload before downloading, or the local data may be replaced.\n\nContinue?")){
+        syncStatus("idle","Setup code not saved.");return;
+      }
+    }
+    /* Anything scoped to a club must be dropped when the club changes —
+       a carried-over roster revision is meaningless against a different
+       club and produces a 409 on the first push. */
+    if(cfg.clubId&&cfg.clubId!==c.club){cfg.rosterRevision=0;cfg.pending=null;}
+    cfg.serverUrl=c.url;cfg.clubId=c.club;cfg.secret=c.secret;
+    cfg.clubName=clubName||"";
+    if(!cfg.deviceId)cfg.deviceId=newDeviceId();      /* generate once, never regenerate (§2.3) */
+    if(!cfg.dataClubId)cfg.dataClubId=c.club;
+    cfg.online=true;saveCfg();
+    syncEditing=false;document.getElementById("set-blob").value="";
+    renderSync();
+    syncStatus("ok","Connected"+(clubName?" to "+clubName:"")+".");
+  }).catch(function(err){
+    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. Check the tablet's connection and try again.");
+  });
+});
+document.getElementById("set-test").addEventListener("click",function(){
+  if(!syncOn())return;
+  syncStatus("idle","Checking\u2026");
+  apiPing({url:cfg.serverUrl,club:cfg.clubId,secret:cfg.secret}).then(function(n){
+    cfg.clubName=n||"";saveCfg();syncStatus("ok","Connected"+(n?" to "+n:"")+".");
+  }).catch(function(err){
+    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. The app still works offline.");
+  });
+});
+/* --- remove a shooter --------------------------------------------------
+   Operates on the PERSON, not one entry: a shooter with several division-runs
+   or rounds loses all of them together, so no orphaned entries are left behind.
+   Warns (rather than blocks) when they have scores — a wrongly-added shooter
+   with a stray tap on them is a real case, and Undo covers a mistake. */
+function removePerson(pid){
+  var mine=state.entries.filter(function(e){return e.personId===pid;});
+  if(!mine.length)return;
+  var nm=mine[0].name||"(unnamed)",scored=mine.filter(hasAny).length;
+  var msg="Remove "+nm+" from this tablet's list?";
+  if(mine.length>1)msg+="\n\nThis removes all "+mine.length+" of their entries.";
+  if(scored)msg+="\n\n\u26a0 "+(scored===1?"They have a score":scored+" of their entries have scores")+" in this match. That will be removed too.";
+  if(!confirm(msg))return;
+  undoPush("Removed "+nm);
+  state.entries=state.entries.filter(function(e){return e.personId!==pid;});
+  if(state.selected&&!byId(state.selected))state.selected=null;
+  save();renderShooters();toast(nm+" removed");
+}
+function renderRemoveList(){
+  var q=(document.getElementById("removeSearch").value||"").toLowerCase();
+  var byP={},order=[];
+  state.entries.forEach(function(e){if(!byP[e.personId]){byP[e.personId]=[];order.push(e.personId);}byP[e.personId].push(e);});
+  var people=order.map(function(pid){var runs=byP[pid];return {pid:pid,rep:runs[0],n:runs.length,scored:runs.some(hasAny)};})
+    .filter(function(p){return !q||(p.rep.name||"").toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return (a.rep.name||"").localeCompare(b.rep.name||"");});
+  var list=document.getElementById("removeList");
+  if(!people.length){list.innerHTML='<div class="empty" style="padding:18px">'+(state.entries.length?"No match for \u201c"+esc(q)+"\u201d.":"No shooters on file.")+'</div>';return;}
+  list.innerHTML=people.map(function(p){
+    return '<div class="cirow" data-pid="'+p.pid+'"><div class="meta"><div class="nm">'+esc(p.rep.name||"(unnamed)")+'</div>'
+      +'<div class="dv">'+(p.n>1?p.n+" entries":esc(p.rep.division||"\u2014"))+(p.scored?' \u00b7 has scores':'')+(p.rep.active?' \u00b7 checked in':'')+'</div></div>'
+      +'<span class="cistat" style="background:var(--red);color:#fff">Remove</span></div>';}).join("");
+  list.querySelectorAll(".cirow").forEach(function(row){
+    row.addEventListener("click",function(){removePerson(row.dataset.pid);});});
+}
+/* A roster push replaces the club's whole list, so it belongs to whoever holds
+   the complete picture: a director curating beforehand, or the tablet that just
+   compiled. A squad tablet mid-match holds only its own view. */
+function matchInProgress(){return !!state.meta.started&&!state.meta.compiledAt;}
+function renderShooters(){
+  var n=state.entries.length,empty=document.getElementById("shooters-empty"),
+      main=document.getElementById("shooters-main"),sub=document.getElementById("shooters-sub");
+  if(!n){
+    main.style.display="none";empty.style.display="";
+    empty.innerHTML=syncOn()
+      ? '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
+        +'<button class="btn green" id="shooters-get">\u2b07 Get shooter list from server</button>'
+        +'<div class="sethint">Or add them one at a time.</div>'
+        +'<div style="height:8px"></div><button class="btn ghost sm" id="shooters-add2">+ Add shooter</button>'
+      : '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
+        +'<button class="btn ghost sm" id="shooters-restore">Restore from a backup file</button>'
+        +'<div style="height:8px"></div><button class="btn ghost sm" id="shooters-add2">+ Add shooter</button>';
+    sub.textContent="";
+    var g=document.getElementById("shooters-get");
+    if(g)g.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");getRoster();});
+    var r=document.getElementById("shooters-restore");
+    if(r)r.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");document.getElementById("restoreFile").click();});
+    var a2=document.getElementById("shooters-add2");
+    if(a2)a2.addEventListener("click",function(){document.getElementById("removeScrim").classList.remove("open");openEdit(null);});
+    return;
+  }
+  empty.style.display="none";main.style.display="";
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  sub.textContent=Object.keys(people).length+" shooters on this tablet"
+    +(syncOn()&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"");
+  document.getElementById("shooters-history").style.display=syncOn()?"":"none";
+  document.getElementById("shooters-publish").style.display=syncOn()?"":"none";
+  renderRemoveList();
+}
+/* Rollback publishes an old list again as a NEW revision — nothing is deleted,
+   the conflict model is untouched, and the history records that a rollback
+   happened rather than pretending it didn't. */
+function openHistory(){
+  if(!syncOn())return;
+  document.getElementById("histList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("histScrim").classList.add("open");
+  apiRosterRevisions().then(function(list){
+    var el=document.getElementById("histList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No shooter list has been published yet.</div>';return;}
+    var newest=list[0]&&list[0].revision;
+    el.innerHTML=list.map(function(r){
+      var cur=r.revision===newest;
+      return '<div class="cirow" data-rev="'+r.revision+'"><div class="meta">'
+        +'<div class="nm">Version '+r.revision+(cur?' <span class="cibadge">current</span>':'')+'</div>'
+        +'<div class="dv">'+r.entry_count+' shooters \u00b7 '+esc(r.author||"unknown")
+        +(r.updated_at?' \u00b7 '+esc(whenText(r.updated_at)):'')+'</div></div>'
+        +(cur?'':'<span class="cistat on">Roll back</span>')+'</div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      var rev=+row.dataset.rev;if(rev===newest)return;
+      row.addEventListener("click",function(){rollbackTo(rev);});});
+  }).catch(function(err){
+    document.getElementById("histList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function rollbackTo(rev){
+  toast("Fetching version "+rev+"\u2026");
+  apiGetRoster(rev).then(function(r){
+    if(!r)throw "That version couldn't be found.";
+    var d;try{d=JSON.parse(r.payload);}catch(e){throw "That version couldn't be read.";}
+    if(!d||!d.entries)throw "That version was empty.";
+    var who=r.author||"unknown";
+    if(!confirm("Roll back to version "+rev+"?\n\n"+d.entries.length+" shooters, published by "+who+".\n\nThis loads that list onto this tablet and publishes it again as a new version. Nothing is deleted."))return;
+    undoPush("Rolled back the shooter list");
+    var mt=(state.meta&&state.meta.matchType)||"outdoor";
+    state.entries=d.entries.map(function(e){return ensureShape(e,mt);});
+    save();renderRoster();
+    document.getElementById("histScrim").classList.remove("open");
+    /* say what it is in the history — an unexplained duplicate of an earlier
+       revision is a puzzle six months later */
+    pushRoster(1,"Rolled back to r"+rev+" ("+who+")").then(function(){renderShooters();});
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected — check Tools":(typeof err==="string"?err:"Couldn't fetch that version."));
+  });
+}
+document.getElementById("shooters-history").addEventListener("click",openHistory);
+document.getElementById("histClose").addEventListener("click",function(){document.getElementById("histScrim").classList.remove("open");});
+document.getElementById("histScrim").addEventListener("click",function(ev){if(ev.target.id==="histScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("shooters-add").addEventListener("click",function(){
+  document.getElementById("removeScrim").classList.remove("open");openEdit(null);});
+document.getElementById("shooters-publish").addEventListener("click",function(){
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  var n=Object.keys(people).length;
+  if(!n){toast("There are no shooters on this tablet to publish");return;}
+  if(matchInProgress()&&!confirm("WARNING — MATCH IN PROGRESS\n\nThis tablet is part-way through a match and hasn't compiled the other squads.\n\nPublishing now makes THIS tablet's list the club's list, which may not include shooters other squads have added.\n\nContinue anyway?"))return;
+  if(!confirm("Publish "+n+" shooters as the club's list?\n\nEvery tablet that downloads the list will get this one."))return;
+  document.getElementById("removeScrim").classList.remove("open");
+  pushRoster();
+});
+document.getElementById("set-remove").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("removeSearch").value="";renderShooters();
+  document.getElementById("removeScrim").classList.add("open");
+});
+document.getElementById("removeSearch").addEventListener("input",renderRemoveList);
+document.getElementById("removeClose").addEventListener("click",function(){
+  document.getElementById("removeScrim").classList.remove("open");renderRoster();});
+document.getElementById("removeScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="removeScrim"){ev.currentTarget.classList.remove("open");renderRoster();}});
+
+/* --- roster pull (§4.6) ------------------------------------------------
+   Fetches the club's shooter list and RESTORES it, per §7 — the online
+   equivalent of restoring the shooter-list file, so one mental model covers
+   both. Retains `revision`, which is required for the next push (§4.7). */
+var AUTH_ERR="__auth__";
+function apiGetRoster(revision){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster"+(revision?("?revision="+encodeURIComponent(revision)):""),
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===404)return null;                  /* normal for a new club */
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return j?(j.roster||null):null;});
+}
+function getRoster(){
+  if(!syncOn())return;
+  var scored=state.entries.filter(hasAny).length;
+  var warn="Replace this tablet's shooter list with the club's current one?";
+  if(scored)warn+="\n\n\u26a0 "+scored+" shooter"+(scored===1?" has":"s have")+" scores in this match. Those scores will be replaced.\n\nUpload this squad first if you haven't.";
+  if(!confirm(warn))return;
+  syncStatus("idle","Fetching\u2026");
+  apiGetRoster().then(function(r){
+    if(!r){
+      /* 404 is a normal state for a new club, not an error (§4.6) */
+      syncStatus("idle","The club hasn't published a shooter list yet.");
+      offerRosterFile("The club hasn't published a shooter list yet.\n\nLoad one from a file on this tablet instead?");
+      return;
+    }
+    var d;try{d=JSON.parse(r.payload);}catch(e){throw "The shooter list from the server couldn't be read.";}
+    if(!d||!d.entries)throw "The shooter list from the server was empty or malformed.";
+    undoPush("Downloaded shooter list");
+    var mt=(state.meta&&state.meta.matchType)||"outdoor";
+    state.entries=d.entries.map(function(e){return ensureShape(e,mt);});
+    cfg.rosterRevision=r.revision;saveCfg();
+    save();renderSync();renderRoster();
+    syncStatus("ok",d.entries.length+" shooters downloaded (list #"+r.revision+").");
+    toast(d.entries.length+" shooters downloaded");
+  }).catch(function(err){
+    if(err===AUTH_ERR){
+      /* a rejected setup code is a misconfigured tablet — routing around it
+         with a file would leave a tablet that looks fine but can't upload */
+      syncStatus("bad","The server rejected this tablet's setup code. Check the setup code before the match \u2014 this tablet can't upload until it's fixed.");
+      return;
+    }
+    var msg=(typeof err==="string")?err:"Couldn't reach the server.";
+    syncStatus("bad",msg+" The app still works offline.");
+    offerRosterFile(msg+"\n\nLoad the shooter list from a file on this tablet instead?");
+  });
+}
+/* Surfaces the offline path at the moment it's needed, rather than making the
+   RO go and find it. Same Restore flow, so it's a control they already use. */
+function offerRosterFile(msg){
+  if(!confirm(msg))return;
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("restoreFile").click();
+}
+document.getElementById("set-getroster").addEventListener("click",getRoster);
+/* --- roster push (§4.7) ------------------------------------------------
+   base_revision is the revision we compiled from; null only when the GET
+   returned 404. On 409 the roster moved under us — that is a normal outcome
+   of two people working at once, not a failure (§4.8): pull, merge, push
+   again with the new base. Capped at three automatic attempts. */
+function apiPutRoster(body){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster",{
+    method:"PUT",
+    headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){
+    return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,ok:res.ok,body:j};});
+  });
+}
+function apiRosterRevisions(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/roster/revisions",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return [];
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.revisions)||[];});
+}
+function pushRoster(attempt,authorNote){
+  attempt=attempt||1;
+  if(!syncOn())return Promise.resolve();
+  var p=rosterPayload(),txt=JSON.stringify(p);
+  var body={payload:txt,schema_version:SCHEMA_VERSION,
+    base_revision:(cfg.rosterRevision?cfg.rosterRevision:null),
+    entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
+    author:authorNote||cfg.deviceLabel||"Unnamed tablet"};
+  syncStatus("idle",attempt>1?"Retrying\u2026":"Uploading shooter list\u2026");
+  return apiPutRoster(body).then(function(r){
+    if(r.status===201){
+      cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();renderSync();
+      syncStatus("ok",p.entries.length+" shooters uploaded (list #"+cfg.rosterRevision+").");
+      toast("Shooter list uploaded");return;
+    }
+    if(r.status===409){
+      if(attempt>=3)throw "The roster kept changing while uploading. Try again in a moment.";
+      var who=(r.body&&r.body.current_author)||"another tablet";
+      var curRev=(r.body&&r.body.current_revision);
+      syncStatus("idle",(curRev===null||curRev===undefined)
+        ? "This club has no shooter list yet \u2014 starting a new one\u2026"
+        : who+" updated the list first \u2014 pulling their changes\u2026");
+      /* pull + merge + push again with the new base */
+      return apiGetRoster().then(function(cur){
+        if(!cur){
+          /* No roster exists — the base_revision we sent was stale (usually
+             left over from a different club). Retry from scratch rather than
+             treating this as terminal. */
+          cfg.rosterRevision=0;saveCfg();
+          return pushRoster(attempt+1,authorNote);
+        }
+        var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
+        mergePayloads([d],{skipMatchGuard:true,undoLabel:"Merged "+who+"'s shooter list"});
+        cfg.rosterRevision=cur.revision;saveCfg();
+        return pushRoster(attempt+1,authorNote);
+      });
+    }
+    if(r.status===401)throw "The server rejected this tablet's setup code.";
+    if(r.status===400)throw "The server rejected the upload"+((r.body&&r.body.error&&r.body.error.message)?": "+r.body.error.message:".");
+    throw "The server answered with an error ("+r.status+").";
+  }).catch(function(err){
+    if(err===AUTH_ERR)err="The server rejected this tablet's setup code.";
+    syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. Nothing was uploaded \u2014 the list is still on this tablet.");
+  });
+}
+/* --- squad upload (§4.3) ------------------------------------------------
+   payload is generated ONCE and sent verbatim — the server hashes those exact
+   bytes for duplicate detection, so it must not be re-serialized in between.
+   A 200 with duplicate:true is a success, not an error (§4.3). */
+function matchKey(rawMatch,matchType){return String(matchType||"outdoor")+"|"+normMatch(rawMatch);}
+function apiPostSquad(txt){
+  var body={
+    match_key:matchKey(state.meta.match,state.meta.matchType),
+    device_id:cfg.deviceId,
+    match_type:(state.meta.matchType||"outdoor"),
+    payload:txt,                                   /* verbatim */
+    schema_version:SCHEMA_VERSION,
+    squad_key:normMatch(state.meta.squad),
+    squad_label:(state.meta.squad||""),
+    match_label:(matchDisplay(state.meta.match)||""),
+    device_label:(cfg.deviceLabel||""),
+    app_version:APP_VERSION,app_build:APP_BUILD,
+    entry_count:state.entries.filter(function(e){return e.active;}).length
+  };
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads",{
+    method:"POST",
+    headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){
+    return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,body:j};});
+  });
+}
+/* Attempt an upload, retrying a few times with a short delay (§5.3). */
+function uploadSquad(txt,attempt){
+  attempt=attempt||1;
+  return apiPostSquad(txt).then(function(r){
+    if(r.status===201||r.status===200)return r.body;    /* duplicate:true counts as stored */
+    if(r.status===401)throw AUTH_ERR;
+    if(r.status===409&&attempt<3)
+      return new Promise(function(res){setTimeout(res,600*attempt);}).then(function(){return uploadSquad(txt,attempt+1);});
+    if(r.status===400)throw "The server rejected the upload"+((r.body&&r.body.error&&r.body.error.message)?": "+r.body.error.message:".");
+    throw "The server answered with an error ("+r.status+").";
+  }).catch(function(err){
+    if(err===AUTH_ERR||typeof err==="string")throw err;
+    if(attempt<3)return new Promise(function(res){setTimeout(res,600*attempt);}).then(function(){return uploadSquad(txt,attempt+1);});
+    throw "no-connection";
+  });
+}
+
+/* --- pending upload (§5.3) ---------------------------------------------
+   Survives restarts: stored in cfg, which is its own localStorage key.
+   Tagged with the club it was queued for — a queued upload must never be
+   sent to a different club after reconfiguration. */
+function setPending(txt){
+  cfg.pending={payload:txt,clubId:cfg.clubId,squad:(state.meta.squad||""),
+               match:(state.meta.match||""),matchType:(state.meta.matchType||"outdoor"),at:Date.now()};
+  saveCfg();renderPending();
+}
+function clearPending(){cfg.pending=null;saveCfg();renderPending();}
+/* A queued upload belongs to a specific club AND a specific match. Sending it
+   into a different one would file a squad under a match it isn't from — the
+   payload still carries the old label, so the compiler would silently refuse it. */
+function pendingValid(){
+  var p=cfg.pending;
+  if(!(p&&p.payload&&p.clubId&&p.clubId===cfg.clubId))return false;
+  if(normMatch(p.match)!==normMatch(state.meta.match))return false;
+  if((p.matchType||"outdoor")!==((state.meta&&state.meta.matchType)||"outdoor"))return false;
+  return true;
+}
+/* Called when the match changes: drop a queued upload that no longer belongs,
+   and say so rather than losing it quietly. */
+function checkPendingMatch(){
+  var p=cfg.pending;
+  if(!p||!p.payload)return;
+  if(p.clubId===cfg.clubId&&normMatch(p.match)===normMatch(state.meta.match)&&
+     (p.matchType||"outdoor")===((state.meta&&state.meta.matchType)||"outdoor"))return;
+  var was=p.squad||"a squad",lbl=p.match||"another match";
+  cfg.pending=null;saveCfg();renderPending();
+  toast("The upload waiting for "+was+" was for "+lbl+" — not sent. Save or upload it again under this match.");
+}
+function renderPending(){
+  var b=document.getElementById("pendingBadge");if(!b)return;
+  if(syncOn()&&pendingValid()){
+    b.style.display="";
+    b.textContent="⚠ "+(cfg.pending.squad?cfg.pending.squad:"Squad")+" not uploaded";
+    b.title="Tap to retry uploading "+(cfg.pending.squad||"this squad")+" from "+(cfg.pending.match||"this match");
+  }else b.style.display="none";
+}
+function retryPending(){
+  if(!syncOn()||!pendingValid())return;
+  var p=cfg.pending;
+  toast("Retrying upload\u2026");
+  uploadSquad(p.payload).then(function(){
+    clearPending();toast("Squad uploaded");
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected — check Tools":"Still no connection. It will stay pending.");
+  });
+}
+/* --- squad list & download (§4.4, §4.5) --------------------------------
+   The match_key carries the match type, so the list can never return squads
+   from a different match type — no client-side filtering needed. */
+function apiListSquads(){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)+"/squads",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squads)||[];});
+}
+function apiGetSquad(deviceId,revision){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  var u=cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)
+       +"/squads/"+encodeURIComponent(deviceId)+(revision?("?revision="+encodeURIComponent(revision)):"");
+  return fetch(u,{headers:{"Authorization":"Bearer "+cfg.secret}}).then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "That squad couldn't be downloaded ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squad)||null;});
+}
+/* Absolute plus relative, stating facts only — never "possibly stale" (§10.2). */
+function whenText(ms){
+  if(!ms)return "";
+  var d=new Date(ms),mins=Math.round((Date.now()-ms)/60000),rel;
+  if(mins<1)rel="just now"; else if(mins<60)rel=mins+"m ago";
+  else if(mins<1440)rel=Math.round(mins/60)+"h ago";
+  else rel=Math.round(mins/1440)+"d ago";
+  return d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"})+" ("+rel+")";
+}
+/* --- restore a squad from the server -----------------------------------
+   Presents the match's uploads and lets the RO pick by squad label, so a
+   replacement tablet doesn't need to know which device failed or how its
+   squad was spelled. Deliberately asks "which squad", never "which tablet
+   is alive" — same framing as the compile screen. */
+function openSquadPicker(){
+  if(!syncOn())return;
+  if(!state.meta.match){toast("Set the match date on Setup first");return;}
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("squad-match").textContent=matchDisplay(state.meta.match)+" \u00b7 "+typeLabel();
+  document.getElementById("squadList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("rsquadScrim").classList.add("open");
+  apiListSquads().then(function(list){
+    var el=document.getElementById("squadList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No squads have been uploaded for this match yet.</div>';return;}
+    list.sort(function(a,b){return (a.squad_label||"").localeCompare(b.squad_label||"")||((b.uploaded_at||0)-(a.uploaded_at||0));});
+    /* flag squad labels claimed by more than one device — the RO decides */
+    var counts={};list.forEach(function(s){var k=(s.squad_label||"").toLowerCase();counts[k]=(counts[k]||0)+1;});
+    el.innerHTML=list.map(function(s){
+      var dup=counts[(s.squad_label||"").toLowerCase()]>1;
+      return '<div class="cirow" data-dev="'+esc(s.device_id)+'" data-rev="'+(s.revision||"")+'">'
+        +'<div class="meta"><div class="nm">'+esc(s.squad_label||"(no squad name)")
+        +(dup?' <span class="cibadge warn">2 tablets</span>':'')
+        +(s.first_upload_for_device?' <span class="cibadge email">new tablet</span>':'')+'</div>'
+        +'<div class="dv">'+esc(s.device_label||"unnamed tablet")+' \u00b7 '+(s.entry_count||0)+' shooters \u00b7 '+esc(whenText(s.uploaded_at))+'</div></div>'
+        +'<span class="cistat on">Load</span></div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      row.addEventListener("click",function(){restoreSquad(row.dataset.dev,row.dataset.rev,row);});});
+  }).catch(function(err){
+    document.getElementById("squadList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function restoreSquad(deviceId,revision,row){
+  var label=row?(row.querySelector(".nm")?row.querySelector(".nm").textContent:""):"";
+  if(!confirm("Load this squad onto this tablet?\n\nEverything currently on this tablet will be replaced."))return;
+  toast("Downloading\u2026");
+  apiGetSquad(deviceId,revision).then(function(sq){
+    if(!sq||!sq.payload)throw "That squad came back empty.";
+    var d;try{d=JSON.parse(sq.payload);}catch(e){throw "That squad's data couldn't be read.";}
+    if(!d||!d.entries)throw "That squad's data was empty or malformed.";
+    undoPush("Restored a squad from the server");
+    state.meta.matchType=backupType(d);
+    state.entries=d.entries.map(function(e){return ensureShape(e,state.meta.matchType);});
+    if(d.meta){
+      /* take over that squad's identity — this tablet IS that squad now */
+      if(d.meta.squad)state.meta.squad=d.meta.squad;
+      if(d.meta.match)state.meta.match=d.meta.match;
+      state.meta.started=true;
+    }
+    save();document.getElementById("rsquadScrim").classList.remove("open");
+    applyPhase();syncSetupSquad();show("roster");
+    toast("Squad restored \u2014 this tablet is now "+(state.meta.squad||"that squad"));
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected \u2014 check Tools":(typeof err==="string"?err:"Couldn't download that squad."));
+  });
+}
+document.getElementById("set-getsquad").addEventListener("click",openSquadPicker);
+document.getElementById("set-past").addEventListener("click",openPastMatches);
+document.getElementById("rsquadClose").addEventListener("click",function(){document.getElementById("rsquadScrim").classList.remove("open");});
+document.getElementById("rsquadScrim").addEventListener("click",function(ev){if(ev.target.id==="rsquadScrim")ev.currentTarget.classList.remove("open");});
+/* --- what has already been compiled in ------------------------------------
+   Stored as {device,revision} pairs — the same unit phase 5 sends as
+   merged_squads. Marking by device alone would claim revisions we never saw.
+   Lives in meta so it survives a reload, rides along in backups, and is rolled
+   back by undo. */
+function compiledSet(){if(!Array.isArray(state.meta.compiled))state.meta.compiled=[];return state.meta.compiled;}
+function compiledKey(dev,rev){return String(dev)+"@"+String(rev||"");}
+function isCompiled(dev,rev){var k=compiledKey(dev,rev);return compiledSet().some(function(c){return compiledKey(c.device,c.revision)===k;});}
+/* device was compiled, but at an older revision — it has re-uploaded since */
+function reuploadedSince(dev,rev){
+  if(isCompiled(dev,rev))return 0;
+  var prev=compiledSet().filter(function(c){return c.device===dev;});
+  if(!prev.length)return 0;
+  return prev[prev.length-1].revision||0;
+}
+function markCompiled(dev,rev){if(!dev||isCompiled(dev,rev))return;compiledSet().push({device:dev,revision:rev,at:Date.now()});}
+
+/* --- compile screen (§10) ----------------------------------------------
+   One list, mixed sources: server uploads and local files side by side, one
+   Compile. A club with no server sees the same screen with only file rows.
+   Never asks how many squads there should be (§10.3), never resolves an
+   ambiguity on the RO's behalf. */
+var compileRows=[];
+function compileNames(d){
+  var seen={},out=[];
+  (d.entries||[]).forEach(function(e){
+    if(!e.active)return;var n=(e.name||"").trim();if(!n||seen[n])return;seen[n]=1;out.push(n);});
+  return out;
+}
+function renderCompile(){
+  var el=document.getElementById("compileList");
+  if(!compileRows.length){
+    el.innerHTML='<div class="empty" style="padding:18px">'
+      +(syncOn()?"No squads uploaded for this match yet.<br>Use <b>+ Add squad files</b> for squads sent by file."
+                :"Add the squad files you've collected.")+'</div>';
+  }else{
+    /* flag squad labels claimed by more than one row — cause is ambiguous (§10.2) */
+    var counts={};compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();counts[k]=(counts[k]||0)+1;});
+    el.innerHTML=compileRows.map(function(r,i){
+      var dup=counts[(r.squad||"").toLowerCase()]>1;
+      return '<div class="crow"><input type="checkbox" data-i="'+i+'"'+(r.selected?" checked":"")+'>'
+        +'<div class="cbody"><div class="nm">'+esc(r.squad||"(no squad name)")
+        +'<span class="src'+(r.kind==="file"?" file":"")+'">'+(r.kind==="file"?"file":"server")+'</span>'
+        +(dup?' <span class="cibadge warn">2 tablets</span>':'')
+        +(r.done?' <span class="cibadge">already compiled</span>':'')
+        +(r.redo?' <span class="cibadge warn">re-uploaded since you compiled</span>':'')+'</div>'
+        +'<div class="dv">'+esc(r.device||(r.kind==="file"?"from a file":"unnamed tablet"))
+        +' · '+(r.count||0)+' shooters'+(r.at?' · '+esc(whenText(r.at)):'')+'</div>'
+        +'<button class="exp" data-x="'+i+'">'+(r.open?"Hide shooters":"Show shooters")+'</button>'
+        +(r.open?'<div class="names">'+(r.names?esc(r.names.join(", ")):"Loading…")+'</div>':'')
+        +'</div></div>';}).join("");
+    el.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+      cb.addEventListener("change",function(){
+        var row=compileRows[+cb.dataset.i];
+        /* Re-including a squad that's already been compiled replays the server's
+           copy over anything corrected since — the merge can't tell a correction
+           from another tablet's different score, and keeps both. */
+        /* Two different situations, opposite causes, same trap: re-importing
+           replays the server's copy over anything corrected locally. */
+        var msg=row.done
+          ? "\u201c"+(row.squad||"This squad")+"\u201d has already been compiled into these results.\n\n"
+            +"Including it again re-imports the server's copy. If you have corrected any of its scores "
+            +"since, you will end up with the shooter listed twice \u2014 once corrected, once not.\n\n"
+            +"To fix a score or division, edit it on the Roster instead. You do not need to compile again.\n\n"
+            +"Include it anyway?"
+          : "\u201c"+(row.squad||"This squad")+"\u201d uploaded again after you compiled it.\n\n"
+            +"Including it re-imports the WHOLE squad, not only what changed \u2014 anything you have "
+            +"corrected here will end up listed twice.\n\n"
+            +"Safer: make the change on this tablet's Roster instead.\n\n"
+            +"Include it anyway?";
+        if(cb.checked&&(row.done||row.redo)&&!confirm(msg)){
+          cb.checked=false;row.selected=false;renderCompileWarn();return;
+        }
+        row.selected=cb.checked;renderCompileWarn();});});
+    el.querySelectorAll(".exp").forEach(function(b){
+      b.addEventListener("click",function(){toggleCompileNames(+b.dataset.x);});});
+  }
+  renderCompileWarn();
+}
+/* Once everything is in, this screen's job is finished — say so, rather than
+   presenting the same tickable list, which reads as an invitation. */
+function compileAllDone(){
+  return compileRows.length>0&&compileRows.every(function(r){return r.done;});
+}
+function renderCompileWarn(){
+  var w=document.getElementById("compile-warn"),counts={};
+  compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();if(k)counts[k]=(counts[k]||0)+1;});
+  var dups=Object.keys(counts).filter(function(k){return counts[k]>1;});
+  var h="";
+  if(dups.length)h+='<div class="warnbox" style="margin-top:10px"><b>Two tablets used the same squad name.</b> '
+    +'Check whether these are different squads that were both labelled the same — compile both — or a replacement tablet taking over, in which case compile one. '
+    +'Tap <b>Show shooters</b> on each: overlapping names mean a replacement, different names mean two squads.</div>';
+  if(compileAllDone())
+    h+='<div class="goodbox" style="margin-top:10px"><b>Every squad here is already compiled.</b> '
+      +'Nothing more to do on this screen. To fix a score or division, edit it on the Roster, then use '
+      +'<b>Publish corrected results</b>.</div>';
+  var n=compileRows.filter(function(r){return r.selected;}).length;
+  h+='<div class="sethint" style="margin-top:8px">'+n+' of '+compileRows.length+' selected.</div>';
+  w.innerHTML=h;
+}
+function ensurePayload(r){
+  if(r.payload)return Promise.resolve(r.payload);
+  if(r.kind==="file")return Promise.resolve(null);
+  return apiGetSquad(r.device_id,r.revision).then(function(sq){
+    if(!sq||!sq.payload)throw "That squad came back empty.";
+    var d=JSON.parse(sq.payload);r.payload=d;return d;});
+}
+function toggleCompileNames(i){
+  var r=compileRows[i];r.open=!r.open;
+  if(r.open&&!r.names){
+    renderCompile();
+    ensurePayload(r).then(function(d){r.names=d?compileNames(d):[];renderCompile();})
+      .catch(function(){r.names=["(couldn't load)"];renderCompile();});
+    return;
+  }
+  renderCompile();
+}
+function openCompile(){
+  if(!state.meta.match){toast("Set the match date on Setup first — it has to match the squads you're compiling");return;}
+  compileRows=[];
+  document.getElementById("compile-match").textContent=matchDisplay(state.meta.match)+" · "+typeLabel();
+  document.getElementById("compileScrim").classList.add("open");
+  renderCompile();
+  if(syncOn())loadCompileServer();
+}
+function loadCompileServer(){
+  document.getElementById("compileList").innerHTML='<div class="empty" style="padding:18px">Looking…</div>';
+  apiListSquads().then(function(list){
+    /* "compiled" is a result, not a squad (§10.1) */
+    list.filter(function(s){return s.device_id!=="compiled";}).forEach(function(s){
+      if(compileRows.some(function(r){return r.kind==="server"&&r.device_id===s.device_id;}))return;
+      var done=isCompiled(s.device_id,s.revision),redo=reuploadedSince(s.device_id,s.revision);
+      compileRows.push({kind:"server",device_id:s.device_id,revision:s.revision,
+        squad:s.squad_label||"",device:s.device_label||"",count:s.entry_count||0,
+        at:s.uploaded_at,selected:!done&&!redo,done:done,redo:redo,payload:null,names:null,open:false});
+        /* new squads default selected (§10.2); ones already compiled default OFF so a
+           re-compile can't overwrite corrections made since */
+    });
+    renderCompile();
+  }).catch(function(err){
+    renderCompile();
+    document.getElementById("compile-warn").innerHTML='<div class="warnbox" style="margin-top:10px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))
+      +' You can still add squad files below.</div>';
+  });
+}
+/* --- publish (§4.7, §4.9, §4.10) ---------------------------------------
+   Three steps, each reported separately: roster first (it can't be
+   reconstructed), then the compiled archive (re-pushable any time), then the
+   late-upload check. Retry RESUMES rather than restarts — the archive string
+   is generated once and kept, so a re-send hits the server's content-hash
+   dedup instead of creating a second revision of the same compile. */
+function apiPostCompiled(txt){
+  var body={
+    match_key:matchKey(state.meta.match,state.meta.matchType),
+    device_id:"compiled",
+    match_type:(state.meta.matchType||"outdoor"),
+    payload:txt,schema_version:SCHEMA_VERSION,
+    squad_key:"compiled",squad_label:"Compiled results",
+    match_label:(matchDisplay(state.meta.match)||""),
+    device_label:(cfg.deviceLabel||"")+" (compiled)",
+    app_version:APP_VERSION,app_build:APP_BUILD,
+    entry_count:state.entries.filter(function(e){return e.active;}).length
+  };
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads",{
+    method:"POST",headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+    body:JSON.stringify(body)
+  }).then(function(res){return res.json().catch(function(){return {};}).then(function(j){return {status:res.status,body:j};});});
+}
+function apiListMatches(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return [];
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.matches)||[];});
+}
+/* fetch a specific match's compiled archive — key passed in, not read from state */
+function apiGetCompiled(mk){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"
+    +encodeURIComponent(mk)+"/squads/compiled",{headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(res.status===404)return null;
+    if(!res.ok)throw "Those results couldn't be downloaded ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squad)||null;});
+}
+function apiUnmerged(){
+  return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads/unmerged",
+    {headers:{"Authorization":"Bearer "+cfg.secret}})
+  .then(function(res){
+    if(res.status===401)throw AUTH_ERR;
+    if(!res.ok)throw "The server answered with an error ("+res.status+").";
+    return res.json();
+  }).then(function(j){return (j&&j.squads)||[];});
+}
+function publishState(){
+  if(!state.meta.publish)state.meta.publish={rosterDone:false,archiveDone:false,archiveText:null};
+  return state.meta.publish;
+}
+/* merged_squads carries the exact revision compiled from — marking by device
+   alone would claim a newer revision nobody has seen (§4.8). */
+function mergedSquads(){
+  var mk=matchKey(state.meta.match,state.meta.matchType);
+  return (state.meta.compiled||[]).filter(function(c){return c.device&&c.revision;})
+    .map(function(c){return {match_key:mk,device_id:c.device,revision:c.revision};});
+}
+/* results changed since the last publish — the kept archive is now stale */
+function invalidatePublished(){
+  if(state.meta.publish){state.meta.publish=null;save();}
+}
+function republishResults(){
+  if(!syncOn()||!state.meta.compiledAt)return;
+  if(!confirm("Publish the corrected results?\n\nThis updates the club shooter list and the match archive on the server."))return;
+  invalidatePublished();
+  toast("Publishing\u2026");
+  publishResults(function(res){
+    if(!res)return;
+    toast(res.ok?"Published":(res.err||"Couldn't publish"));
+    if(!res.ok&&res.lines.length)alert(res.lines.join("\n")+"\n\n"+res.err+"\n\nThe results are on this tablet — you can still view, print and email them.");
+    updateBackupInfo();
+  });
+}
+function publishResults(report){
+  var ps=publishState(),lines=[];
+  if(!syncOn()){report(null);return Promise.resolve();}
+  /* the archive string is made once and kept, so a resumed retry is byte-identical */
+  if(!ps.archiveText)ps.archiveText=JSON.stringify(payload(),null,2);
+  var step1=ps.rosterDone?Promise.resolve("skip"):pushRosterWithMerges();
+  return step1.then(function(r){
+    if(r!=="skip"){
+      ps.rosterDone=true;save();
+      lines.push("Shooter list published as #"+cfg.rosterRevision+".");
+      var want=mergedSquads().length,got=(r&&r.marked_squads);
+      if(typeof got==="number"&&got<want)
+        lines.push("\u26a0 "+got+" of "+want+" squads were marked as compiled — one may have re-uploaded since.");
+    }
+    if(ps.archiveDone)return null;
+    return apiPostCompiled(ps.archiveText).then(function(a){
+      if(a.status!==201&&a.status!==200)throw "archive";
+      ps.archiveDone=true;save();lines.push("Match archive uploaded.");
+    });
+  }).then(function(){
+    return apiUnmerged().then(function(list){
+      var mk=matchKey(state.meta.match,state.meta.matchType);
+      var mine=list.filter(function(u){return u.match_key===mk;});
+      if(mine.length)lines.push("\u26a0 "+mine.length+" squad"+(mine.length===1?"":"s")+" uploaded for this match but not compiled: "
+        +mine.map(function(u){return (u.squad_label||"unnamed")+" ("+whenText(u.uploaded_at)+")";}).join(", "));
+      else lines.push("No late uploads.");
+    }).catch(function(){lines.push("Couldn't check for late uploads.");});
+  }).then(function(){report({ok:true,lines:lines});})
+  .catch(function(err){
+    report({ok:false,lines:lines,
+      err:(err===AUTH_ERR)?"The server rejected this tablet's setup code."
+        :(err==="archive")?"The shooter list published, but the match archive didn't upload."
+        :"Couldn't reach the server."});
+  });
+}
+function pushRosterWithMerges(){
+  var p=rosterPayload(),txt=JSON.stringify(p);
+  var body={payload:txt,schema_version:SCHEMA_VERSION,
+    base_revision:(cfg.rosterRevision?cfg.rosterRevision:null),
+    entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
+    author:cfg.deviceLabel||"Unnamed tablet",merged_squads:mergedSquads()};
+  return apiPutRoster(body).then(function(r){
+    if(r.status===201){cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();return r.body;}
+    if(r.status===409){
+      return apiGetRoster().then(function(cur){
+        if(!cur){cfg.rosterRevision=0;saveCfg();}
+        else{
+          var d;try{d=JSON.parse(cur.payload);}catch(e){throw "The roster from the server couldn't be read.";}
+          mergePayloads([d],{skipMatchGuard:true});cfg.rosterRevision=cur.revision;saveCfg();
+        }
+        return pushRosterWithMerges();
+      });
+    }
+    if(r.status===401)throw AUTH_ERR;
+    throw "The server rejected the shooter list ("+r.status+").";
+  });
+}
+function doCompile(){
+  var sel=compileRows.filter(function(r){return r.selected;});
+  if(!sel.length){
+    var missed=compileRows.filter(function(r){return !r.done;});
+    if(missed.length){
+      toast("Nothing selected — “"+(missed[0].squad||"one squad")+"” hasn't been compiled yet. Tick it to include it.");
+    }else{
+      var n=compiledSet().length;
+      toast("Nothing new to compile — these results already include "+n+" squad"+(n===1?"":"s")+". To fix a score, edit it on the Roster, then use \u201cPublish corrected results\u201d.");
+    }
+    return;
+  }
+  toast("Compiling "+sel.length+" squad"+(sel.length===1?"":"s")+"…");
+  Promise.all(sel.map(function(r){return ensurePayload(r).catch(function(){return null;});})).then(function(list){
+    var payloads=list.filter(Boolean);
+    if(!payloads.length){toast("Couldn't load the selected squads");return;}
+    var r=mergePayloads(payloads,{undoLabel:"Compiled "+payloads.length+" squad"+(payloads.length===1?"":"s")});
+    sel.forEach(function(row){if(row.kind==="server")markCompiled(row.device_id,row.revision);});
+    state.meta.compiledAt=Date.now();
+    state.meta.started=true;    /* compiling means the match is underway here — show the tabs */
+    state.meta.publish=null;    /* a new compile publishes afresh */
+    save();applyPhase();
+    document.getElementById("compileScrim").classList.remove("open");
+    showMergeSummary(r);show("results");
+    /* The merge is local and already done. Publishing is separate, and a
+       network failure must never make a completed compile look failed. */
+    if(syncOn()){
+      toast("Compiled \u00b7 publishing\u2026");
+      publishResults(function(res){
+        if(!res)return;
+        appendMergeSummary(res);
+        toast(res.ok?"Published":"Compiled \u2014 not published, see the summary");
+      });
+    }
+  });
+}
+document.getElementById("compileBtn").addEventListener("click",openCompile);
+document.getElementById("republishBtn").addEventListener("click",republishResults);
+document.getElementById("compile-go").addEventListener("click",doCompile);
+document.getElementById("compile-refresh").addEventListener("click",function(){if(syncOn())loadCompileServer();else renderCompile();});
+document.getElementById("compile-addfiles").addEventListener("click",function(){document.getElementById("mergeFile").click();});
+document.getElementById("compileClose").addEventListener("click",function(){document.getElementById("compileScrim").classList.remove("open");});
+document.getElementById("compileScrim").addEventListener("click",function(ev){if(ev.target.id==="compileScrim")ev.currentTarget.classList.remove("open");});
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
@@ -716,6 +1958,23 @@ function stageAccountProblem(e,key){
   if(key==="plates"){
     for(var i=0;i<4;i++){var acct=num0(e.plates.hits[i])+num0(e.plates.miss[i]);
       if(acct!==6)return "String "+(i+1)+" is "+acct+"/6 — each plates string must total 6 (hits + misses standing).";}
+    return "";
+  }
+  /* Paper: every target must account for all its shots. ROs enter A-zone hits
+     as well as down-zones and misses, so the row has to add up. Catches both an
+     untouched target and one where a shot was missed off the tally. */
+  var tg=(e[key]&&e[key].targets)||[],want=expectedPaper(e);
+  for(var j=0;j<tg.length;j++){
+    var t=tg[j]||{},got=num0(t.a)+num0(t.c)+num0(t.d)+num0(t.miss);
+    if(got!==want)return "Target "+(j+1)+" is "+got+"/"+want+" — each target must account for all "+want+" shots (A + C + D + misses).";
+  }
+  /* Glock'M has one steel popper per string, three strings — so hits plus
+     standing must come to exactly 3. Requiring the exact total (not merely
+     "something entered") catches the likelier mistake: two poppers recorded
+     and the third forgotten, which silently drops a 10-second penalty. */
+  if(key==="glockm"){
+    var st=num0(e.glockm.steelHits)+num0(e.glockm.steelMiss);
+    if(st!==3)return "Steel is "+st+"/3 — one popper per string, so hits plus standing must total 3.";
   }
   return "";}
 function sumT(a){var s=0;for(var i=0;i<a.length;i++)s+=numf(a[i]);return s;}
@@ -761,6 +2020,8 @@ function renderSetup(){
   var t=state.meta.matchType||"outdoor",locked=!!state.meta.started;
   document.querySelectorAll("#setupType button").forEach(function(b){b.classList.toggle("on",b.dataset.type===t);b.disabled=locked;});
   document.getElementById("f-match").value=state.meta.match||"";
+  var fms=document.getElementById("f-match-shown");
+  if(fms)fms.textContent=state.meta.match?matchDisplay(state.meta.match):"Not set — pick tonight's date.";
   document.getElementById("f-squad-device").value=state.meta.squad||"";
   var active=state.entries.filter(function(e){return e.active;}).length;
   document.getElementById("setupCount").textContent=active?(active+" checked in — add more or start the match"):"No shooters checked in yet — add them now, or after starting.";
@@ -783,7 +2044,7 @@ function renderRoster(){
   document.getElementById("matchBanner").innerHTML='<span class="pill'+(mt==="indoor"?' indoor':'')+'">'+typeLabel()+'</span><span>'+esc(state.meta.match||"—")+'</span>';
   var q=(document.getElementById("rosterSearch").value||"").toLowerCase();
   var active=state.entries.filter(function(e){return e.active;});
-  if(!active.length){document.getElementById("rosterCount").textContent="0 checked in";document.getElementById("rosterList").innerHTML='<div class="empty"><div class="ico">☰</div>No shooters checked in.<br>Tap “Check in shooters” to pick tonight’s squad.</div>';return;}
+  if(!active.length){document.getElementById("rosterCount").textContent="0 checked in";document.getElementById("rosterList").innerHTML='<div class="empty"><div class="ico">≡</div>No shooters checked in.<br>Tap “Check in shooters” to pick tonight’s squad.</div>';return;}
   if(mt==="indoor")return renderRosterIndoor(active,q);
   var shown=active.filter(function(e){return !q||(e.name||"").toLowerCase().indexOf(q)>=0;}).sort(function(a,b){return ((a.checkinSeq||0)-(b.checkinSeq||0))||((a.name||"").localeCompare(b.name||""));});
   document.getElementById("rosterCount").textContent=active.length+" checked in"+(state.entries.length>active.length?(" · "+state.entries.length+" on file"):"");
@@ -792,7 +2053,8 @@ function renderRoster(){
   list.innerHTML=shown.map(function(e,i){var s=hasAny(e),st=statusOf(e);
     return '<div class="entry" data-id="'+e.id+'"><div class="ord">'+(i+1)+'</div><div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")
       +(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>'
-      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')
+      +(divGunMismatch(e)?' <span class="cibadge warn">check division/gun</span>':'')+'</div></div>'
       +'<div class="stagedots"><span class="sdot'+(e.done.five?' on':'')+'" title="Five to Glock">F</span><span class="sdot'+(e.done.glockm?' on':'')+'" title="Glock\u2019M">M</span><span class="sdot'+(e.done.plates?' on':'')+'" title="Glock the Plates">P</span></div>'
       +'<div class="tot">'+(s?fmt(total(e)):'—')+'<small>'+(s?'total':'not shot')+'</small></div></div>';}).join("");
   list.querySelectorAll(".entry").forEach(function(r){r.addEventListener("click",function(){state.selected=r.dataset.id;show("score");});});
@@ -819,8 +2081,15 @@ function renderRosterIndoor(active,q){
   }).join("");
   list.querySelectorAll(".entry").forEach(function(r){r.addEventListener("click",function(){state.selected=r.dataset.id;show("score");});});
 }
-document.getElementById("f-squad-device").addEventListener("input",function(){state.meta.squad=this.value.trim();save();});
-document.getElementById("f-match").addEventListener("input",function(){state.meta.match=this.value.trim();save();});
+document.getElementById("set-squad").addEventListener("input",function(){state.meta.squad=this.value.trim();save();syncSetupSquad();});
+document.getElementById("f-match").addEventListener("change",function(){
+  if(this.value&&!validMatchDate(this.value)){
+    toast("That date doesn't look right — pick a date from the calendar.");
+    this.value=state.meta.match||"";return;
+  }
+  state.meta.match=this.value;save();checkPendingMatch();
+  var h=document.getElementById("f-match-shown");if(h)h.textContent=state.meta.match?matchDisplay(state.meta.match):"Not set — pick tonight\u2019s date.";});
+document.getElementById("f-match").addEventListener("change",checkPendingMatch);
 document.getElementById("rosterSearch").addEventListener("input",renderRoster);
 
 /* check-in */
@@ -923,12 +2192,15 @@ document.getElementById("checkinClose").addEventListener("click",function(){docu
   if(parts.length)toast("Heads up: "+parts.join(", "));});
 document.getElementById("checkinScrim").addEventListener("click",function(ev){if(ev.target.id==="checkinScrim"){ev.currentTarget.classList.remove("open");renderRoster();}});
 document.getElementById("checkinAddNew").addEventListener("click",function(){document.getElementById("checkinScrim").classList.remove("open");openEdit(null);});
-document.getElementById("newMatchBtn").addEventListener("click",function(){
+document.getElementById("set-newmatch").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");
   if(!confirm("Start a NEW match?\n\nThis clears ALL scores and check-ins on this tablet. Your shooter list (names, divisions, emails) is kept for next week.\n\nBack up first if you haven’t. Continue?"))return;
   undoPush("Start new match");
   var seen={};state.entries=state.entries.filter(function(e){if(seen[e.personId])return false;seen[e.personId]=true;return true;});  /* collapse extra rounds → one per person */
   state.entries.forEach(function(e){clearAll(e);e.active=false;e.status="normal";e.checkinSeq=0;});
-  state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;save();
+  state.meta.match=todayStr();state.meta.seq=1;state.meta.started=false;
+  state.meta.compiled=[];state.meta.compiledAt=null;
+  state.meta.lastUpload=null;state.meta.lastBackup=null;state.meta.lastShared=null;save();
   document.getElementById("checkinScrim").classList.remove("open");
   applyPhase();show("setup");toast("New match — pick type & check in");
 });
@@ -936,6 +2208,22 @@ document.getElementById("newMatchBtn").addEventListener("click",function(){
 /* score */
 /* Outdoor: a shooter may enter several divisions, each a separate scored entry.
    Show their other entries so it's obvious they exist and can be jumped to. */
+/* Removes ONE of a shooter's division entries. Person-level removal lives in
+   the shooter list; this is the "they shouldn't be in Rimfire" case. */
+function dropDivision(id){
+  var r=byId(id);if(!r)return;
+  var mine=state.entries.filter(function(x){return x.personId===r.personId&&x.active;});
+  if(mine.length<2){toast("That's their only division — remove the shooter from Tools instead");return;}
+  var msg="Remove "+(r.name||"this shooter")+" from "+(r.division||"this division")+"?";
+  if(hasAny(r))msg+="\n\n\u26a0 This entry has a score of "+fmt(total(r))+". That will be removed too.";
+  msg+="\n\nTheir other divisions are not affected.";
+  if(!confirm(msg))return;
+  undoPush("Removed a division for "+(r.name||"a shooter"));
+  var others=mine.filter(function(x){return x.id!==r.id;});
+  state.entries=state.entries.filter(function(x){return x.id!==r.id;});
+  if(state.selected===r.id)state.selected=others[0]?others[0].id:null;
+  save();renderScore();renderRoster();toast("Division removed");
+}
 function otherDivisionsBlock(e){
   var mine=state.entries.filter(function(r){return r.personId===e.personId&&r.active;})
     .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
@@ -943,19 +2231,21 @@ function otherDivisionsBlock(e){
   return '<div class="card pad" style="margin-bottom:8px"><div class="muted" style="font-weight:800;margin-bottom:6px">'
     +esc(firstName(e.name))+'’s divisions this match</div>'
     +mine.map(function(r){var cur=(r.id===e.id);
-      return '<div class="lbrow'+(cur?' gold':'')+'" data-jump="'+r.id+'" style="cursor:pointer">'
-        +'<div class="meta"><div class="nm">'+esc(r.division||"—")+(r.gun?' · '+esc(r.gun):'')+'</div>'
+      return '<div class="lbrow'+(cur?' gold':'')+'">'
+        +'<div class="meta" data-jump="'+r.id+'" style="cursor:pointer"><div class="nm">'+esc(r.division||"—")+(r.gun?' · '+esc(r.gun):'')+'</div>'
         +'<div class="dv">'+(cur?'currently scoring':'tap to switch')+'</div></div>'
-        +'<div class="sc">'+(hasAny(r)?fmt(total(r)):'—')+'<small>'+(hasAny(r)?'total':'not shot')+'</small></div></div>';}).join("")
+        +'<div class="sc">'+(hasAny(r)?fmt(total(r)):'—')+'<small>'+(hasAny(r)?'total':'not shot')+'</small></div>'
+        +'<button class="linklike" data-dropdiv="'+r.id+'" title="Remove this division">remove</button></div>';}).join("")
     +'</div>';
 }
 function renderScore(){
   var body=document.getElementById("scoreBody"),e=byId(state.selected);
   if((state.meta.matchType||"outdoor")==="indoor")return renderScoreIndoor();
-  if(!e){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">◎</div>Pick a competitor from the Roster to score them.</div>';return;}
+  if(!e){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">●</div>Pick a competitor from the Roster to score them.</div>';return;}
   body.innerHTML=
     '<div class="totalcard"><div class="who"><div class="nm">'+esc(e.name||"(unnamed)")+' <span id="statusBadge"></span></div>'
-      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')
+      +(divGunMismatch(e)?' <span class="cibadge warn">check division/gun</span>':'')+'</div></div>'
       +'<div class="big" id="grandTotal">'+fmt(total(e))+'<small>match total</small></div></div>'
     +'<div class="statusctl"><span class="lbl">Status</span><div class="seg">'
       +'<button data-st="normal">Finished</button><button data-st="DNF">DNF</button><button data-st="DQ">DQ</button></div></div>'
@@ -1002,6 +2292,8 @@ function renderScore(){
   if(adb)adb.addEventListener("click",function(){openRoundModal("add",null);});
   body.querySelectorAll("[data-jump]").forEach(function(row){
     row.addEventListener("click",function(){state.selected=row.dataset.jump;renderScore();window.scrollTo(0,0);});});
+  body.querySelectorAll("[data-dropdiv]").forEach(function(b){
+    b.addEventListener("click",function(ev){ev.stopPropagation();dropDivision(b.dataset.dropdiv);});});
   updateScoreUI(e);updateStatusUI(e);
 }
 function updateStatusUI(e){
@@ -1025,8 +2317,8 @@ function openStageConfirm(e,key){
     +'<div class="confbreak">'+fmt(raw)+' time&nbsp;&nbsp;+&nbsp;&nbsp;'+fmt(pen)+' penalties</div>'
     +(review?'<div class="confnote">This stage is completed and locked. Unlock it to make changes.</div>':'');
   var acc=document.getElementById("confirmAccept"),rej=document.getElementById("confirmReject");
-  if(review){acc.textContent="Keep completed";rej.textContent="Unlock &amp; edit";}
-  else{acc.textContent="Accept";rej.textContent="Reject &amp; edit";}
+  if(review){acc.textContent="Keep completed";rej.textContent="Unlock & edit";}
+  else{acc.textContent="Accept";rej.textContent="Reject & edit";}
   document.getElementById("confirmScrim").classList.add("open");
 }
 document.getElementById("confirmAccept").addEventListener("click",function(){
@@ -1053,7 +2345,7 @@ function roundComplete(r){return !!(r.done||statusOf(r)!=="normal");}
 function personRounds(pid){return state.entries.filter(function(r){return r.personId===pid&&r.active;});}
 function renderScoreIndoor(){
   var body=document.getElementById("scoreBody"),sel=byId(state.selected);
-  if(!sel){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">◎</div>Pick a shooter from the Roster to score them.</div>';return;}
+  if(!sel){body.innerHTML='<h2 class="section">Score</h2><div class="empty"><div class="ico">●</div>Pick a shooter from the Roster to score them.</div>';return;}
   var pid=sel.personId,rounds=personRounds(pid);if(!rounds.length)rounds=[sel];
   var best=bestRound(rounds),last=rounds[rounds.length-1],canAdd=roundComplete(last);
   var h='<h2 class="section">'+esc(sel.name||"(unnamed)")+'</h2>';
@@ -1064,7 +2356,8 @@ function renderScoreIndoor(){
     h+='<div class="hd"><div class="name">ROUND '+(k+1)+(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>';
     h+='<div class="stagescore">'+(r.score!=null?num0(r.score):'—')+'<small>'+(r.x!=null?num0(r.x)+'X':'score')+'</small></div></div>';
     h+='<div class="bd">';
-    h+='<div class="rmeta">'+esc(r.division||"—")+' · '+(r.gun?esc(r.gun):'no gun')+(locked?'':' <button class="linklike" data-rdedit="'+r.id+'">change</button>')+'</div>';
+    h+='<div class="rmeta">'+esc(r.division||"—")+' · '+(r.gun?esc(r.gun):'no gun')
+      +(divGunMismatch(r)?' <span class="cibadge warn">check division/gun</span>':'')+(locked?'':' <button class="linklike" data-rdedit="'+r.id+'">change</button>')+'</div>';
     if(locked)h+='<div class="donebanner">✓ Round locked — tap “Review / edit” to change</div>';
     h+='<div class="scorepads">'
       +'<button type="button" class="padfield'+(locked?' locked':'')+'" data-fld="score" data-rid="'+r.id+'"'+(locked?' disabled':'')+'><span class="pfnum">'+(r.score!=null?num0(r.score):'—')+'</span><span class="pflab">Score · 0–500</span></button>'
@@ -1145,7 +2438,7 @@ function openRoundConfirm(r){if(!r)return;
                     :'<div class="confbig">'+st+'<small>this round</small></div>')
     +(review?'<div class="confnote">This round is locked. Unlock it to make changes.</div>':'');
   var acc=document.getElementById("confirmAccept"),rej=document.getElementById("confirmReject");
-  if(review){acc.textContent="Keep locked";rej.innerHTML="Unlock &amp; edit";}
+  if(review){acc.textContent="Keep locked";rej.textContent="Unlock & edit";}
   else{acc.textContent="Lock round";rej.textContent="Back";}
   document.getElementById("confirmScrim").classList.add("open");
 }
@@ -1365,12 +2658,15 @@ function placeIn(list,e){var ord=ordered(list);for(var i=0;i<ord.length;i++)if(o
 function editMatchInfo(){
   var v=prompt("Match name / date:",state.meta.match||"");
   if(v===null)return;
-  state.meta.match=v.trim();save();renderResults();
+  state.meta.match=v.trim();save();checkPendingMatch();renderResults();
 }
 function renderResults(){
   var mi=document.getElementById("resultsMatchInfo");
-  mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(state.meta.match||"—")+'<button class="linklike" id="editMatchBtn">edit</button>';
-  var emb=document.getElementById("editMatchBtn");if(emb)emb.addEventListener("click",editMatchInfo);
+  mi.innerHTML='<span class="pill'+((state.meta.matchType||"outdoor")==="indoor"?' indoor':'')+'" style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;background:var(--steel);color:#fff;margin-right:6px">'+typeLabel()+'</span>'+esc(matchDisplay(state.meta.match)||"—");
+  var rpb=document.getElementById("republishBtn");
+  if(rpb)rpb.style.display=(syncOn()&&state.meta.compiledAt)?"":"none";
+  var fsb=document.getElementById("finishSquadBtn");
+  if(fsb)fsb.textContent=syncOn()?"\u2b06 Upload this squad's results":"\ud83d\udcbe Save this squad's results";
   if((state.meta.matchType||"outdoor")==="indoor")return renderResultsIndoor();
   var ie=document.getElementById("indoorExtra");if(ie)ie.innerHTML="";
   var divs=["All"].concat(divisions()),sqs=["All"].concat(squads());
@@ -1385,7 +2681,7 @@ function renderResults(){
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
   var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard");
-  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">▤</div>No scored entries yet.</div>';}
+  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored entries yet.</div>';}
   else lb.innerHTML=ord.map(function(o){var e=o.e,fin=o.place!=="DNF"&&o.place!=="DQ";
     return '<div class="lbrow'+(o.place==="1"?' gold':'')+'"><div class="rk'+(fin?'':' st')+'">'+o.place+'</div>'
     +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+'</div><div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
@@ -1416,7 +2712,7 @@ function renderResultsIndoor(){
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
   var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
-  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">▤</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
+  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
   lb.innerHTML=ord.map(lbRowIndoor).join("");
   var xh="";
   if(state.filterDiv==="All"&&state.filterSquad==="All"){
@@ -1438,12 +2734,18 @@ function renderResultsIndoor(){
 }
 function updateBackupInfo(){
   var el=document.getElementById("backupInfo");if(!el)return;
-  var lb=state.meta.lastBackup,txt=lb?('Last backup: '+new Date(lb).toLocaleString()):'Last backup: never';
-  var ls=state.meta.lastShared;if(ls)txt+=' · Sent: '+new Date(ls).toLocaleTimeString();
-  el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span>'+esc(txt)+'</span>';
-  var ub=document.getElementById("undoBtn");
+  function hm(t){return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});}
+  var lb=state.meta.lastBackup,txt=lb?('Saved '+hm(lb)):'Not saved yet';
+  if(syncOn())txt+=state.meta.lastUpload?(' · uploaded '+hm(state.meta.lastUpload)):' · not uploaded';
+  var ls=state.meta.lastShared;if(ls)txt+=' · sent '+hm(ls);
+  if(state.meta.compiledAt){
+    var cn=(state.meta.compiled||[]).length;
+    txt+='\n Compiled from '+cn+' squad'+(cn===1?'':'s')+' · '+hm(state.meta.compiledAt);
+  }
+  el.innerHTML='<span class="dot" style="background:'+(lb?'var(--green)':'var(--steel-soft)')+'"></span><span style="white-space:pre-line">'+esc(txt)+'</span>';
+  var ub=document.getElementById("set-undo");
   if(ub){var t=undoTop();
-    if(t){ub.style.display="";ub.textContent="↶ Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
+    if(t){ub.style.display="";ub.textContent="← Undo: "+t.label+" ("+new Date(t.at).toLocaleTimeString()+")";}
     else ub.style.display="none";}
 }
 
@@ -1454,8 +2756,8 @@ function composeEmailIndoor(e){
   var rounds=state.entries.filter(function(r){return r.personId===e.personId&&inResults(r);})
     .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
   if(!rounds.length)rounds=[e];
-  var match=state.meta.match||"GSSF Indoor Match",L=[];
-  L.push("GSSF Indoor Match — Score Report");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Indoor Match",L=[];
+  L.push("Indoor Match — Score Report");L.push("Match: "+match);L.push("");
   L.push("Competitor:  "+(e.name||""));
   if(e.squad)L.push("Squad:       "+e.squad);
   L.push("");L.push("ROUNDS");
@@ -1480,8 +2782,8 @@ function composeEmailIndoor(e){
 function composeEmail(e){
   if((state.meta.matchType||"outdoor")==="indoor")return composeEmailIndoor(e);
   var ov=placeIn(resultEntries(),e),dv=e.division?placeIn(filterEntries(e.division,"All"),e):null;
-  var now=new Date(),match=state.meta.match||"GSSF Outdoor Match",L=[];
-  L.push("GSSF Outdoor Match — Score Report");L.push("Match: "+match);L.push("");
+  var now=new Date(),match=state.meta.match||"Outdoor Match",L=[];
+  L.push("Outdoor Match — Score Report");L.push("Match: "+match);L.push("");
   L.push("Competitor:  "+(e.name||""));
   L.push("Division:    "+(e.division||"—")+(e.category?"  ("+e.category+")":""));
   if(e.gun)L.push("Glock:       "+e.gun);
@@ -1505,23 +2807,10 @@ function composeEmail(e){
 function clickHref(href){var a=document.createElement("a");a.href=href;document.body.appendChild(a);a.click();document.body.removeChild(a);}
 function sendEmail(e){if(!e.email){toast("No email on file");return;}var m=composeEmail(e);
   clickHref("mailto:"+e.email+"?subject="+encodeURIComponent(m.subject)+"&body="+encodeURIComponent(m.body));}
-document.getElementById("emailAllBtn").addEventListener("click",function(){
-  var ord=ordered(filterEntries(state.filterDiv,state.filterSquad));if(!ord.length){toast("No scored competitors");return;}
-  var list=document.getElementById("emailList");
-  var indoor=(state.meta.matchType||"outdoor")==="indoor";
-  if(indoor){var seenP={};ord=ord.filter(function(o){if(seenP[o.e.personId])return false;seenP[o.e.personId]=true;return true;});}
-  list.innerHTML=ord.map(function(o){var e=o.e,has=!!e.email;
-    var sc=indoor?(num0(e.score)+" ("+num0(e.x)+"X)"):fmt(total(e));
-    return '<div class="erow"><div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+' · '+sc+(statusOf(e)!=="normal"?' ('+statusOf(e)+')':'')+'</div>'
-      +'<div class="em'+(has?'':' none')+'">'+(has?esc(e.email):'no email on file')+'</div></div>'
-      +(has?'<button class="btn sm" data-id="'+e.id+'">Send</button>':'<button class="btn ghost sm" disabled>—</button>')+'</div>';}).join("");
-  list.querySelectorAll("button[data-id]").forEach(function(b){b.addEventListener("click",function(){sendEmail(byId(b.dataset.id));b.textContent="Sent ✓";b.classList.add("dark");});});
-  document.getElementById("emailScrim").classList.add("open");
-});
 document.getElementById("emailClose").addEventListener("click",function(){document.getElementById("emailScrim").classList.remove("open");});
 document.getElementById("emailScrim").addEventListener("click",function(ev){if(ev.target.id==="emailScrim")ev.currentTarget.classList.remove("open");});
 
-/* GSSF-style results tables */
+/* results tables */
 function stageCells(raw,pen,rank){var fin=raw+pen;
   return '<td style="'+SC.tdr+'">'+fmt(raw)+'</td><td style="'+SC.tdr+'">'+(pen>0?pen:0)+'</td><td style="'+SC.tdr+'">'+fmt(fin)+'</td><td style="'+SC.tdr+'">'+rank+'</td>';}
 function detailTable(title,list,secLabel,secFn){
@@ -1606,10 +2895,18 @@ function bestTableIndoor(){
   h+='</tbody></table>';
   return h;
 }
+/* Render a DIFFERENT match's results without disturbing the live one. The
+   builders and their helpers read `state` throughout; try/finally guarantees the
+   live match is restored even if rendering throws. Never call save() in here. */
+function withMatchState(entries,meta,fn){
+  var se=state.entries,sm=state.meta;
+  try{state.entries=entries;state.meta=meta;return fn();}
+  finally{state.entries=se;state.meta=sm;}
+}
 function buildTablesHTMLIndoor(){
-  var match=esc(state.meta.match||"GSSF Indoor Match"),now=new Date();
+  var match=esc(state.meta.match||"Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
-  h+='<div style="font-size:19px;font-weight:bold">GSSF Indoor Match — Final Results</div>';
+  h+='<div style="font-size:19px;font-weight:bold">Indoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
   h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · high score wins, X breaks ties</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
@@ -1623,9 +2920,9 @@ function buildTablesHTMLIndoor(){
 }
 function buildTablesHTML(){
   if((state.meta.matchType||"outdoor")==="indoor")return buildTablesHTMLIndoor();
-  var match=esc(state.meta.match||"GSSF Outdoor Match"),now=new Date();
+  var match=esc(state.meta.match||"Outdoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
-  h+='<div style="font-size:19px;font-weight:bold">GSSF Outdoor Match — Final Results</div>';
+  h+='<div style="font-size:19px;font-weight:bold">Outdoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
   h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · lower total wins</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
@@ -1635,6 +2932,8 @@ function buildTablesHTML(){
   h+='</div>';
   return h;
 }
+var CLOSEMSG='<div style="font:16px Arial;padding:28px;line-height:1.7">Finished with the results.'
+  +'<br><br>Use your device\u2019s back gesture to return to Match Scorekeeper.</div>';
 function composeResultsHTML(autoprint){
   var title=esc(state.meta.match||("GSSF "+typeLabel()+" Match Results"));
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -1642,12 +2941,17 @@ function composeResultsHTML(autoprint){
     +'@media print{body{padding:0}.noprint{display:none!important}}table{page-break-inside:auto}tr{page-break-inside:avoid}'
     +'.noprint{margin:0 0 16px;padding:12px 14px;background:#f4f1ea;border:1px solid #d9d4c8;border-radius:8px}'
     +'.noprint button{background:#e8541e;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:800;cursor:pointer}'
+    +'.noprint button.close{background:#16181d;margin-left:8px}'
     +'.noprint p{margin:8px 0 0;font-size:12px;color:#555;line-height:1.5}</style></head><body>'
-    +'<div class="noprint"><button onclick="window.print()">🖨 Save as PDF / Print</button>'
-    +'<p>Tap the button, then choose <b>Save as PDF</b> (or “Save to Files”). Email that PDF so everyone can open it on any device. This bar does not appear in the saved PDF.</p></div>'
+    +'<div class="noprint"><button onclick="window.print()">Save as PDF / Print</button>'
+    +' <button class="close" onclick="closeMe()">Close</button>'
+    +'<p>Tap <b>Save as PDF / Print</b>, then choose <b>Save as PDF</b> (or “Save to Files”). Email that PDF so everyone can open it on any device. This bar does not appear in the saved PDF.</p>'
+    +'<p>Tap <b>Close</b> when you are done to go back to the app.</p></div>'
     +buildTablesHTML()
     +'<div style="margin-top:18px;font-size:11px;color:#888">Generated by Match Scorekeeper · created by G. Groiss · GNU AGPL v3.0</div>'
-    +(autoprint?'<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},400);});<\/script>':'')
+    +'<script>function closeMe(){window.close();'
+    +'setTimeout(function(){if(!window.closed){'
+    +'document.body.innerHTML='+JSON.stringify(CLOSEMSG)+';}},300);}<\/script>'
     +'</body></html>';
 }
 function makeResultsPDF(){
@@ -1661,8 +2965,8 @@ function padL(s,n){s=""+s;while(s.length<n)s=" "+s;return s;}
 function ptRow(pl,name,a,b,c,tot){return padL(pl,4)+"  "+padR(name,20)+padL(a,8)+padL(b,8)+padL(c,8)+padL(tot,9);}
 function ptRowIn(pl,name,div,gun,sc,x){return padL(pl,4)+"  "+padR(name,20)+padR(div,14)+padR(gun,8)+padL(sc,7)+padL(x,5);}
 function composeResultsTextIndoor(){
-  var match=state.meta.match||"GSSF Indoor Match",L=[];
-  L.push("GSSF Indoor Match — Final Results");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Indoor Match",L=[];
+  L.push("Indoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRowIn("Pl","Name","Division","Glock","Score","X");
   var divs=byDivision();
   L.push("DIVISION RANKINGS");
@@ -1679,8 +2983,8 @@ function composeResultsTextIndoor(){
 }
 function composeResultsText(){
   if((state.meta.matchType||"outdoor")==="indoor")return composeResultsTextIndoor();
-  var match=state.meta.match||"GSSF Outdoor Match",L=[];
-  L.push("GSSF Outdoor Match — Final Results");L.push("Match: "+match);L.push("");
+  var match=state.meta.match||"Outdoor Match",L=[];
+  L.push("Outdoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRow("Pl","Name","5toG","GlockM","Plates","Total");
   var divs=byDivision();
   L.push("DIVISION RANKINGS");
@@ -1708,7 +3012,7 @@ document.getElementById("dlSheetBtn").addEventListener("click",function(){
 document.getElementById("emailBccBtn").addEventListener("click",function(){
   var emails=scoreSheetEmails();
   if(!emails.length){toast("No competitor emails on file");return;}
-  var match=state.meta.match||"GSSF Outdoor Match";
+  var match=state.meta.match||"Outdoor Match";
   clickHref("mailto:?bcc="+encodeURIComponent(emails.join(","))+"&subject="+encodeURIComponent(match+" — Final Results")+"&body="+encodeURIComponent(composeResultsText()));
   toast(emails.length+" recipients BCC’d");
 });
@@ -1761,7 +3065,6 @@ function openEdit(id){editingId=id||null;fPair.asked=false;var e=id?byId(id):bla
   document.getElementById("f-phone").value=e.phone||"";document.getElementById("f-email").value=e.email||"";
   document.getElementById("f-ro").checked=!!e.ro;
   document.getElementById("f-squad").value=e.squad||state.meta.squad||"";
-  document.getElementById("editDelete").style.display=id?"flex":"none";
   document.getElementById("editScrim").classList.add("open");
   if(!id){editingId="__new__";window.__draft=e;}}
 function closeEdit(){document.getElementById("editScrim").classList.remove("open");}
@@ -1790,13 +3093,13 @@ document.getElementById("editSave").addEventListener("click",function(){
     updatePerson(e.personId,{name:name,category:cat,phone:phone,email:email,ro:ro});  /* identity → all of this person's runs */
   }
   save();closeEdit();toast("Saved");
+  /* Before the match starts there is no navigation bar, so landing on the
+     Roster leaves no way back. Return to Setup, which is where more shooters
+     get checked in anyway. */
+  if(!state.meta.started){renderSetup();show("setup");return;}
   if(document.getElementById("view-score").classList.contains("active"))renderScore();else show("roster");
 });
-document.getElementById("editDelete").addEventListener("click",function(){
-  if(!editingId||editingId==="__new__")return;if(!confirm("Delete this competitor and their scores?"))return;
-  state.entries=state.entries.filter(function(x){return x.id!==editingId;});
-  if(state.selected===editingId)state.selected=null;save();closeEdit();toast("Deleted");show("roster");
-});
+
 
 /* export / backup / restore / merge */
 function download(fn,txt,type){var b=new Blob([txt],{type:type||"text/plain"}),u=URL.createObjectURL(b),a=document.createElement("a");
@@ -1813,7 +3116,101 @@ function csvIndoor(){
     lines.push(row.map(q).join(","));});
   download("match-results-"+stamp()+".csv",lines.join("\n"),"text/csv");toast("CSV exported");
 }
-document.getElementById("csvBtn").addEventListener("click",function(){
+document.getElementById("set-compile").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");openCompile();
+});
+document.getElementById("set-savefile").addEventListener("click",function(){
+  document.getElementById("fileScrim").classList.add("open");});
+document.getElementById("fixClose").addEventListener("click",function(){
+  document.getElementById("fixScrim").classList.remove("open");});
+document.getElementById("fixScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="fixScrim")ev.currentTarget.classList.remove("open");});
+/* --- past matches ------------------------------------------------------
+   Viewing is strictly read-only: the archive is rendered through a temporary
+   state swap and the live match is restored afterwards, so nothing here can
+   touch a match in progress. */
+var pastPrintHTML="";
+function openPastMatches(){
+  if(!syncOn())return;
+  document.getElementById("gearScrim").classList.remove("open");
+  document.getElementById("pastList").innerHTML='<div class="empty" style="padding:18px">Looking\u2026</div>';
+  document.getElementById("pastScrim").classList.add("open");
+  apiListMatches().then(function(list){
+    var el=document.getElementById("pastList");
+    if(!list.length){el.innerHTML='<div class="empty" style="padding:18px">No matches on the server yet.</div>';return;}
+    el.innerHTML=list.map(function(m){
+      return '<div class="cirow" data-mk="'+esc(m.match_key)+'" data-lbl="'+esc(m.match_label||"")+'">'
+        +'<div class="meta"><div class="nm">'+esc(m.match_label||"(no date)")
+        +' <span class="cibadge">'+esc(m.match_type||"")+'</span></div>'
+        +'<div class="dv">'+(m.squad_count||0)+' squad'+((m.squad_count===1)?'':'s')
+        +(m.has_compiled?'':' \u00b7 not compiled')+'</div></div>'
+        +'<span class="cistat '+(m.has_compiled?'on':'')+'">'+(m.has_compiled?'View':'\u2014')+'</span></div>';}).join("");
+    el.querySelectorAll(".cirow").forEach(function(row){
+      row.addEventListener("click",function(){viewPastMatch(row.dataset.mk,row.dataset.lbl);});});
+  }).catch(function(err){
+    document.getElementById("pastList").innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+function viewPastMatch(mk,label){
+  toast("Loading results\u2026");
+  apiGetCompiled(mk).then(function(sq){
+    if(!sq||!sq.payload){toast("No compiled results for that match");return;}
+    var d;try{d=JSON.parse(sq.payload);}catch(e){throw "Those results couldn't be read.";}
+    if(!d||!d.entries)throw "Those results were empty.";
+    var mt=backupType(d),meta=d.meta||{};
+    meta=JSON.parse(JSON.stringify(meta));meta.matchType=mt;
+    var entries=d.entries.map(function(e){return ensureShape(JSON.parse(JSON.stringify(e)),mt);});
+    var html=withMatchState(entries,meta,function(){return buildTablesHTML();});
+    pastPrintHTML=html;
+    document.getElementById("pastViewTitle").textContent=(label||"Results")+" \u00b7 "+(mt==="indoor"?"Indoor":"Outdoor");
+    document.getElementById("pastViewBody").innerHTML=html;
+    document.getElementById("pastViewScrim").classList.add("open");
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected \u2014 check Tools":(typeof err==="string"?err:"Couldn't load those results."));
+  });
+}
+document.getElementById("pastClose").addEventListener("click",function(){document.getElementById("pastScrim").classList.remove("open");});
+document.getElementById("pastScrim").addEventListener("click",function(ev){if(ev.target.id==="pastScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("pastViewClose").addEventListener("click",function(){document.getElementById("pastViewScrim").classList.remove("open");});
+document.getElementById("pastViewScrim").addEventListener("click",function(ev){if(ev.target.id==="pastViewScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("pastPrint").addEventListener("click",function(){
+  if(!pastPrintHTML)return;
+  var w=window.open("","_blank");
+  if(!w){toast("Allow pop-ups to save a PDF");return;}
+  w.document.write('<!DOCTYPE html><html><head><meta charset=utf-8><title>Results</title>'
+    +'<style>body{margin:0;padding:20px;font-family:Arial,Helvetica,sans-serif;background:#fff}'
+    +'@media print{.noprint{display:none!important}body{padding:0}}'
+    +'.noprint{margin:0 0 16px;padding:12px 14px;background:#f4f1ea;border:1px solid #d9d4c8;border-radius:8px}'
+    +'.noprint button{background:#e8541e;color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;font-weight:800}'
+    +'.noprint button.close{background:#16181d;margin-left:8px}</style></head><body>'
+    +'<div class="noprint"><button onclick="window.print()">Save as PDF / Print</button>'
+    +' <button class="close" onclick="closeMe()">Close</button></div>'
+    +pastPrintHTML
+    +'<script>function closeMe(){window.close();setTimeout(function(){if(!window.closed){'
+    +'document.body.innerHTML='+JSON.stringify(CLOSEMSG)+';}},300);}<\/script>'
+    +'</body></html>');
+  w.document.close();setTimeout(function(){w.print();},250);
+});
+function openFixGuide(){document.getElementById("fixScrim").classList.add("open");}
+document.getElementById("fileClose").addEventListener("click",function(){
+  document.getElementById("fileScrim").classList.remove("open");});
+document.getElementById("fileScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="fileScrim")ev.currentTarget.classList.remove("open");});
+function closeFileSheets(){document.getElementById("fileScrim").classList.remove("open");
+  document.getElementById("gearScrim").classList.remove("open");}
+document.getElementById("file-archive").addEventListener("click",function(){closeFileSheets();saveArchive();});
+document.getElementById("file-roster").addEventListener("click",function(){closeFileSheets();saveShooterList();});
+document.getElementById("set-match").addEventListener("change",function(){
+  if(this.value&&!validMatchDate(this.value)){
+    toast("That date doesn't look right — pick a date from the calendar.");
+    this.value=state.meta.match||"";return;
+  }
+  state.meta.match=this.value;save();checkPendingMatch();
+  matchEditing=false;renderSettings();syncSetupSquad();renderRoster();
+});
+document.getElementById("file-csv").addEventListener("click",function(){
+  closeFileSheets();
   if((state.meta.matchType||"outdoor")==="indoor")return csvIndoor();
   var hdr=["Place","Name","Status","Email","Phone","Division","Glock","Category","Squad",
     "5_S1","5_S2","5_S3","5_A","5_C","5_D","5_Miss","5_Stage",
@@ -1850,8 +3247,9 @@ function rosterPayload(){
     if(seen[e.personId])return;seen[e.personId]=true;out.push(stripScores(e));});
   var meta=JSON.parse(JSON.stringify(state.meta));
   meta.started=false;meta.seq=1;meta.lastShared=null;
+  meta.match="";                       /* §4.6 — a roster is not a match artifact */
   return {appName:"Match Scorekeeper",appVersion:APP_VERSION,schemaVersion:SCHEMA_VERSION,
-          matchType:meta.matchType||"outdoor",match:meta.match||"",entries:out,meta:meta};}
+          matchType:meta.matchType||"outdoor",match:"",entries:out,meta:meta};}
 function saveArchive(){
   download("match-archive-"+matchTag()+".json",JSON.stringify(payload(),null,2),"application/json");
   state.meta.lastBackup=Date.now();save();updateBackupInfo();toast("Match archive saved");}
@@ -1860,9 +3258,23 @@ function saveShooterList(){
   download("shooter-list-"+matchTag()+".json",JSON.stringify(p,null,2),"application/json");
   toast(p.entries.length+" shooters saved for next match");}
 function doBackup(){var sq=sanit(state.meta.squad);
-  download("match-backup"+(sq?"-"+sq:"")+"-"+stamp()+".json",JSON.stringify(payload(),null,2),"application/json");
-  state.meta.lastBackup=Date.now();save();updateBackupInfo();toast("Backup saved");}
-document.getElementById("backupBtn").addEventListener("click",doBackup);
+  /* The local backup always happens first and always succeeds on its own.
+     When sync is configured the same tap also uploads — §5.2. A failed upload
+     must never make the successful local backup look like it failed. */
+  var txt=JSON.stringify(payload(),null,2);
+  download("match-backup"+(sq?"-"+sq:"")+"-"+stamp()+".json",txt,"application/json");
+  state.meta.lastBackup=Date.now();save();updateBackupInfo();
+  if(!syncOn()){toast("Results saved to this tablet");return;}
+  toast("Saved \u00b7 uploading\u2026");
+  uploadSquad(txt).then(function(){
+    clearPending();state.meta.lastUpload=Date.now();save();updateBackupInfo();toast("Saved and uploaded");
+  }).catch(function(err){
+    setPending(txt);
+    toast(err===AUTH_ERR?"Saved to this tablet \u00b7 setup code rejected"
+                        :"Saved to this tablet \u00b7 not uploaded yet, retry from the badge");
+  });}
+document.getElementById("finishSquadBtn").addEventListener("click",doBackup);
+document.getElementById("pendingBadge").addEventListener("click",retryPending);
 
 /* --- send squad results ------------------------------------------------
    Hands this tablet's data to whoever is compiling the match, using the
@@ -1892,8 +3304,7 @@ function sendResults(){
   state.meta.lastShared=Date.now();save();updateBackupInfo();
   toast("File saved — attach it to an email or drop it in Drive");
 }
-document.getElementById("sendResultsBtn").addEventListener("click",sendResults);
-document.getElementById("restoreBtn").addEventListener("click",function(){document.getElementById("restoreFile").click();});
+document.getElementById("set-restore").addEventListener("click",function(){document.getElementById("gearScrim").classList.remove("open");document.getElementById("restoreFile").click();});
 document.getElementById("restoreFile").addEventListener("change",function(ev){var f=ev.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d.entries)throw 0;
     var kind=backupKind(d);
@@ -1918,51 +3329,80 @@ document.getElementById("restoreFile").addEventListener("change",function(ev){va
     }catch(e){toast("Couldn't read that file");}};
   rd.readAsText(f);ev.target.value="";});
 
-document.getElementById("mergeBtn").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.add("open");});
-document.getElementById("mergeHelpCancel").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.remove("open");});
-document.getElementById("mergeHelpScrim").addEventListener("click",function(ev){if(ev.target.id==="mergeHelpScrim")ev.currentTarget.classList.remove("open");});
-document.getElementById("mergeChoose").addEventListener("click",function(){document.getElementById("mergeHelpScrim").classList.remove("open");document.getElementById("mergeFile").click();});
-document.getElementById("mergeFile").addEventListener("change",function(ev){
-  var files=[].slice.call(ev.target.files);if(!files.length)return;
-  Promise.all(files.map(readText)).then(function(texts){
-    var added=0,updated=0,kept=0,conflicts=0,bySquad={},errors=0,refused=0,already=0,wrongMatch=[];
-    var curType=(state.meta&&state.meta.matchType)||"outdoor";
-    var curMatch=normMatch(state.meta&&state.meta.match);
-    undoPush("Merge of "+files.length+" file"+(files.length===1?"":"s"));
-    texts.forEach(function(txt){var d;try{d=JSON.parse(txt);}catch(e){errors++;return;}
-      if(!d||!d.entries){errors++;return;}
-      var kind=backupKind(d);
-      /* a v2 backup of a different match type must never merge into this match */
-      if(kind==="v2"&&backupType(d)!==curType){refused++;return;}
-      /* A file from a DIFFERENT match must not merge in: its scores would be
-         written onto entries this tablet has already cleared, resurrecting last
-         week's results. Only checked when both sides are labelled. */
-      var fileMatch=normMatch(backupMatch(d));
-      if(kind==="v2"&&curMatch&&fileMatch&&fileMatch!==curMatch){wrongMatch.push(backupMatch(d));return;}
-      if(d.meta&&d.meta.match&&!state.meta.match)state.meta.match=d.meta.match;
-      d.entries.forEach(function(ie){
-        if(kind==="legacy")ie=rosterOnly(ie); else ensureShape(ie,curType);   /* legacy merges roster only, no scores */
-        if(ie.squad)bySquad[ie.squad]=(bySquad[ie.squad]||0)+1;
-        var idx=indexOfId(ie.id);
-        if(idx<0){state.entries.push(ie);added++;return;}
-        var ex=state.entries[idx],ieS=inResults(ie),exS=inResults(ex);
-        /* Identity is person-level and must survive regardless of which copy
-           wins on scores — otherwise an email corrected at check-in on a
-           shooter who never shot is silently discarded. */
-        var bi=bestIdentity(ex,ie);
-        if(ieS&&exS){
-          /* Same entry, both scored. If the scores are identical this is the
-             same file being merged again (double-tap, re-picked, re-sent) —
-             skip it. Only genuinely different scores are a real conflict. */
-          if(scoreFingerprint(ie)===scoreFingerprint(ex)){already++;updatePerson(ex.personId,bi.fields,bi.at);return;}
-          ie.id=uid("e");state.entries.push(ie);added++;conflicts++;updatePerson(ex.personId,bi.fields,bi.at);
-        }
-        else if(ieS&&!exS){state.entries[idx]=ie;updated++;updatePerson(ie.personId,bi.fields,bi.at);}
-        else{kept++;updatePerson(ex.personId,bi.fields,bi.at);}
-      });});
-    save();showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already,wrongMatch);show("results");
+/* --- merge core --------------------------------------------------------
+   Merges parsed payloads into local state and returns a stats object. Kept
+   free of DOM and file handling so it can be driven from the file picker,
+   and later from downloaded payloads (compile screen, §10) and the roster
+   conflict path (§4.8).
+
+   payloads : array of parsed objects; null/invalid entries count as errors
+   opts.skipMatchGuard : merge regardless of match label. For ROSTER payloads
+     only — a roster carries no scores, so the guard (which exists to stop last
+     week's scores landing in this match) protects nothing there.
+   opts.undoLabel : if set, a snapshot is taken before merging. */
+function mergePayloads(payloads,opts){
+  opts=opts||{};
+  var r={added:0,updated:0,kept:0,conflicts:0,bySquad:{},errors:0,refused:0,already:0,wrongMatch:[]};
+  var curType=(state.meta&&state.meta.matchType)||"outdoor";
+  var curMatch=normMatch(state.meta&&state.meta.match);
+  if(opts.undoLabel)undoPush(opts.undoLabel);
+  (payloads||[]).forEach(function(d){
+    if(!d||!d.entries){r.errors++;return;}
+    var kind=backupKind(d);
+    /* a v2 backup of a different match type must never merge into this match */
+    if(kind==="v2"&&backupType(d)!==curType){r.refused++;return;}
+    /* A file from a DIFFERENT match must not merge in: its scores would be
+       written onto entries this tablet has already cleared, resurrecting last
+       week's results. Only checked when both sides are labelled. */
+    var fileMatch=normMatch(backupMatch(d));
+    if(!opts.skipMatchGuard&&kind==="v2"&&curMatch&&fileMatch&&fileMatch!==curMatch){r.wrongMatch.push(backupMatch(d));return;}
+    if(d.meta&&d.meta.match&&!state.meta.match)state.meta.match=d.meta.match;
+    d.entries.forEach(function(ie){
+      if(kind==="legacy")ie=rosterOnly(ie); else ensureShape(ie,curType);   /* legacy merges roster only, no scores */
+      if(ie.squad)r.bySquad[ie.squad]=(r.bySquad[ie.squad]||0)+1;
+      var idx=indexOfId(ie.id);
+      if(idx<0){state.entries.push(ie);r.added++;return;}
+      var ex=state.entries[idx],ieS=inResults(ie),exS=inResults(ex);
+      /* Identity is person-level and must survive regardless of which copy
+         wins on scores — otherwise an email corrected at check-in on a
+         shooter who never shot is silently discarded. */
+      var bi=bestIdentity(ex,ie);
+      if(ieS&&exS){
+        /* Same entry, both scored. Identical scores means this is the same
+           file again (double-tap, re-picked, re-sent) — skip it. Only
+           genuinely different scores are a real conflict. */
+        if(scoreFingerprint(ie)===scoreFingerprint(ex)){r.already++;updatePerson(ex.personId,bi.fields,bi.at);return;}
+        ie.id=uid("e");state.entries.push(ie);r.added++;r.conflicts++;updatePerson(ex.personId,bi.fields,bi.at);
+      }
+      else if(ieS&&!exS){state.entries[idx]=ie;r.updated++;updatePerson(ie.personId,bi.fields,bi.at);}
+      else{r.kept++;updatePerson(ex.personId,bi.fields,bi.at);}
+    });
   });
-  ev.target.value="";
+  save();
+  return r;
+}
+function parsePayloads(texts){
+  return (texts||[]).map(function(t){try{return JSON.parse(t);}catch(e){return null;}});
+}
+document.getElementById("mergeFile").addEventListener("change",function(ev){
+  var files=[].slice.call(ev.target.files);ev.target.value="";if(!files.length)return;
+  var names=files.map(function(f){return f.name;});
+  Promise.all(files.map(readText)).then(function(texts){
+    var parsed=parsePayloads(texts);
+    /* Files picked from the compile screen join the list rather than merging
+       immediately, so server and file squads compile in one operation (§10). */
+    if(document.getElementById("compileScrim").classList.contains("open")){
+      parsed.forEach(function(d,i){
+        if(!d||!d.entries){toast("Couldn't read "+names[i]);return;}
+        compileRows.push({kind:"file",squad:(d.meta&&d.meta.squad)||"",device:names[i],
+          count:(d.entries||[]).filter(function(e){return e.active;}).length,
+          at:0,selected:true,payload:d,names:null,open:false});
+      });
+      renderCompile();return;
+    }
+    var r=mergePayloads(parsed,{undoLabel:"Merge of "+files.length+" file"+(files.length===1?"":"s")});
+    showMergeSummary(r);show("results");
+  });
 });
 function readText(f){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=function(){res("");};r.readAsText(f);});}
 function indexOfId(id){for(var i=0;i<state.entries.length;i++)if(state.entries[i].id===id)return i;return -1;}
@@ -2042,11 +3482,18 @@ function findDuplicates(){
   });
   return out;
 }
-function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,already,wrongMatch){
+function showMergeSummary(r){
+  var added=r.added,updated=r.updated,conflicts=r.conflicts,bySquad=r.bySquad,
+      errors=r.errors,refused=r.refused,already=r.already,wrongMatch=r.wrongMatch;
   var dups=findDuplicates();
   var h='<div class="mstat"><div class="box"><b>'+added+'</b><span>added</span></div><div class="box"><b>'+updated+'</b><span>updated</span></div><div class="box"><b>'+state.entries.length+'</b><span>total</span></div></div>';
   var sk=Object.keys(bySquad);
   if(sk.length)h+='<div class="muted" style="margin-bottom:10px">From squads: '+sk.map(function(s){return esc(s)+' ('+bySquad[s]+')';}).join(", ")+'.</div>';
+  if(state.meta.compiledAt){
+    var n=compiledSet().length;
+    h+='<div class="goodbox"><b>Results compiled from '+n+' squad'+(n===1?'':'s')+'</b> \u00b7 '
+      +esc(new Date(state.meta.compiledAt).toLocaleString())+'</div>';
+  }
   if(already)h+='<div class="goodbox"><b>'+already+' already merged</b> — skipped, because those scores were identical to what this tablet already had. Merging the same file twice is safe.</div>';
   if(errors)h+='<div class="warnbox">'+errors+' file(s) couldn’t be read and were skipped.</div>';
   if(refused)h+='<div class="warnbox"><b>'+refused+' file(s) skipped</b> — wrong match type (indoor vs outdoor) for this match. Merge only backups of the same type.</div>';
@@ -2054,8 +3501,8 @@ function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,al
     +'This match is “'+esc(state.meta.match||"—")+'”, but '+(wrongMatch.length===1?'that file is':'those files are')+' from '
     +wrongMatch.map(function(m){return '“'+esc(m)+'”';}).join(", ")+'.<br>'
     +'Merging it would have written those scores onto this match. If the label is just wrong, fix the match name on Results and try again.</div>';
-  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and delete the wrong one from the Roster.</div>';
-  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Delete the wrong one from the Roster (or keep both if they really are different people with the same name):<br>'
+  if(conflicts)h+='<div class="warnbox"><b>'+conflicts+' scored differently on two tablets</b> — kept both copies so nothing was lost. Check the duplicates below and remove the wrong one with Tools › Remove a shooter.</div>';
+  if(dups.length)h+='<div class="warnbox"><b>Duplicate shooters</b> — these names exist as more than one separate record, so they’ll rank separately and appear twice in the master list. Remove the wrong one with Tools › Remove a shooter (or keep both if they really are different people with the same name):<br>'
     +dups.map(function(g){return '• '+esc(g.name)+' — '+g.people+' separate records ('+g.divisions.map(esc).join(", ")+')';}).join("<br>")+'</div>';
   else h+='<div class="muted" style="margin-bottom:6px">No duplicate shooters detected.</div>';
   document.getElementById("mergeBody").innerHTML=h;
@@ -2063,11 +3510,35 @@ function showMergeSummary(added,updated,kept,conflicts,bySquad,errors,refused,al
   document.getElementById("mergeScrim").classList.add("open");
   toast("Merged: +"+added+" added, "+updated+" updated"+(already?", "+already+" already had":""));
 }
+/* adds the publish outcome to the summary already on screen */
+function appendMergeSummary(res){
+  var el=document.getElementById("mergeBody");if(!el)return;
+  var h='<div class="'+(res.ok?"goodbox":"warnbox")+'" style="margin-top:10px">';
+  h+='<b>'+(res.ok?"Published to the club server":"Compiled, but not fully published")+'</b><br>';
+  h+=res.lines.map(esc).join("<br>");
+  if(!res.ok){
+    h+='<br>'+esc(res.err)+'<br>The results are on this tablet \u2014 you can still view, print and email them.';
+    h+='<div style="height:8px"></div><button class="btn ghost sm" id="retryPublish">Try publishing again</button>';
+  }
+  h+='</div>';
+  h+='<div class="note" style="margin-top:10px">Spotted a mistake? Fix it on the <b>Roster</b>, then tap '
+   +'<b>Publish corrected results</b>. Don\u2019t tick squads here again \u2014 that re-imports the old copy.'
+   +'<div style="height:8px"></div><button class="btn ghost sm" id="openFix">How do I fix a mistake?</button></div>';
+  el.innerHTML+=h;
+  var fx=document.getElementById("openFix");
+  if(fx)fx.addEventListener("click",openFixGuide);
+  var rp=document.getElementById("retryPublish");
+  if(rp)rp.addEventListener("click",function(){
+    rp.disabled=true;rp.textContent="Publishing\u2026";
+    publishResults(function(r2){appendMergeSummary(r2);});
+  });
+}
 document.getElementById("mergeUndo").addEventListener("click",doUndo);
 document.getElementById("saveArchiveBtn").addEventListener("click",saveArchive);
 document.getElementById("saveRosterBtn").addEventListener("click",saveShooterList);
-document.getElementById("setupRosterBtn").addEventListener("click",saveShooterList);
-document.getElementById("undoBtn").addEventListener("click",doUndo);
+
+
+document.getElementById("set-undo").addEventListener("click",doUndo);
 document.getElementById("mergeClose").addEventListener("click",function(){document.getElementById("mergeScrim").classList.remove("open");});
 document.getElementById("mergeScrim").addEventListener("click",function(ev){if(ev.target.id==="mergeScrim")ev.currentTarget.classList.remove("open");});
 
@@ -2083,6 +3554,16 @@ var DIV_GUN_PAIRS=[
    isGun:function(g){return String(g||"").toLowerCase().replace(/[^a-z0-9]/g,"")==="g44"
                           ||String(g||"").replace(/[^0-9]/g,"")==="44";}}
 ];
+/* True when this entry's division and gun contradict a known pairing.
+   The prompt catches a mismatch going in; this catches one however it arrived. */
+function divGunMismatch(e){
+  if(!e||!e.division||!e.gun)return false;
+  var p=pairForDiv(e.division);
+  if(p)return !p.isGun(e.gun);
+  var q=pairForGun(e.gun);
+  if(q)return String(e.division).trim().toLowerCase()!==q.div.toLowerCase();
+  return false;
+}
 function pairForDiv(d){var n=String(d||"").trim().toLowerCase();
   for(var i=0;i<DIV_GUN_PAIRS.length;i++)if(DIV_GUN_PAIRS[i].div.toLowerCase()===n)return DIV_GUN_PAIRS[i];
   return null;}
@@ -2125,7 +3606,7 @@ function firstName(n){if(!n)return "there";n=n.trim();if(n.indexOf(",")>=0){var 
 function esc(s){return (""+s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function stamp(){var d=new Date();function p(n){return (n<10?"0":"")+n;}return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes());}
 var toastT;function toast(m,action){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");t.classList.toggle("act",!!action);
-  t.onclick=action||null;clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");t.classList.remove("act");t.onclick=null;},action?6000:1600);}
+  t.onclick=action||null;clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");t.classList.remove("act");t.onclick=null;},action?6000:(String(m).length>60?4500:2400));}
 
 /* resilience */
 document.addEventListener("visibilitychange",function(){if(document.hidden)save();});
@@ -2133,12 +3614,18 @@ window.addEventListener("pagehide",save);
 setInterval(function(){
   if(!state.meta.remind)return;if(!state.entries.some(hasAny))return;
   var last=state.meta.lastBackup||0,now=Date.now();
-  if(now-last>REMIND_MS && now-lastRemind>REMIND_MS){lastRemind=now;toast("Back up your scores ▸ tap here",function(){doBackup();});}
+  if(now-last>REMIND_MS && now-lastRemind>REMIND_MS){lastRemind=now;toast("Back up your scores › tap here",function(){doBackup();});}
 },60000);
 
-load();markSaved(true);
+loadCfg();applyScreen();load();markSaved(true);
+["f-match","set-match"].forEach(function(id){
+  var el=document.getElementById(id);if(!el)return;
+  el.max=dateMax();
+  /* the icon is a small target on a tablet — let the whole field open the picker */
+  el.addEventListener("click",function(){try{if(el.showPicker)el.showPicker();}catch(e){}});
+});
 if(state.meta.started===undefined)state.meta.started=state.entries.some(function(e){return e.active||hasAny(e);});  /* mid-match reload skips Setup */
-applyPhase();
+applyPhase();renderPending();
 show(state.meta.started?"roster":"setup");
 document.getElementById("ci-div").innerHTML=document.getElementById("f-div").innerHTML;
 document.getElementById("ci-gun").innerHTML=document.getElementById("f-gun").innerHTML;
