@@ -53,8 +53,6 @@ in `localStorage`; backups and squad transfers are plain JSON.
 
 Server credentials are stored under a separate key and never appear in any exported file.
 
-Hosting and update instructions: **[DEPLOY-GUIDE.html](DEPLOY-GUIDE.html)**
-
 ## License
 
 Copyright (C) 2026 G. Groiss. Free software under the
