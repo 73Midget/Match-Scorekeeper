@@ -23,8 +23,12 @@ It's a Progressive Web App — open the link above and add it to your home scree
 iPad/iPhone: Safari → Share → Add to Home Screen. Android: Chrome → Install app. Desktop: bookmark
 it or install from the address bar.
 
-Step-by-step: **[install.html](install.html)** ·
-Full manual: **[manual.html](manual.html)**
+Step-by-step: **[Installation guide](https://gpl-scorekeeper.netlify.app/install.html)** ·
+Full manual: **[User manual](https://gpl-scorekeeper.netlify.app/manual.html)**
+
+*(Those open as web pages. The same files are in this repository as
+`install.html` and `manual.html`, but GitHub shows HTML as source rather than
+rendering it.)*
 
 ## Optional online services
 
