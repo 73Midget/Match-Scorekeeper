@@ -793,12 +793,12 @@
 <script>
 "use strict";
 /* Match Scorekeeper — indoor + outdoor. Autosaves to device on every change. */
-var APP_VERSION="2.1.0";
+var APP_VERSION="2.1.1";
 /* Build stamp. APP_VERSION moves only on a release, so this is what
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-06-c";
+var APP_BUILD="2026-09-06-e";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1829,19 +1829,111 @@ function republishResults(){
     updateBackupInfo();
   });
 }
+/* --- is the club's shooter list actually different? --------------------
+   Clubs shoot largely the same people week to week. Publishing a roster on
+   every compile fills the history with identical revisions, which matters
+   because that history is what you search when a bad list goes out.
+
+   The comparison is over WHO is on the list and their core details — never a
+   byte comparison, because a roster payload also carries matchType,
+   appVersion, division and gun, all of which move weekly without anyone's
+   details changing.
+
+   Deliberately excluded:
+     division, gun, squad, type, checkinSeq  — per-match, not about the person
+     idAt  — moves whenever updatePerson runs, even with identical values,
+             which would break the skip on exactly the no-op edit this exists
+             for */
+var NO_MARK_ROUTE="__nomark__";
+function rosterFingerprint(entries){
+  var t=function(v){return String(v==null?"":v).trim();};   /* trim, but keep case:
+                                                               "bob" -> "Bob" is a real correction */
+  return (entries||[]).map(function(e){
+      return [t(e.personId),t(e.name),t(e.email),t(e.phone),t(e.category),(e.ro?"1":"0")].join("\u0001");
+    })
+    .sort()                    /* by personId first — otherwise check-in order
+                                  makes every compile look different */
+    .join("\u0002");
+}
+/* Mark squads as absorbed without publishing a roster. Batches of 25: the
+   server caps there, and marking is idempotent and order-independent so
+   splitting is safe. */
+function apiMarkMerged(triples){
+  var batches=[];
+  for(var i=0;i<triples.length;i+=25)batches.push(triples.slice(i,i+25));
+  var marked=0,unmatched=[],rev=null;
+  return batches.reduce(function(chain,batch){
+    return chain.then(function(){
+      return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/squads/merged",{
+        method:"POST",
+        headers:{"Authorization":"Bearer "+cfg.secret,"Content-Type":"application/json"},
+        body:JSON.stringify({merged_squads:batch})
+      }).then(function(res){
+        return res.json().catch(function(){return {};}).then(function(j){
+          if(res.status===401)throw AUTH_ERR;
+          /* We only reach here having just fetched a roster, so a 404 is the
+             route being absent — an older server. Signal a fallback rather
+             than failing the publish. */
+          if(res.status===404)throw NO_MARK_ROUTE;
+          if(!res.ok)throw "The server couldn't record which squads were compiled ("+res.status+").";
+          marked+=(j.marked_squads||0);
+          if(j.unmatched&&j.unmatched.length)unmatched=unmatched.concat(j.unmatched);
+          if(typeof j.roster_revision==="number")rev=j.roster_revision;
+        });
+      });
+    });
+  },Promise.resolve()).then(function(){return {marked:marked,unmatched:unmatched,revision:rev};});
+}
+/* The server returns unmatched triples; the RO was looking at squad names.
+   Map them back, and say the likely cause rather than only the fact. */
+function describeUnmatched(un){
+  var names=un.map(function(u){
+    var row=(compileRows||[]).filter(function(r){return r.kind==="server"&&r.device_id===u.device_id;})[0];
+    return (row&&row.squad)?row.squad:("a squad from "+(u.device_id||"an unknown tablet"));
+  });
+  var uniq=names.filter(function(v,i){return names.indexOf(v)===i;});
+  return uniq.join(", ")+(uniq.length===1?" wasn't":" weren't")
+    +" marked as compiled \u2014 likely uploaded again after you compiled.";
+}
 function publishResults(report){
   var ps=publishState(),lines=[];
   if(!syncOn()){report(null);return Promise.resolve();}
   /* the archive string is made once and kept, so a resumed retry is byte-identical */
   if(!ps.archiveText)ps.archiveText=JSON.stringify(payload(),null,2);
-  var step1=ps.rosterDone?Promise.resolve("skip"):pushRosterWithMerges();
+  /* Compare against a FRESH pull, never a stored fingerprint. If another
+     tablet rolled the roster back, a stored one would truthfully say "my list
+     hasn't changed" while answering the wrong question, and those shooters
+     would silently never be republished. */
+  var step1=ps.rosterDone?Promise.resolve("skip"):apiGetRoster().then(function(cur){
+    var mine=rosterFingerprint(rosterPayload().entries),theirs=null;
+    if(cur){try{theirs=rosterFingerprint((JSON.parse(cur.payload)||{}).entries);}catch(e){theirs=null;}}
+    if(cur&&theirs!==null&&theirs===mine){
+      /* nothing about the people changed — mark the squads and leave the
+         history alone */
+      return apiMarkMerged(mergedSquads()).then(function(m){
+        var rev=(typeof m.revision==="number")?m.revision:cur.revision;
+        return {skipped:true,revision:rev,marked:m.marked,unmatched:m.unmatched};
+      }).catch(function(err){
+        if(err!==NO_MARK_ROUTE)throw err;
+        /* older server: publish as earlier versions did, so the squads still
+           get marked. The history stays noisy, but nothing breaks. */
+        cfg.rosterRevision=cur.revision;saveCfg();
+        return pushRosterWithMerges();
+      });
+    }
+    cfg.rosterRevision=cur?cur.revision:0;saveCfg();
+    return pushRosterWithMerges();
+  });
   return step1.then(function(r){
     if(r!=="skip"){
       ps.rosterDone=true;save();
-      lines.push("Shooter list published as #"+cfg.rosterRevision+".");
-      var want=mergedSquads().length,got=(r&&r.marked_squads);
-      if(typeof got==="number"&&got<want)
-        lines.push("\u26a0 "+got+" of "+want+" squads were marked as compiled — one may have re-uploaded since.");
+      if(r&&r.skipped){
+        lines.push("Shooter list unchanged"+(r.revision?(" \u2014 still #"+r.revision):"")+".");
+      }else{
+        lines.push("Shooter list published as #"+cfg.rosterRevision+".");
+      }
+      var un=(r&&r.unmatched)||[];
+      if(un.length)lines.push("\u26a0 "+describeUnmatched(un));
     }
     if(ps.archiveDone)return null;
     return apiPostCompiled(ps.archiveText).then(function(a){
@@ -1871,7 +1963,9 @@ function pushRosterWithMerges(){
     entry_count:p.entries.length,app_version:APP_VERSION,app_build:APP_BUILD,
     author:cfg.deviceLabel||"Unnamed tablet",merged_squads:mergedSquads()};
   return apiPutRoster(body).then(function(r){
-    if(r.status===201){cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();return r.body;}
+    if(r.status===201){cfg.rosterRevision=(r.body&&r.body.revision)||cfg.rosterRevision;saveCfg();
+      /* the PUT now reports unmatched too, so both paths use one reporting route */
+      return {skipped:false,unmatched:(r.body&&r.body.unmatched)||[]};}
     if(r.status===409){
       return apiGetRoster().then(function(cur){
         if(!cur){cfg.rosterRevision=0;saveCfg();}
