@@ -873,7 +873,7 @@ var APP_VERSION="2.2.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-19-a";
+var APP_BUILD="2026-09-19-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1224,7 +1224,6 @@ document.getElementById("wnLater").addEventListener("click",function(){
   document.getElementById("whatsNewScrim").classList.remove("open");});
 document.getElementById("whatsNewScrim").addEventListener("click",function(ev){
   if(ev.target.id==="whatsNewScrim")ev.currentTarget.classList.remove("open");});
-renderNewDots();
 document.getElementById("gearClose").addEventListener("click",closeSettings);
 document.getElementById("gearScrim").addEventListener("click",function(ev){if(ev.target.id==="gearScrim")closeSettings();});
 document.getElementById("set-match-edit").addEventListener("click",function(){
@@ -3947,6 +3946,9 @@ setInterval(function(){
 },60000);
 
 loadCfg();applyScreen();load();markSaved(true);
+/* After loadCfg(), never before: the dot depends on the read marker stored in
+   cfg. Drawn earlier, it sees an empty cfg and shows on every launch. */
+renderNewDots();
 ["f-match","set-match"].forEach(function(id){
   var el=document.getElementById(id);if(!el)return;
   el.max=dateMax();
