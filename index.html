@@ -259,7 +259,20 @@
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
   /* sheets opened from inside another sheet must stack above it, regardless of
      where they sit in the document */
-  #fileScrim,#histScrim,#fixScrim,#pastScrim{z-index:60}
+  #fileScrim,#histScrim,#fixScrim,#pastScrim,#whatsNewScrim{z-index:60}
+  /* "new" dot — passive, never a prompt. It stays until someone explicitly
+     taps Mark as read, so a curious tap on the link doesn't clear it. */
+  .gearbtn{position:relative}
+  .newdot{display:none;position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;
+          background:var(--orange);border:2px solid var(--ink)}
+  .hasnew .newdot{display:block}
+  .wnbtn{position:relative;display:inline-block;margin-top:7px;background:var(--card);border:1.5px solid var(--line-strong);
+         border-radius:8px;padding:6px 11px;font:inherit;font-size:12px;font-weight:800;color:var(--ink);cursor:pointer}
+  .wnbtn .newdot{border-color:var(--card)}
+  .wnver{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;color:var(--ink)}
+  .wnver:first-child{margin-top:0}
+  .wnlist{margin:0 0 4px;padding-left:19px}
+  .wnlist li{margin-bottom:6px;line-height:1.45}
   #pastViewScrim{z-index:70}
   .scrim.open{display:flex}
   .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
@@ -395,7 +408,7 @@
 <header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
   <button class="pendbadge" id="pendingBadge" style="display:none"></button>
   <span class="sub" id="saved">not saved yet</span>
-  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div></header>
+  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><span class="newdot"></span><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div></header>
 
 <main>
   <section class="view active" id="view-setup">
@@ -454,6 +467,8 @@
     <div style="height:14px"></div>
     <button class="btn green" id="finishSquadBtn">↑ Upload this squad's results</button>
     <div class="btnhint" id="finishSquadHint"></div>
+    <button class="btn" id="sendSquadBtn" style="display:none">↗ Send to the compiling tablet</button>
+    <div class="btnhint" id="sendSquadHint" style="display:none">Opens your tablet's share sheet — AirDrop, email or message this squad's file to whoever is compiling.</div>
     <button class="btn dark" id="squadResultsBtn">Results &amp; email</button>
     <div class="btnhint">Save a PDF, copy the BCC list, or send scorecards.</div>
         <button class="btn ghost sm" id="compileBtn">Compile match results</button>
@@ -567,6 +582,16 @@
   <button class="btn ghost" id="pastViewClose">Close</button>
 </div></div>
 
+<div class="scrim" id="whatsNewScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="whatsNewScrim" aria-label="Close">✕</button>
+  <h3>What's new</h3>
+  <p class="muted" id="wnIntro" style="margin:0 0 10px"></p>
+  <div class="card pad" id="wnBody" style="max-height:60vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn green" id="wnRead">Mark as read</button>
+  <div style="height:8px"></div>
+  <button class="btn ghost" id="wnLater">Remind me later</button>
+</div></div>
+
 <div class="scrim" id="fixScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="fixScrim" aria-label="Close">✕</button>
   <h3>Fixing a mistake</h3>
   <p class="muted" style="margin:0 0 10px">Wrong score, wrong division, wrong gun — find where you are in the list below.</p>
@@ -653,6 +678,7 @@
       </div>
       <div class="sethint">Sunlight raises contrast for scoring outdoors. Night dims everything so it doesn't spoil your eyes on a dark range.</div>
       <div class="sethint" id="set-version" style="margin-top:8px;font-weight:700"></div>
+      <button type="button" class="wnbtn" id="set-whatsnew">What's new<span class="newdot"></span></button>
     </div>
   </div>
 
@@ -676,10 +702,14 @@
     </div>
     <button class="btn green" id="set-compile">Compile match results</button>
     <div class="sethint" style="margin-bottom:8px">Combines every squad's scores into the final results.</div>
-    <button class="btn ghost sm" id="set-past" style="display:none">Past matches on the server</button>
-    <div class="sethint" id="set-past-hint" style="display:none;margin-bottom:8px">Read the results of an earlier match. Viewing one doesn't affect the match on this tablet.</div>
+    <div class="subhd" id="set-movehd" style="display:none">Moving a squad by hand</div>
+    <button class="btn ghost sm" id="set-sendfile" style="display:none">↗ Send this squad as a file</button>
+    <div class="sethint" id="set-sendfile-hint" style="display:none;margin-bottom:8px">If the server can't be reached. Opens your tablet's share sheet — AirDrop or Bluetooth work with no signal.</div>
     <button class="btn ghost sm" id="set-getsquad" style="display:none">↓ Restore a squad from the server</button>
     <div class="sethint" id="set-getsquad-hint" style="display:none;margin-bottom:8px">For a replacement tablet taking over a squad. <b>Replaces everything on this tablet, scores included.</b></div>
+    <div class="subhd">Records</div>
+    <button class="btn ghost sm" id="set-past" style="display:none">Past matches on the server</button>
+    <div class="sethint" id="set-past-hint" style="display:none;margin-bottom:8px">Read the results of an earlier match. Viewing one doesn't affect the match on this tablet.</div>
     <button class="btn ghost sm" id="set-savefile">Save a file…</button>
     <div class="sethint">Match archive, shooter list, or spreadsheet.</div>
   </div>
@@ -843,7 +873,7 @@ var APP_VERSION="2.2.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-18-c";
+var APP_BUILD="2026-09-19-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1106,7 +1136,7 @@ function renderSettings(){
   /* Online controls appear only when they can do something — the group shrinks
      rather than substituting a button that isn't really the same action. */
   var on=syncOn();
-  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint"].forEach(function(id){
+  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint","set-movehd","set-sendfile","set-sendfile-hint"].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
   var people={};state.entries.forEach(function(e){people[e.personId]=1;});
   var n=Object.keys(people).length;
@@ -1125,6 +1155,76 @@ function renderSettings(){
 function openSettings(){renderSettings();document.getElementById("gearScrim").classList.add("open");}
 function closeSettings(){document.getElementById("gearScrim").classList.remove("open");syncSetupSquad();}
 document.getElementById("gearBtn").addEventListener("click",openSettings);
+
+/* --- What's new ---------------------------------------------------------
+   Written for ROs, not developers. Add an entry at the TOP for every version
+   that reaches the club's tablets. Tracked by version, not build: builds
+   change far more often than anything an RO needs to hear about.
+   Which version this tablet has marked read lives in cfg, so it is per
+   tablet and never exported. */
+var WHATSNEW=[
+  {v:"2.2.0",items:[
+    "At the top of the <b>Roster</b>, set <b>Squad is shooting</b> to the stage your squad is on. Tap a shooter and that stage opens ready to score, marked <b>Now shooting</b>.",
+    "The other stages fold down to one line. Tap a stage's header to open it for a correction, and again to fold it back.",
+    "<b>Start match</b> now checks the match date is set, offers today's date if it isn't, and asks before starting with nobody checked in.",
+    "Clubs not using online services: <b>Send to the compiling tablet</b> on Results hands your squad over in one tap.",
+    "Easier to read in sunlight, and pop-up screens have a \u2715 in the corner to close them.",
+    "This page. The dot on <b>Tools</b> means there is something new here \u2014 it stays until someone taps <b>Mark as read</b>."
+  ]},
+  {v:"2.1.1",items:[
+    "Compiling no longer publishes a new copy of the club shooter list when nobody was added and no details changed."
+  ]},
+  {v:"2.1.0",items:[
+    "Everything that isn't scoring is now in <b>Tools</b>, top right.",
+    "A stage won't confirm until every target, popper and plate is accounted for.",
+    "Outdoor ties now share a place.",
+    "Optional online services: get the shooter list, upload your squad, and compile without passing files around."
+  ]}
+];
+function verCmp(a,b){
+  var x=String(a||"0").split("."),y=String(b||"0").split(".");
+  for(var i=0;i<3;i++){var d=(+x[i]||0)-(+y[i]||0);if(d)return d;}
+  return 0;
+}
+/* Versions newer than the last one marked read on this tablet. A tablet that
+   has never marked anything read sees only the current version — a fresh
+   install shouldn't open to the whole history. */
+function unreadNews(){
+  if(!cfg.seenVersion)return WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)===0;});
+  return WHATSNEW.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0&&verCmp(w.v,APP_VERSION)<=0;});
+}
+function renderNewDots(){
+  var on=unreadNews().length>0;
+  ["gearBtn","set-whatsnew"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.toggle("hasnew",on);});
+}
+function openWhatsNew(){
+  var un=unreadNews(),show=un.length?un:WHATSNEW.slice(0,3);
+  document.getElementById("wnIntro").textContent=un.length
+    ? "Changes since this tablet was last updated."
+    : "You're up to date. Recent changes:";
+  document.getElementById("wnBody").innerHTML=show.map(function(w){
+    return '<div class="wnver">Version '+esc(w.v)+'</div><ul class="wnlist">'
+      +w.items.map(function(t){return "<li>"+t+"</li>";}).join("")+"</ul>";
+  }).join("");
+  /* nothing unread: there is nothing to mark, so offer only a way out */
+  document.getElementById("wnRead").style.display=un.length?"":"none";
+  document.getElementById("wnLater").textContent=un.length?"Remind me later":"Close";
+  document.getElementById("whatsNewScrim").classList.add("open");
+}
+document.getElementById("set-whatsnew").addEventListener("click",openWhatsNew);
+/* The ONLY thing that clears the dot. Remind me later, the \u2715 and tapping
+   outside all just close the sheet. */
+document.getElementById("wnRead").addEventListener("click",function(){
+  cfg.seenVersion=APP_VERSION;saveCfg();renderNewDots();
+  document.getElementById("whatsNewScrim").classList.remove("open");
+  toast("Marked as read");
+});
+document.getElementById("wnLater").addEventListener("click",function(){
+  document.getElementById("whatsNewScrim").classList.remove("open");});
+document.getElementById("whatsNewScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="whatsNewScrim")ev.currentTarget.classList.remove("open");});
+renderNewDots();
 document.getElementById("gearClose").addEventListener("click",closeSettings);
 document.getElementById("gearScrim").addEventListener("click",function(ev){if(ev.target.id==="gearScrim")closeSettings();});
 document.getElementById("set-match-edit").addEventListener("click",function(){
@@ -1241,7 +1341,7 @@ function renderShooters(){
     main.style.display="none";empty.style.display="";
     empty.innerHTML=syncOn()
       ? '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
-        +'<button class="btn green" id="shooters-get">\u2b07 Get shooter list from server</button>'
+        +'<button class="btn green" id="shooters-get">\u2193 Get shooter list from server</button>'
         +'<div class="sethint">Or add them one at a time.</div>'
         +'<div style="height:8px"></div><button class="btn ghost sm" id="shooters-add2">+ Add shooter</button>'
       : '<div class="empty" style="padding:18px">No shooters on this tablet yet.</div>'
@@ -2875,7 +2975,19 @@ function renderResults(){
   var rpb=document.getElementById("republishBtn");
   if(rpb)rpb.style.display=(syncOn()&&state.meta.compiledAt)?"":"none";
   var fsb=document.getElementById("finishSquadBtn");
-  if(fsb)fsb.textContent=syncOn()?"\u2b06 Upload this squad's results":"\ud83d\udcbe Save this squad's results";
+  if(fsb)fsb.textContent=syncOn()?"\u2191 Upload this squad's results":"Save this squad's results";
+  /* The line under each Results button says what it does. These two depend on
+     the connection setting, so they're set here rather than in the markup. */
+  var fsh=document.getElementById("finishSquadHint");
+  if(fsh)fsh.textContent=syncOn()
+    ? "Always saves to this tablet first. Sends a copy to the club server if there's a connection."
+    : "Saves this squad to the tablet. Tap it between shooters so there's always a recent copy.";
+  var rph=document.getElementById("republishHint");
+  if(rph)rph.style.display=(syncOn()&&state.meta.compiledAt)?"":"none";
+  /* Offline, handing the file over IS the end-of-squad step, so it sits on
+     Results. Online it's a fallback and lives in Tools instead. */
+  ["sendSquadBtn","sendSquadHint"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display=syncOn()?"none":"";});
   if((state.meta.matchType||"outdoor")==="indoor")return renderResultsIndoor();
   var ie=document.getElementById("indoorExtra");if(ie)ie.innerHTML="";
   var divs=["All"].concat(divisions()),sqs=["All"].concat(squads());
@@ -3493,7 +3605,11 @@ document.getElementById("pendingBadge").addEventListener("click",retryPending);
    Local data is never modified or cleared by this — it is always a copy.
    Falls back to a plain download where file sharing isn't available
    (desktop Firefox, file:// builds, older browsers). */
+/* Shares a copy of this squad through the device's share sheet. The squad
+   stays in this tablet's own storage either way — sending never removes or
+   replaces anything here. */
 function sendResults(){
+  if(!state.entries.some(function(e){return e.active;})){toast("Nothing to send yet — no shooters checked in");return;}
   var sq=sanit(state.meta.squad);
   var fn="match"+(sq?"-"+sq:"")+"-"+stamp()+".json";
   var txt=JSON.stringify(payload(),null,2);
@@ -3513,6 +3629,10 @@ function sendResults(){
   state.meta.lastShared=Date.now();save();updateBackupInfo();
   toast("File saved — attach it to an email or drop it in Drive");
 }
+document.getElementById("sendSquadBtn").addEventListener("click",sendResults);
+document.getElementById("set-sendfile").addEventListener("click",function(){
+  /* close Tools first so the share sheet isn't opened behind it */
+  document.getElementById("gearScrim").classList.remove("open");sendResults();});
 document.getElementById("set-restore").addEventListener("click",function(){document.getElementById("gearScrim").classList.remove("open");document.getElementById("restoreFile").click();});
 document.getElementById("restoreFile").addEventListener("change",function(ev){var f=ev.target.files[0];if(!f)return;var rd=new FileReader();
   rd.onload=function(){try{var d=JSON.parse(rd.result);if(!d.entries)throw 0;
