@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Match Scorekeeper — User Manual (app v2.1.1)
+  Match Scorekeeper — User Manual (app v2.2.0)
   Created by G. Groiss · Free software under the GNU AGPL v3.0
 -->
 <html lang="en">
@@ -68,7 +68,7 @@
 <header>
   <h1>Match <b>Scorekeeper</b></h1>
   <p>User manual — scoring for GSSF-style indoor &amp; outdoor matches</p>
-  <div class="v">app v2.1.1</div>
+  <div class="v">app v2.2.0</div>
 </header>
 <main>
 
@@ -201,8 +201,17 @@ available from every screen, including before a match has started.</p>
   <li><b>Match date</b> — pick it from the calendar. <b>Every tablet must have the same date</b>;
       it's how the app knows which squads belong together.</li>
   <li><b>Check in shooters</b> — see section 6.</li>
+  <li>Check the <b>Ready to start</b> line above the button — it lists the type, date, squad name
+      and how many are checked in, and shows anything missing in red.</li>
   <li>Tap <b>› Start match</b>.</li>
 </ol>
+
+<div class="note">
+  <b>Start match checks the setup first.</b> It won't start without a match date, since that's how
+  the tablets find each other's squads. If the date isn't today it offers to change it — or keep it,
+  if you're deliberately entering an earlier match. It also asks before starting with nobody checked
+  in, or with no squad name when online services are on.
+</div>
 
 <div class="warn">
   <b>The match type locks when you tap Start match.</b> Indoor and outdoor score completely
@@ -240,7 +249,21 @@ outdoor score sheet, use <b>+ Add another division</b>.</p>
 
 <h2 id="s7">7 · Scoring — Outdoor</h2>
 
-<p>From the <b>Roster</b>, tap a shooter to open their score sheet.</p>
+<h3>Set the stage your squad is on</h3>
+<p>At the top of the <b>Roster</b>, <b>"Squad is shooting"</b> has three buttons — Five to Glock,
+Glock'M, Glock the Plates. Set it when the squad arrives at a bay, and change it when you move.</p>
+
+<p>Then tap a shooter. The stage you set opens ready to score, bordered in orange and marked
+<b>Now shooting</b>. The other two stages fold down to a single line showing their total.</p>
+
+<ul>
+  <li><b>Need to fix a finished stage?</b> Tap its header to open it, and tap again to fold it
+      back. That doesn't change which stage the squad is on.</li>
+  <li>The setting only decides which stage opens first. It doesn't stop you scoring any stage, and
+      stages can be shot in any order.</li>
+  <li>It's remembered for the match, so closing the app between relays returns you to the same
+      stage.</li>
+</ul>
 
 <h3>Entering times</h3>
 <p>Tap a <b>String</b> box and the number pad appears. Type the digits and the decimal fills in from
@@ -700,6 +723,10 @@ change on the compiling tablet instead.</p>
 <h4>"I published the wrong shooter list."</h4>
 <p><b>Tools › View &amp; edit shooter list › Earlier versions</b>, pick the good one, roll back.</p>
 
+<h4>"How do I close one of the pop-up screens?"</h4>
+<p>Tap the <b>✕</b> in its top right corner, the <b>Close</b> button at the bottom, or anywhere on the
+dimmed area around it.</p>
+
 <h4>"Did I lose scores when the screen locked?"</h4>
 <p>No. Everything auto-saves. Reopen the app and carry on.</p>
 
@@ -719,7 +746,7 @@ change on the compiling tablet instead.</p>
 
 </main>
 <footer>
-  Match Scorekeeper · User manual for app v2.1.1. Created by G. Groiss · Free software under the
+  Match Scorekeeper · User manual for app v2.2.0. Created by G. Groiss · Free software under the
   GNU AGPL v3.0. Keep a copy with the tablets and update it when the app version changes.<br><br>
   Not affiliated with, endorsed by, or sponsored by Glock Ges.m.b.H. or GLOCK, Inc. "GSSF" and
   "GLOCK" are trademarks of their respective owners and are used here only to describe match format.

@@ -34,8 +34,8 @@
 <meta name="apple-mobile-web-app-title" content="Scorekeeper">
 <style>
   :root{
-    --paper:#f4f1ea; --card:#fbfaf6; --ink:#16181d; --steel:#5a6068; --steel-soft:#8a9098;
-    --line:#d9d4c8; --orange:#e8541e; --orange-deep:#b53c10; --green:#1f7a4d; --gold:#caa12a; --red:#c8341f;
+    --paper:#f4f1ea; --card:#fbfaf6; --ink:#16181d; --steel:#5a6068; --steel-soft:#6b7178;
+    --line:#d9d4c8; --line-strong:#968c74; --orange:#e8541e; --orange-deep:#b53c10; --green:#1f7a4d; --gold:#caa12a; --red:#c8341f;
     --shadow:0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(20,24,29,.06);
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -45,7 +45,7 @@
      these overrides remove. ---- */
   body.sun{
     --paper:#fff; --card:#fff; --ink:#000; --steel:#000; --steel-soft:#000;
-    --line:#000; --orange:#c23a00; --orange-deep:#a03000;
+    --line:#000; --line-strong:#000; --orange:#c23a00; --orange-deep:#a03000;
     --green:#00602e; --gold:#7a5c00; --red:#b00000;
     --shadow:none;
   }
@@ -60,8 +60,8 @@
      them, and they look up at the line constantly. ---- */
   body.night{
     --paper:#12140f; --card:#1a1d16; --ink:#ded8c6; --steel:#948f7e; --steel-soft:#7d7a6c;
-    --line:#3a3d31; --orange:#d1541c; --orange-deep:#b04415;
-    --green:#6f9e7a; --gold:#a8862c; --red:#b3503f;
+    --line:#3a3d31; --line-strong:#6a6f5c; --orange:#e06a30; --orange-deep:#c25520;
+    --green:#7fb189; --gold:#c09a35; --red:#d4705c;
     --shadow:none;
   }
   body.night input,body.night select,body.night textarea,body.night .tap,
@@ -106,7 +106,7 @@
   button{font-family:var(--sans);cursor:pointer;border:none;border-radius:9px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;font-size:14px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--orange);color:#fff;width:100%}
   .btn:active{background:var(--orange-deep)}
-  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn.ghost:active{background:#f0ede5}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line-strong)}.btn.ghost:active{background:#f0ede5}
   .btn.dark{background:var(--ink);color:#fff}.btn.green{background:var(--green)}
   .btn.sm{padding:11px 12px;font-size:12px;width:auto}
   .btn.danger{background:#fff;color:var(--red);border:1px solid var(--red)}
@@ -132,7 +132,7 @@
   .stage .bd{padding:12px 14px}
   .card .hd{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line)}
   .stage .hd{background:#16181d;color:#fff;border-bottom:none}
-  .stage .hd .name{color:#fff;font-size:13px;letter-spacing:.1em;text-transform:uppercase;flex:1}
+  .stage .hd .name{color:#fff;font-size:15px;letter-spacing:.1em;text-transform:uppercase;flex:1}
   .stage .hd .name .warn{display:none;color:#ffb38f;font-size:13px;margin-left:6px}
   .stage .hd .stageclear{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.28);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:7px;margin-right:10px;flex:0 0 auto}
   .stage .hd .stageclear:active{background:rgba(255,255,255,.26)}
@@ -141,7 +141,7 @@
   .strings{display:grid;grid-template-columns:repeat(auto-fit,minmax(66px,1fr));gap:8px;margin-bottom:4px}
   .tinp{display:flex;flex-direction:column;gap:4px}
   .tinp label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--steel);font-weight:700;text-align:center}
-  .tinp input{text-align:center;font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums;padding:10px 4px;border:1px solid var(--line);border-radius:9px;width:100%;background:#fff}
+  .tinp input{text-align:center;font-family:var(--mono);font-size:18px;font-variant-numeric:tabular-nums;padding:10px 4px;border:1px solid var(--line-strong);border-radius:9px;width:100%;background:#fff}
   .penhdr{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:700;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
   .penhdr::after{content:"";flex:1;height:1px;background:var(--line)}
   .penhdr .hint{font-weight:600;letter-spacing:0;text-transform:none;color:var(--steel-soft);font-size:10px}
@@ -160,7 +160,7 @@
   .tnum{font-family:var(--mono);font-weight:700;text-align:center;color:var(--steel);line-height:1}
   .tnum em{display:block;font-family:var(--sans);font-style:normal;font-size:9px;font-weight:800;margin-top:2px;line-height:1}
   .cnt.ok{color:var(--green)} .cnt.warn{color:var(--red)} .cnt.neutral{color:var(--steel-soft)}
-  .tap{width:100%;height:48px;font-family:var(--mono);font-size:20px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .06s ease,background .12s}
+  .tap{width:100%;height:48px;font-family:var(--mono);font-size:20px;font-weight:700;background:#fff;border:1px solid var(--line-strong);border-radius:9px;color:var(--ink);font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .06s ease,background .12s}
   .tap.zero{color:var(--steel-soft)}
   .tap.miss{border-color:#e3c4be;background:#fdf6f4}
   .tap:active{background:#f0ede5}
@@ -183,7 +183,7 @@
   .steelgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:end}
   .scell{display:flex;flex-direction:column;gap:4px}
   .scell .slab{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--steel);font-weight:700;text-align:center}
-  .sacct{height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:9px;font-family:var(--mono);font-weight:700;font-size:18px;background:#fff;font-variant-numeric:tabular-nums}
+  .sacct{height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line-strong);border-radius:9px;font-family:var(--mono);font-weight:700;font-size:18px;background:#fff;font-variant-numeric:tabular-nums}
   .sacct small{font-family:var(--sans);font-size:8px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--steel)}
   .sacct.ok{color:var(--green);border-color:#bfe0cd}.sacct.warn{color:var(--red);border-color:#e7c3bd}.sacct.neutral{color:var(--steel-soft)}
   .pen-steel-line{font-family:var(--mono);font-size:12px;color:var(--steel);margin-top:8px}
@@ -193,9 +193,9 @@
   .totalcard .who .dv{font-size:11px;color:var(--steel-soft);letter-spacing:.06em}
   .totalcard .big{font-family:var(--mono);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:var(--orange);text-align:right}
   .totalcard .big small{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.14em;color:var(--steel-soft);text-transform:uppercase;margin-top:3px}
-  .statusctl{display:flex;align-items:center;gap:10px;margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;box-shadow:var(--shadow)}
+  .statusctl{display:flex;align-items:center;gap:10px;margin:0 0 12px;background:var(--card);border:1px solid var(--line-strong);border-radius:12px;padding:9px 12px;box-shadow:var(--shadow)}
   .statusctl .lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;flex:0 0 auto}
-  .seg{display:flex;flex:1;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg{display:flex;flex:1;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden}
   .seg button{flex:1;background:#fff;border:none;border-right:1px solid var(--line);padding:10px 4px;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--steel)}
   .seg button:last-child{border-right:none}
   .seg button.on[data-st="normal"]{background:var(--green);color:#fff}
@@ -205,7 +205,7 @@
   .sbadge.DNF{background:#f5e6bf;color:#7a5e00}.sbadge.DQ{background:#f7d9d3;color:var(--red)}
   .filters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
   .filtlab{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-soft);font-weight:800;align-self:center;flex:0 0 auto;padding-right:2px}
-  .chip{flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.05em;padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--steel);white-space:nowrap}
+  .chip{flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.05em;padding:7px 13px;border-radius:20px;background:#fff;border:1px solid var(--line-strong);color:var(--steel);white-space:nowrap}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
   .chip.sq.on,.chip.dv.on{background:var(--orange);border-color:var(--orange);color:#fff}
   .lbrow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line)}
@@ -224,7 +224,7 @@
   .infoline{font-size:12px;color:var(--steel);margin:2px 2px 10px;display:flex;align-items:center;gap:6px}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:0 0 auto}
   .countline{font-size:12px;color:var(--steel);font-weight:700;margin:2px 2px 8px}
-  .typeseg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:4px}
+  .typeseg{display:flex;border:1px solid var(--line-strong);border-radius:9px;overflow:hidden;margin-top:4px}
   .typeseg button{flex:1;background:#fff;border:none;border-right:1px solid var(--line);padding:13px 4px;font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--steel)}
   .typeseg button:last-child{border-right:none}
   .typeseg button.on{background:var(--orange);color:#fff}
@@ -235,16 +235,16 @@
   .linklike{background:none;border:none;color:var(--orange-deep);font-weight:800;font-size:12px;text-decoration:underline;padding:0 0 0 6px;cursor:pointer}
   .iround .rmeta{font-size:12px;color:var(--steel);font-weight:700;margin-bottom:10px}
   .scorepads{display:flex;gap:10px;margin-bottom:12px}
-  .padfield{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px 6px}
+  .padfield{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fff;border:2px solid var(--line-strong);border-radius:12px;padding:14px 6px}
   .padfield .pfnum{font-size:30px;font-weight:800;color:var(--ink);line-height:1}
   .padfield .pflab{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--steel)}
   .padfield.locked{opacity:.55}
   .padsheet{max-width:340px}
   .padhd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
   .padhd .padsub{font-size:12px;color:var(--steel);font-weight:700}
-  .paddisp{font-size:40px;font-weight:800;text-align:center;padding:12px;margin:8px 0 12px;background:#fff;border:2px solid var(--line);border-radius:12px;color:var(--ink)}
+  .paddisp{font-size:40px;font-weight:800;text-align:center;padding:12px;margin:8px 0 12px;background:#fff;border:2px solid var(--line-strong);border-radius:12px;color:var(--ink)}
   .padgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-  .padgrid button{padding:16px 0;font-size:22px;font-weight:800;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink)}
+  .padgrid button{padding:16px 0;font-size:22px;font-weight:800;background:#fff;border:1px solid var(--line-strong);border-radius:12px;color:var(--ink)}
   .padgrid button:active{background:var(--line)}
   .rollrow{padding:10px 12px;border-bottom:1px solid var(--line)}
   .rollrow:last-child{border-bottom:none}
@@ -263,6 +263,15 @@
   #pastViewScrim{z-index:70}
   .scrim.open{display:flex}
   .sheet{background:var(--card);width:100%;max-width:680px;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+  /* Outlined rather than solid: it should read as a button without competing
+     with the sheet's heading. Uses --line-strong like every other control edge,
+     so it goes black in sunlight mode along with the rest. */
+  .sheetx{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:9px;
+          border:1.5px solid var(--line-strong);background:var(--surface,#fff);color:var(--steel);
+          font-size:15px;line-height:1;cursor:pointer;padding:0}
+  .sheetx:active{background:var(--line);color:var(--ink)}
+  body.night .sheetx{background:#23261d;color:var(--ink)}
+  .sheet{position:relative}
   .sheet h3{margin:0 0 6px;font-size:14px;letter-spacing:.1em;text-transform:uppercase}
   .erow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.erow:last-child{border-bottom:none}
   .erow .meta{flex:1;min-width:0}.erow .meta .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -319,6 +328,28 @@
   #set-match-row{border-bottom:none;padding:2px 0 4px;font-size:15px}
   #set-match-row .k{color:var(--ink);font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
   #set-match-row .v{font-family:var(--sans);font-size:19px;font-weight:800;color:var(--ink)}
+  .setupsum{font-size:12px;color:var(--steel);background:var(--card);border:1px solid var(--line);
+             border-radius:9px;padding:9px 11px;margin:0 0 10px;line-height:1.6}
+  .setupsum b{color:var(--ink)}
+  .setupsum .miss{color:var(--red);font-weight:800}
+  /* A folded stage keeps its header — name, total, status — and hides only the
+     inputs. Tapping the header unfolds it, so correcting a finished stage never
+     means going back to the selector. */
+  .stage.folded .bd{display:none}
+  .stage.folded .stageclear{display:none}
+  /* The header toggles, so the chevron shows which way it will go. Only stages
+     the squad ISN'T on get it — folding the stage being scored would hide the
+     thing in front of you on a stray tap. */
+  .stage:not(.nowshooting) > .hd{cursor:pointer}
+  .stage:not(.nowshooting) > .hd::after{content:"\203a";margin-left:8px;color:var(--steel-soft);
+      font-size:19px;line-height:1;display:inline-block;transition:transform .12s;transform:rotate(90deg)}
+  .stage.folded:not(.nowshooting) > .hd::after{transform:rotate(0deg)}
+  .stage.nowshooting{border:2px solid var(--orange)}
+  .nowtag{display:inline-block;background:var(--orange);color:#fff;font-size:9px;font-weight:800;
+          letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-right:5px;
+          vertical-align:middle}
+  .btnhint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 10px}
+  .btnhint b{color:var(--orange-deep)}
   .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
              font-size:11px;line-height:1.6;color:var(--steel-soft);text-align:center}
   .setcredit b{color:var(--steel);font-weight:800}
@@ -388,6 +419,7 @@
     <div class="btnrow"><button class="btn" id="checkinBtnSetup">Check in shooters</button><button class="btn ghost" id="addBtnSetup">+ Add shooter</button></div>
     <div class="countline" id="setupCount"></div>
     <div style="height:6px"></div>
+    <div class="setupsum" id="setupSummary"></div>
     <button class="btn green" id="startMatchBtn">› Start match</button>
 
   </section>
@@ -395,6 +427,15 @@
   <section class="view" id="view-roster">
     <div class="matchbanner" id="matchBanner"></div>
     <div class="btnrow"><button class="btn" id="checkinBtn">Check in shooters</button><button class="btn ghost" id="addBtn">+ Walk-in</button></div>
+    <div class="card pad" id="stageSelWrap" style="margin-bottom:12px">
+      <div class="subhd" style="margin-top:0" id="stageSelLabel">Squad is shooting</div>
+      <div class="typeseg" id="stageSel">
+        <button type="button" data-stage="five">Five to Glock</button>
+        <button type="button" data-stage="glockm">Glock&rsquo;M</button>
+        <button type="button" data-stage="plates">Glock the Plates</button>
+      </div>
+      <div class="sethint">Change this when the squad moves to a different bay. It only decides which stage opens first.</div>
+    </div>
     <h2 class="section">Tonight’s Shooters</h2>
     <div class="countline" id="rosterCount"></div>
     <input type="search" id="rosterSearch" placeholder="Search tonight’s shooters" style="margin-bottom:10px">
@@ -412,11 +453,13 @@
     <div id="indoorExtra"></div>
     <div style="height:14px"></div>
     <button class="btn green" id="finishSquadBtn">↑ Upload this squad's results</button>
-    <div style="height:8px"></div>
+    <div class="btnhint" id="finishSquadHint"></div>
     <button class="btn dark" id="squadResultsBtn">Results &amp; email</button>
-    <div style="height:8px"></div>
+    <div class="btnhint">Save a PDF, copy the BCC list, or send scorecards.</div>
         <button class="btn ghost sm" id="compileBtn">Compile match results</button>
+    <div class="btnhint"><b>Match director only</b> — combines every squad at the end.</div>
     <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
+    <div class="btnhint" id="republishHint" style="display:none">Sends a correction made after compiling up to the server.</div>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -429,7 +472,7 @@
   <button data-tab="results"><span class="ic">≡</span>Results</button>
 </nav>
 
-<div class="scrim" id="editScrim"><div class="sheet">
+<div class="scrim" id="editScrim"><div class="sheet"><button class="sheetx" data-closes="editScrim" aria-label="Close">✕</button>
   <h3 id="editTitle">Add Competitor</h3>
   <div style="height:8px"></div>
   <label class="fld"><span>Name</span><input type="text" id="f-name" autocomplete="off" placeholder="Last, First"></label>
@@ -472,7 +515,7 @@
   <div style="height:10px"></div>
 </div></div>
 
-<div class="scrim" id="compileScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="compileScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="compileScrim" aria-label="Close">✕</button>
   <h3>Compile match results</h3>
   <p class="muted" style="margin:0 0 8px">Squads for <b id="compile-match"></b>. Tick the ones to include, then Compile.</p>
   <div class="card" id="compileList" style="max-height:46vh;overflow:auto"></div>
@@ -484,7 +527,7 @@
   <button class="btn ghost" id="compileClose">Close</button>
 </div></div>
 
-<div class="scrim" id="rsquadScrim"><div class="sheet">
+<div class="scrim" id="rsquadScrim"><div class="sheet"><button class="sheetx" data-closes="rsquadScrim" aria-label="Close">✕</button>
   <h3>Restore a squad from the server</h3>
   <p class="muted" style="margin:0 0 8px">Uploads for <b id="squad-match"></b>. Pick the squad to load onto this tablet — you don't need to know which tablet uploaded it.</p>
   <div class="card" id="squadList" style="max-height:52vh;overflow:auto"></div>
@@ -492,7 +535,7 @@
   <button class="btn ghost" id="rsquadClose">Close</button>
 </div></div>
 
-<div class="scrim" id="removeScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="removeScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="removeScrim" aria-label="Close">✕</button>
   <h3>Shooter list</h3>
   <p class="muted" id="shooters-sub" style="margin:0 0 8px"></p>
   <div id="shooters-empty" style="display:none"></div>
@@ -508,7 +551,7 @@
   <button class="btn ghost" id="removeClose">Close</button>
 </div></div>
 
-<div class="scrim" id="pastScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="pastScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="pastScrim" aria-label="Close">✕</button>
   <h3>Past matches</h3>
   <p class="muted" style="margin:0 0 8px">Matches on the club server. Viewing one doesn't affect the match on this tablet.</p>
   <div class="card" id="pastList" style="max-height:56vh;overflow:auto"></div>
@@ -516,7 +559,7 @@
   <button class="btn ghost" id="pastClose">Close</button>
 </div></div>
 
-<div class="scrim" id="pastViewScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="pastViewScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="pastViewScrim" aria-label="Close">✕</button>
   <h3 id="pastViewTitle">Results</h3>
   <div class="card pad" id="pastViewBody" style="max-height:62vh;overflow:auto"></div>
   <div style="height:10px"></div>
@@ -524,7 +567,7 @@
   <button class="btn ghost" id="pastViewClose">Close</button>
 </div></div>
 
-<div class="scrim" id="fixScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="fixScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="fixScrim" aria-label="Close">✕</button>
   <h3>Fixing a mistake</h3>
   <p class="muted" style="margin:0 0 10px">Wrong score, wrong division, wrong gun — find where you are in the list below.</p>
 
@@ -564,7 +607,7 @@
   <button class="btn ghost" id="fixClose">Close</button>
 </div></div>
 
-<div class="scrim" id="fileScrim"><div class="sheet">
+<div class="scrim" id="fileScrim"><div class="sheet"><button class="sheetx" data-closes="fileScrim" aria-label="Close">✕</button>
   <h3>Save a file</h3>
   <p class="muted" style="margin:0 0 10px">These save to this tablet's Downloads folder.</p>
   <button class="btn dark filepick" id="file-archive"><b>Match archive</b><span>This match with all scores — your record of the night</span></button>
@@ -574,7 +617,7 @@
   <button class="btn ghost" id="fileClose">Cancel</button>
 </div></div>
 
-<div class="scrim" id="histScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="histScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="histScrim" aria-label="Close">✕</button>
   <h3>Earlier shooter lists</h3>
   <p class="muted" style="margin:0 0 8px">Published versions of the club's list, newest first. Rolling back publishes the old list again as a new version — nothing is deleted.</p>
   <div class="card" id="histList" style="max-height:56vh;overflow:auto"></div>
@@ -582,7 +625,7 @@
   <button class="btn ghost" id="histClose">Close</button>
 </div></div>
 
-<div class="scrim" id="gearScrim"><div class="sheet" style="max-height:94vh">
+<div class="scrim" id="gearScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="gearScrim" aria-label="Close">✕</button>
   <h3>Tools</h3>
 
   <div class="setgrp">
@@ -633,8 +676,10 @@
     </div>
     <button class="btn green" id="set-compile">Compile match results</button>
     <div class="sethint" style="margin-bottom:8px">Combines every squad's scores into the final results.</div>
-    <button class="btn ghost sm" id="set-past" style="display:none;margin-bottom:8px">Past matches on the server</button>
-    <button class="btn ghost sm" id="set-getsquad" style="display:none;margin-bottom:8px">↓ Restore a squad from the server</button>
+    <button class="btn ghost sm" id="set-past" style="display:none">Past matches on the server</button>
+    <div class="sethint" id="set-past-hint" style="display:none;margin-bottom:8px">Read the results of an earlier match. Viewing one doesn't affect the match on this tablet.</div>
+    <button class="btn ghost sm" id="set-getsquad" style="display:none">↓ Restore a squad from the server</button>
+    <div class="sethint" id="set-getsquad-hint" style="display:none;margin-bottom:8px">For a replacement tablet taking over a squad. <b>Replaces everything on this tablet, scores included.</b></div>
     <button class="btn ghost sm" id="set-savefile">Save a file…</button>
     <div class="sethint">Match archive, shooter list, or spreadsheet.</div>
   </div>
@@ -679,7 +724,7 @@
   <button class="btn ghost" id="gearClose">Close</button>
 </div></div>
 
-<div class="scrim" id="checkinScrim"><div class="sheet">
+<div class="scrim" id="checkinScrim"><div class="sheet"><button class="sheetx" data-closes="checkinScrim" aria-label="Close">✕</button>
   <h3>Check In Shooters</h3>
   <p class="muted" style="margin:0 0 8px">Tap a name to set their <b>division and gun for tonight</b> and add them to this tablet’s list. Tap an “In” shooter to update or check them out. Scores are always kept.</p>
   <input type="search" id="checkinSearch" placeholder="Search all shooters" style="margin-bottom:10px">
@@ -692,7 +737,7 @@
   <button class="btn ghost" id="checkinClose">Done</button>
 </div></div>
 
-<div class="scrim" id="ciScrim"><div class="sheet">
+<div class="scrim" id="ciScrim"><div class="sheet"><button class="sheetx" data-closes="ciScrim" aria-label="Close">✕</button>
   <h3 id="ciTitle">Check In</h3>
   <div style="height:6px"></div>
   <div class="grid2">
@@ -715,7 +760,7 @@
   <button class="btn danger" id="ciCheckout" style="display:none">Check out (remove from tonight)</button>
 </div></div>
 
-<div class="scrim" id="emailScrim"><div class="sheet">
+<div class="scrim" id="emailScrim"><div class="sheet"><button class="sheetx" data-closes="emailScrim" aria-label="Close">✕</button>
   <h3>Email Scorecards</h3>
   <p class="muted" style="margin:0 0 6px">Tap Send to open each competitor’s email, pre-filled with their scores.</p>
   <div id="emailList"></div>
@@ -723,7 +768,7 @@
   <button class="btn ghost" id="emailClose">Close</button>
 </div></div>
 
-<div class="scrim" id="squadScrim"><div class="sheet">
+<div class="scrim" id="squadScrim"><div class="sheet"><button class="sheetx" data-closes="squadScrim" aria-label="Close">✕</button>
   <h3>Squad Results</h3>
   <p class="muted" style="margin:0 0 10px">Rankings by division, then overall. Choose how to share:</p>
   <button class="btn dark" id="pdfSheetBtn">Save as PDF <span style="font-weight:600;opacity:.85">— best for email</span></button>
@@ -740,7 +785,7 @@
   <button class="btn ghost" id="squadClose">Close</button>
 </div></div>
 
-<div class="scrim" id="emailListScrim"><div class="sheet" style="max-width:460px">
+<div class="scrim" id="emailListScrim"><div class="sheet" style="max-width:460px"><button class="sheetx" data-closes="emailListScrim" aria-label="Close">✕</button>
   <h3>Email List for BCC</h3>
   <p class="muted" style="margin:0 0 8px">Everyone in these results, plus anyone marked <b>RO</b>. Copy and paste into your email’s BCC field.</p>
   <textarea id="emailListBox" readonly style="width:100%;height:120px;font-family:var(--mono);font-size:12px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fbfaf6"></textarea>
@@ -749,7 +794,7 @@
 
 
 
-<div class="scrim" id="mergeScrim"><div class="sheet">
+<div class="scrim" id="mergeScrim"><div class="sheet"><button class="sheetx" data-closes="mergeScrim" aria-label="Close">✕</button>
   <h3>Merge Summary</h3>
   <div id="mergeBody"></div>
   <div style="height:12px"></div>
@@ -776,7 +821,7 @@
   <div class="btnrow"><button class="btn ghost" id="padCancel">Cancel</button><button class="btn green" id="padSave">Save</button></div>
 </div></div>
 
-<div class="scrim" id="roundScrim"><div class="sheet">
+<div class="scrim" id="roundScrim"><div class="sheet"><button class="sheetx" data-closes="roundScrim" aria-label="Close">✕</button>
   <h3 id="roundTitle">Add round</h3>
   <div style="height:6px"></div>
   <div class="grid2">
@@ -793,17 +838,17 @@
 <script>
 "use strict";
 /* Match Scorekeeper — indoor + outdoor. Autosaves to device on every change. */
-var APP_VERSION="2.1.1";
+var APP_VERSION="2.2.0";
 /* Build stamp. APP_VERSION moves only on a release, so this is what
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-06-e";
+var APP_BUILD="2026-09-18-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
 var REMIND_MS=10*60*1000;
-var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION,compiled:[]}};
+var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION,compiled:[],stage:"five"}};
 var mem=null,lastRemind=0;
 var SC={
   tbl:'border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;margin:0 0 22px',
@@ -1061,7 +1106,7 @@ function renderSettings(){
   /* Online controls appear only when they can do something — the group shrinks
      rather than substituting a button that isn't really the same action. */
   var on=syncOn();
-  ["set-getroster","set-getroster-hint","set-getsquad","set-past"].forEach(function(id){
+  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint"].forEach(function(id){
     var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
   var people={};state.entries.forEach(function(e){people[e.personId]=1;});
   var n=Object.keys(people).length;
@@ -2023,6 +2068,43 @@ document.getElementById("compile-refresh").addEventListener("click",function(){i
 document.getElementById("compile-addfiles").addEventListener("click",function(){document.getElementById("mergeFile").click();});
 document.getElementById("compileClose").addEventListener("click",function(){document.getElementById("compileScrim").classList.remove("open");});
 document.getElementById("compileScrim").addEventListener("click",function(ev){if(ev.target.id==="compileScrim")ev.currentTarget.classList.remove("open");});
+/* One X per sheet, wired generically — a sheet added later gets it for free. */
+document.querySelectorAll(".sheetx").forEach(function(b){
+  b.addEventListener("click",function(){
+    var sc=document.getElementById(b.dataset.closes);
+    if(sc)sc.classList.remove("open");
+  });
+});
+/* Which stage the squad is on. Outdoor only — indoor has no stages. */
+function currentStage(){return (state.meta&&state.meta.stage)||"five";}
+function renderStageSel(){
+  var wrap=document.getElementById("stageSelWrap");if(!wrap)return;
+  var outdoor=((state.meta&&state.meta.matchType)||"outdoor")==="outdoor";
+  wrap.style.display=outdoor?"":"none";
+  if(!outdoor)return;
+  document.getElementById("stageSelLabel").textContent=
+    (state.meta.squad?state.meta.squad:"This squad")+" is shooting";
+  document.querySelectorAll("#stageSel button").forEach(function(b){
+    b.classList.toggle("on",b.dataset.stage===currentStage());});
+}
+document.querySelectorAll("#stageSel button").forEach(function(b){
+  b.addEventListener("click",function(){
+    state.meta.stage=b.dataset.stage;save();renderStageSel();renderRoster();
+    if(state.selected)renderScore();
+  });
+});
+function renderSetupSummary(){
+  var el=document.getElementById("setupSummary");if(!el)return;
+  var n=state.entries.filter(function(e){return e.active;}).length;
+  var bits=[];
+  bits.push("<b>"+esc(typeLabel())+"</b>");
+  bits.push(state.meta.match?("<b>"+esc(matchDisplay(state.meta.match))+"</b>")
+                            :'<span class="miss">no date set</span>');
+  bits.push(state.meta.squad?("<b>"+esc(state.meta.squad)+"</b>")
+                            :'<span class="miss">no squad name</span>');
+  bits.push(n?("<b>"+n+"</b> checked in"):'<span class="miss">nobody checked in</span>');
+  el.innerHTML="Ready to start: "+bits.join(" &middot; ");
+}
 function markSaved(ok){var el=document.getElementById("saved");if(!el)return;
   if(ok){var d=new Date();function p(n){return(n<10?"0":"")+n;}el.innerHTML='<b>✓ saved</b> '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());}
   else el.innerHTML='<span style="color:#ffb38f">⚠ storage blocked — back up often</span>';}
@@ -2127,11 +2209,33 @@ document.querySelectorAll("#setupType button").forEach(function(b){b.addEventLis
 document.getElementById("checkinBtnSetup").addEventListener("click",openCheckin);
 document.getElementById("addBtnSetup").addEventListener("click",function(){openEdit(null);});
 document.getElementById("startMatchBtn").addEventListener("click",function(){
+  /* Everything downstream — uploads, the compile screen, finding other squads —
+     is keyed on the match date. Starting without one produces a match nothing
+     can locate, so this is the one thing that blocks rather than warns. */
+  if(!state.meta.match){
+    toast("Pick the match date before starting — every tablet needs the same one");
+    var d=document.getElementById("f-match");if(d){try{if(d.showPicker)d.showPicker();else d.focus();}catch(e){}}
+    return;
+  }
+  /* A date that isn't today is usually a leftover from the last match. Offer to
+     fix it, but never refuse — entering last week's scores is legitimate. */
+  if(state.meta.match!==todayStr()){
+    if(confirm("The match date is set to "+matchDisplay(state.meta.match)+", not today.\n\n"
+      +"OK = change it to today's date ("+matchDisplay(todayStr())+")\n"
+      +"Cancel = keep "+matchDisplay(state.meta.match))){
+      state.meta.match=todayStr();save();renderSetup&&renderSetup();syncSetupSquad();
+    }
+  }
+  if(!state.entries.filter(function(e){return e.active;}).length
+     && !confirm("No shooters are checked in yet.\n\nStart the match anyway?"))return;
+  if(syncOn()&&!state.meta.squad
+     && !confirm("This tablet has no squad name.\n\nSquads are told apart by name when the match is compiled — without one this squad is hard to identify.\n\nStart anyway?"))return;
   state.meta.started=true;save();applyPhase();show("roster");toast("Match started — "+typeLabel());
 });
 
 /* roster (tonight's active shooters) */
 function renderRoster(){
+  renderStageSel();
   document.getElementById("f-squad-device").value=state.meta.squad||"";
   document.getElementById("f-match").value=state.meta.match||"";
   var mt=state.meta.matchType||"outdoor";
@@ -2384,6 +2488,15 @@ function renderScore(){
   body.querySelector("#backRoster").addEventListener("click",function(){show("roster");});
   var adb=body.querySelector("#addDivBtn");
   if(adb)adb.addEventListener("click",function(){openRoundModal("add",null);});
+  /* Tapping a folded stage's header opens it, without changing which stage the
+     squad is on — a correction shouldn't move the selector. */
+  body.querySelectorAll(".stage:not(.nowshooting) > .hd").forEach(function(hd){
+    hd.addEventListener("click",function(ev){
+      /* the Clear button lives in the header — don't fold when it's tapped */
+      if(ev.target.closest&&ev.target.closest(".stageclear"))return;
+      hd.parentNode.classList.toggle("folded");
+    });
+  });
   body.querySelectorAll("[data-jump]").forEach(function(row){
     row.addEventListener("click",function(){state.selected=row.dataset.jump;renderScore();window.scrollTo(0,0);});});
   body.querySelectorAll("[data-dropdiv]").forEach(function(b){
@@ -2591,7 +2704,8 @@ function paperStage(title,key,strings,steel){
   var e=byId(state.selected),s=e[key],exp=expectedPaper(e);
   var score=key==="five"?stageFive(e):stageGlockm(e);
   var done=e.done&&e.done[key];
-  var h='<div class="card stage'+(done?' locked':'')+'" id="stage-'+key+'"><div class="hd"><div class="name">'+title+' <span class="warn" id="warn-'+key+'">⚠ check</span></div>'
+  var cur=(currentStage()===key);
+  var h='<div class="card stage'+(done?' locked':'')+(cur?' nowshooting':' folded')+'" id="stage-'+key+'" data-stage="'+key+'"><div class="hd"><div class="name">'+(cur?'<span class="nowtag">Now shooting</span> ':'')+title+' <span class="warn" id="warn-'+key+'">⚠ check</span></div>'
     +'<button type="button" class="stageclear" data-stage="'+key+'">Clear</button>'
     +'<div class="stagescore" id="ss-'+key+'">'+fmt(score)+'<small>stage</small></div></div><div class="bd">'
     +(done?'<div class="donebanner">✓ Stage completed &amp; locked — tap “Review / edit” below to change scores</div>':'');
@@ -2626,7 +2740,8 @@ function paperStage(title,key,strings,steel){
 function platesStage(e){
   var sc=statePlates(e);
   var done=e.done&&e.done.plates;
-  var h='<div class="card stage'+(done?' locked':'')+'" id="stage-plates"><div class="hd"><div class="name">GLOCK THE PLATES <span class="warn" id="warn-plates">⚠ check</span></div>'
+  var cur=(currentStage()==="plates");
+  var h='<div class="card stage'+(done?' locked':'')+(cur?' nowshooting':' folded')+'" id="stage-plates" data-stage="plates"><div class="hd"><div class="name">'+(cur?'<span class="nowtag">Now shooting</span> ':'')+'GLOCK THE PLATES <span class="warn" id="warn-plates">⚠ check</span></div>'
     +'<button type="button" class="stageclear" data-stage="plates">Clear</button>'
     +'<div class="stagescore" id="ss-plates">'+fmt(sc)+'<small>stage</small></div></div><div class="bd">'
     +(done?'<div class="donebanner">✓ Stage completed &amp; locked — tap “Review / edit” below to change scores</div>':'');
@@ -2775,7 +2890,7 @@ function renderResults(){
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
   var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard");
-  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored entries yet.</div>';}
+  if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scores yet.<br>Go to the <b>Roster</b> and tap a shooter to start scoring.</div>';}
   else lb.innerHTML=ord.map(function(o){var e=o.e,fin=o.place!=="DNF"&&o.place!=="DQ";
     return '<div class="lbrow'+(o.place==="1"?' gold':'')+'"><div class="rk'+(fin?'':' st')+'">'+o.place+'</div>'
     +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+'</div><div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
