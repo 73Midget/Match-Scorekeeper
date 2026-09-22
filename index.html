@@ -907,7 +907,7 @@ var APP_VERSION="2.3.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-22-b";
+var APP_BUILD="2026-09-22-d";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1022,7 +1022,19 @@ function bestIdentity(ex,ie){
     var wv=win[k]&&String(win[k]).trim();
     out[k]=wv?win[k]:(lose[k]||"");
   });
+  /* Ticks follow the same rule as the fields above: the newer copy wins, and
+     on a tie either tick counts. A flag left out here is set on one tablet and
+     silently dropped the moment another tablet merges that squad. */
   out.ro=(ta===tb)?(!!ex.ro||!!ie.ro):!!win.ro;
+  /* A copy from an app version that predates a tick has no such property at
+     all, which is NOT the same as someone unticking it. Absent means "no
+     opinion" and defers to the other copy; present and false means cleared. */
+  function tick(k){
+    if(ta===tb)return !!ex[k]||!!ie[k];
+    if(k in win)return !!win[k];
+    return (k in lose)?!!lose[k]:false;
+  }
+  out.noClub=tick("noClub");
   return {fields:out,at:Math.max(ta,tb)};
 }
 function ensureOutdoor(e){
@@ -1206,7 +1218,8 @@ var WHATSNEW=[
     "In <b>Tools \u203a View &amp; edit shooter list</b>, tap a name to edit their details. Remove is inside their card now, not on the row.",
     "<b>Tools \u203a Club contact list</b> gives you everyone's email and phone, a BCC list for club notices, and a spreadsheet.",
     "A shooter can be set to <b>Email scores only</b>, so they still get their results but no club announcements.",
-    "A DQ or DNF no longer shows a final time in the results, and a stage nobody shot shows \u201c\u2014\u201d instead of 0.00."
+    "A DQ or DNF no longer shows a final time in the results, and a stage nobody shot shows \u201c\u2014\u201d instead of 0.00.",
+    "Fixed: someone shooting two divisions, or turning up in two squads, could end up with two entries disagreeing about their email or ticks. Both copies now stay in step."
   ]},
   {v:"2.2.0",items:[
     "At the top of the <b>Roster</b>, set <b>Squad is shooting</b> to the stage your squad is on. Tap a shooter and that stage opens ready to score, marked <b>Now shooting</b>.",
@@ -3924,7 +3937,17 @@ function mergePayloads(payloads,opts){
       if(kind==="legacy")ie=rosterOnly(ie); else ensureShape(ie,curType);   /* legacy merges roster only, no scores */
       if(ie.squad)r.bySquad[ie.squad]=(r.bySquad[ie.squad]||0)+1;
       var idx=indexOfId(ie.id);
-      if(idx<0){state.entries.push(ie);r.added++;return;}
+      if(idx<0){
+        /* A new entry for someone already on this tablet — a second division,
+           or the same person from another squad. Identity is person-level, so
+           reconcile it across both copies; without this the person ends up with
+           two entries disagreeing about their email, RO tick or club-email
+           preference, and which one is read is then arbitrary. */
+        var prior=state.entries.filter(function(x){return x.personId===ie.personId;})[0];
+        state.entries.push(ie);r.added++;
+        if(prior){var pb=bestIdentity(prior,ie);updatePerson(ie.personId,pb.fields,pb.at);}
+        return;
+      }
       var ex=state.entries[idx],ieS=inResults(ie),exS=inResults(ex);
       /* Identity is person-level and must survive regardless of which copy
          wins on scores — otherwise an email corrected at check-in on a
