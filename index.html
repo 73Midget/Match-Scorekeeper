@@ -499,9 +499,9 @@
   <h3 id="editTitle">Add Competitor</h3>
   <div style="height:8px"></div>
   <div class="grid-name">
-    <label class="fld"><span>First name</span><input type="text" id="f-first" autocomplete="off" placeholder="Todd"></label>
-    <label class="fld"><span>M.I. <span class="muted">(opt)</span></span><input type="text" id="f-mid" autocomplete="off" maxlength="2" placeholder="A"></label>
-    <label class="fld"><span>Last name</span><input type="text" id="f-last" autocomplete="off" placeholder="Smith"></label>
+    <label class="fld"><span>First name</span><input type="text" id="f-first" autocomplete="off"></label>
+    <label class="fld"><span>M.I. <span class="muted">(opt)</span></span><input type="text" id="f-mid" autocomplete="off" maxlength="2"></label>
+    <label class="fld"><span>Last name</span><input type="text" id="f-last" autocomplete="off"></label>
   </div>
   <div class="sethint" id="f-samelast" style="display:none;margin:-4px 0 8px"></div>
   <div class="grid2" id="f-matchfields">
@@ -907,7 +907,7 @@ var APP_VERSION="2.3.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-22-a";
+var APP_BUILD="2026-09-22-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
