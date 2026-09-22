@@ -259,7 +259,7 @@
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
   /* sheets opened from inside another sheet must stack above it, regardless of
      where they sit in the document */
-  #fileScrim,#histScrim,#fixScrim,#pastScrim,#whatsNewScrim{z-index:60}
+  #fileScrim,#histScrim,#fixScrim,#pastScrim,#whatsNewScrim,#contactsScrim{z-index:60}
   /* "new" dot — passive, never a prompt. It stays until someone explicitly
      taps Mark as read, so a curious tap on the link doesn't clear it. */
   .gearbtn{position:relative}
@@ -361,6 +361,13 @@
   .nowtag{display:inline-block;background:var(--orange);color:#fff;font-size:9px;font-weight:800;
           letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-right:5px;
           vertical-align:middle}
+  /* The list scrolls inside the sheet so Add and Done never need scrolling to —
+     on a long club list they were both below the fold. */
+  #checkinScrim .sheet{display:flex;flex-direction:column;max-height:94vh}
+  #checkinList{flex:1 1 auto;overflow:auto;min-height:120px;-webkit-overflow-scrolling:touch}
+  .stickyfoot{flex:0 0 auto;padding-top:10px;margin-top:4px;border-top:1px solid var(--line);background:var(--paper)}
+  .grid-name{display:grid;grid-template-columns:1fr 70px 1fr;gap:8px}
+  @media(max-width:380px){.grid-name{grid-template-columns:1fr 60px 1fr}}
   .btnhint{font-size:11px;color:var(--steel);line-height:1.5;margin:4px 2px 10px}
   .btnhint b{color:var(--orange-deep)}
   .setcredit{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);
@@ -429,7 +436,8 @@
       <div class="muted" id="setupVer" style="margin-top:6px;font-weight:700"></div>
       <div class="muted" style="margin-top:3px;font-size:11px;line-height:1.5">Match Scorekeeper · for GSSF-style indoor &amp; outdoor matches<br>Created by G. Groiss · Free software under the GNU AGPL v3.0</div>
     </div>
-    <div class="btnrow"><button class="btn" id="checkinBtnSetup">Check in shooters</button><button class="btn ghost" id="addBtnSetup">+ Add shooter</button></div>
+    <button class="btn" id="checkinBtnSetup">Check in shooters</button>
+    <div class="btnhint">Tap the names of everyone shooting tonight. You can add anyone who isn't on the list.</div>
     <div class="countline" id="setupCount"></div>
     <div style="height:6px"></div>
     <div class="setupsum" id="setupSummary"></div>
@@ -439,7 +447,7 @@
 
   <section class="view" id="view-roster">
     <div class="matchbanner" id="matchBanner"></div>
-    <div class="btnrow"><button class="btn" id="checkinBtn">Check in shooters</button><button class="btn ghost" id="addBtn">+ Walk-in</button></div>
+    <div class="btnrow"><button class="btn" id="checkinBtn">Check in shooters</button><button class="btn ghost" id="addBtn">+ Add a late shooter</button></div>
     <div class="card pad" id="stageSelWrap" style="margin-bottom:12px">
       <div class="subhd" style="margin-top:0" id="stageSelLabel">Squad is shooting</div>
       <div class="typeseg" id="stageSel">
@@ -490,8 +498,13 @@
 <div class="scrim" id="editScrim"><div class="sheet"><button class="sheetx" data-closes="editScrim" aria-label="Close">✕</button>
   <h3 id="editTitle">Add Competitor</h3>
   <div style="height:8px"></div>
-  <label class="fld"><span>Name</span><input type="text" id="f-name" autocomplete="off" placeholder="Last, First"></label>
-  <div class="grid2">
+  <div class="grid-name">
+    <label class="fld"><span>First name</span><input type="text" id="f-first" autocomplete="off" placeholder="Todd"></label>
+    <label class="fld"><span>M.I. <span class="muted">(opt)</span></span><input type="text" id="f-mid" autocomplete="off" maxlength="2" placeholder="A"></label>
+    <label class="fld"><span>Last name</span><input type="text" id="f-last" autocomplete="off" placeholder="Smith"></label>
+  </div>
+  <div class="sethint" id="f-samelast" style="display:none;margin:-4px 0 8px"></div>
+  <div class="grid2" id="f-matchfields">
     <label class="fld"><span>Division</span>
       <select id="f-div">
         <option value="">Select…</option>
@@ -516,16 +529,22 @@
         <option>Junior</option><option>Senior</option><option>Lady</option><option>Law Enforcement</option><option>Military</option><option>Guardian</option>
       </select>
     </label>
-    <label class="fld"><span>Squad <span class="muted">(opt)</span></span><input type="text" id="f-squad" autocomplete="off" placeholder="Squad A"></label>
+    <label class="fld" id="f-squad-wrap"><span>Squad <span class="muted">(opt)</span></span><input type="text" id="f-squad" autocomplete="off" placeholder="Squad A"></label>
   </div>
   <div class="grid2">
     <label class="fld"><span>Email <span class="muted">(scorecard)</span></span><input type="email" id="f-email" autocomplete="off" autocapitalize="off" inputmode="email" placeholder="name@example.com"></label>
     <label class="fld"><span>Phone <span class="muted">(opt)</span></span><input type="text" id="f-phone" autocomplete="off" inputmode="tel" placeholder="(555) 555-1234"></label>
   </div>
+  <label class="rochk"><input type="checkbox" id="f-noclub"><span><b>Email scores only</b> — gets their match results by email, but no club announcements.</span></label>
   <label class="rochk"><input type="checkbox" id="f-ro"><span><b>RO</b> — always include this person’s email when sending score sheets, even if they didn’t shoot.</span></label>
   <div class="btnrow" style="margin-top:6px">
     <button class="btn ghost" id="editCancel">Cancel</button>
     <button class="btn" id="editSave">Save</button>
+  </div>
+  <div id="f-removewrap" style="display:none">
+    <div class="subhd">Remove from the club list</div>
+    <button class="btn danger" id="editRemove">Remove this shooter</button>
+    <div class="sethint">Takes them off this tablet's list along with all of their entries. Undo can reverse it.</div>
   </div>
   <div style="height:10px"></div>
 </div></div>
@@ -553,6 +572,7 @@
 <div class="scrim" id="removeScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="removeScrim" aria-label="Close">✕</button>
   <h3>Shooter list</h3>
   <p class="muted" id="shooters-sub" style="margin:0 0 8px"></p>
+  <p class="muted" id="shooters-tip" style="margin:0 0 8px;display:none">Tap a name to edit their details or remove them.</p>
   <div id="shooters-empty" style="display:none"></div>
   <div id="shooters-main">
     <div class="btnrow" style="margin-bottom:8px"><button class="btn ghost sm" id="shooters-add">+ Add shooter</button><button class="btn ghost sm" id="shooters-history">Earlier versions</button></div>
@@ -580,6 +600,18 @@
   <div style="height:10px"></div>
   <button class="btn ghost sm" id="pastPrint" style="margin-bottom:8px">Save as PDF</button>
   <button class="btn ghost" id="pastViewClose">Close</button>
+</div></div>
+
+<div class="scrim" id="contactsScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="contactsScrim" aria-label="Close">✕</button>
+  <h3>Club contact list</h3>
+  <p class="muted" id="contactsCount" style="margin:0 0 10px"></p>
+  <button class="btn green" id="contactsBcc">Copy email list for BCC</button>
+  <div class="sethint" style="margin-bottom:8px">Everyone with an email, except anyone set to <b>Email scores only</b>.</div>
+  <button class="btn ghost sm" id="contactsCsv">Save contact list (spreadsheet)</button>
+  <div class="sethint" style="margin-bottom:8px">Name, email, phone and who is scores-only.</div>
+  <div class="card pad" id="contactsMissing" style="display:none;max-height:32vh;overflow:auto"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="contactsClose">Close</button>
 </div></div>
 
 <div class="scrim" id="whatsNewScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="whatsNewScrim" aria-label="Close">✕</button>
@@ -679,6 +711,7 @@
       <div class="sethint">Sunlight raises contrast for scoring outdoors. Night dims everything so it doesn't spoil your eyes on a dark range.</div>
       <div class="sethint" id="set-version" style="margin-top:8px;font-weight:700"></div>
       <button type="button" class="wnbtn" id="set-whatsnew">What's new<span class="newdot"></span></button>
+      <div class="sethint" id="set-storage" style="margin-top:8px"></div>
     </div>
   </div>
 
@@ -686,6 +719,8 @@
     <h4>Shooter List</h4>
     <button class="btn" id="set-remove">View &amp; edit shooter list</button>
     <div class="sethint" id="set-roster-sub" style="margin-bottom:8px"></div>
+    <button class="btn ghost sm" id="set-contacts">Club contact list</button>
+    <div class="sethint" style="margin-bottom:8px">Email addresses and phone numbers for everyone on this tablet's list.</div>
     <button class="btn green" id="set-getroster" style="display:none">↓ Get latest shooter list</button>
     <div class="sethint" id="set-getroster-hint" style="display:none">Replaces this tablet's list with the club's. Do this before the match, on every tablet.</div>
   </div>
@@ -759,12 +794,11 @@
   <p class="muted" style="margin:0 0 8px">Tap a name to set their <b>division and gun for tonight</b> and add them to this tablet’s list. Tap an “In” shooter to update or check them out. Scores are always kept.</p>
   <input type="search" id="checkinSearch" placeholder="Search all shooters" style="margin-bottom:10px">
   <div id="checkinList"></div>
-  <div style="height:10px"></div>
-  <button class="btn" id="checkinAddNew">+ Add new shooter</button>
-  <div style="height:14px"></div>
-
-  <div style="height:8px"></div>
-  <button class="btn ghost" id="checkinClose">Done</button>
+  <div class="stickyfoot">
+    <button class="btn" id="checkinAddNew">+ Add someone not on the list</button>
+    <div style="height:8px"></div>
+    <button class="btn ghost" id="checkinClose">Done</button>
+  </div>
 </div></div>
 
 <div class="scrim" id="ciScrim"><div class="sheet"><button class="sheetx" data-closes="ciScrim" aria-label="Close">✕</button>
@@ -868,12 +902,12 @@
 <script>
 "use strict";
 /* Match Scorekeeper — indoor + outdoor. Autosaves to device on every change. */
-var APP_VERSION="2.2.0";
+var APP_VERSION="2.3.0";
 /* Build stamp. APP_VERSION moves only on a release, so this is what
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-19-b";
+var APP_BUILD="2026-09-22-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -968,7 +1002,7 @@ function ensureShape(e,type){
    Single choke point so an A->C move later changes only this function. */
 function updatePerson(personId,fields,at){
   if(!personId)return;
-  var IDENT=["name","email","phone","ro","active","category"];
+  var IDENT=["name","email","phone","ro","active","category","noClub"];
   var touched=IDENT.some(function(k){return k in fields&&k!=="active";});
   var stamp=(at===undefined)?Date.now():at;
   state.entries.forEach(function(e){
@@ -1149,6 +1183,7 @@ function renderSettings(){
   document.getElementById("set-match-edit").style.display=matchEditing?"none":"";
   document.getElementById("set-match-hint").textContent=matchEditing?"":"";
   document.getElementById("set-version").textContent="Version "+APP_VERSION+" · build "+APP_BUILD;
+  renderStorageLine();
   renderSync();
   updateBackupInfo();   /* refreshes the undo button's label and visibility */
 }
@@ -1163,6 +1198,16 @@ document.getElementById("gearBtn").addEventListener("click",openSettings);
    Which version this tablet has marked read lives in cfg, so it is per
    tablet and never exported. */
 var WHATSNEW=[
+  {v:"2.3.0",items:[
+    "Checking in is one button now. <b>Check in shooters</b> \u2014 search for someone, and if they are not on the list, tap the <b>+ Add</b> line that appears with their name already filled in.",
+    "<b>Add</b> and <b>Done</b> stay at the bottom of the check-in screen, so you never scroll a long list to reach them.",
+    "New shooters are entered as <b>First name / M.I. / Last name</b>, so nobody has to remember which order to type. The list still shows them as \u201cSmith, John A.\u201d",
+    "Adding someone whose surname is already on the list shows who is there, to help avoid duplicates.",
+    "In <b>Tools \u203a View &amp; edit shooter list</b>, tap a name to edit their details. Remove is inside their card now, not on the row.",
+    "<b>Tools \u203a Club contact list</b> gives you everyone's email and phone, a BCC list for club notices, and a spreadsheet.",
+    "A shooter can be set to <b>Email scores only</b>, so they still get their results but no club announcements.",
+    "A DQ or DNF no longer shows a final time in the results, and a stage nobody shot shows \u201c\u2014\u201d instead of 0.00."
+  ]},
   {v:"2.2.0",items:[
     "At the top of the <b>Roster</b>, set <b>Squad is shooting</b> to the stage your squad is on. Tap a shooter and that stage opens ready to score, marked <b>Now shooting</b>.",
     "The other stages fold down to one line. Tap a stage's header to open it for a correction, and again to fold it back.",
@@ -1193,11 +1238,85 @@ function unreadNews(){
   if(!cfg.seenVersion)return WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)===0;});
   return WHATSNEW.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0&&verCmp(w.v,APP_VERSION)<=0;});
 }
+/* Browsers may clear a site's saved data when the device runs low on space.
+   Asking once marks it as durable. Chrome and Safari decide silently and
+   normally agree for an installed app; Firefox may ask the person. It never
+   protects against someone clearing site data deliberately. */
+var storageState="unknown";
+function checkStorage(){
+  try{
+    if(!navigator.storage||!navigator.storage.persisted){storageState="unsupported";return;}
+    navigator.storage.persisted().then(function(ok){
+      if(ok){storageState="kept";renderStorageLine();return;}
+      if(!navigator.storage.persist){storageState="unsupported";renderStorageLine();return;}
+      return navigator.storage.persist().then(function(granted){
+        storageState=granted?"kept":"atrisk";renderStorageLine();});
+    }).catch(function(){storageState="unknown";});
+  }catch(e){storageState="unknown";}
+}
+function renderStorageLine(){
+  var el=document.getElementById("set-storage");if(!el)return;
+  if(storageState==="kept"){el.textContent="Storage: kept — this tablet won't clear the app's data to free space.";}
+  else if(storageState==="atrisk"){el.textContent="Storage: may be cleared by the tablet if it runs low on space. Back up regularly.";}
+  else{el.textContent="";}
+}
 function renderNewDots(){
   var on=unreadNews().length>0;
   ["gearBtn","set-whatsnew"].forEach(function(id){
     var el=document.getElementById(id);if(el)el.classList.toggle("hasnew",on);});
 }
+/* One row per person on this tablet's list — the club list, not tonight's
+   check-ins. Scores-only people appear here but not in the BCC list. */
+function clubContacts(){
+  var seen={},out=[];
+  state.entries.forEach(function(e){
+    if(seen[e.personId])return;seen[e.personId]=1;
+    out.push({name:e.name||"",email:(e.email||"").trim(),phone:(e.phone||"").trim(),noClub:!!e.noClub});
+  });
+  return out.sort(function(a,b){return a.name.localeCompare(b.name);});
+}
+function openContacts(){
+  var c=clubContacts();
+  var mailable=c.filter(function(p){return p.email&&!p.noClub;});
+  var scoresOnly=c.filter(function(p){return p.noClub;});
+  var noEmail=c.filter(function(p){return !p.email;});
+  document.getElementById("contactsCount").innerHTML=
+    "<b>"+c.length+"</b> shooters \u00b7 <b>"+mailable.length+"</b> on the club email list"
+    +(scoresOnly.length?(" \u00b7 "+scoresOnly.length+" email scores only"):"")
+    +(noEmail.length?(" \u00b7 <b>"+noEmail.length+"</b> with no email"):"");
+  var miss=document.getElementById("contactsMissing");
+  if(noEmail.length){
+    miss.innerHTML='<div class="subhd" style="margin-top:0">No email on file</div>'
+      +noEmail.map(function(p){return esc(p.name);}).join("<br>");
+    miss.style.display="";
+  }else miss.style.display="none";
+  document.getElementById("contactsScrim").classList.add("open");
+}
+document.getElementById("set-contacts").addEventListener("click",function(){
+  document.getElementById("gearScrim").classList.remove("open");openContacts();});
+document.getElementById("contactsClose").addEventListener("click",function(){
+  document.getElementById("contactsScrim").classList.remove("open");});
+document.getElementById("contactsScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="contactsScrim")ev.currentTarget.classList.remove("open");});
+document.getElementById("contactsBcc").addEventListener("click",function(){
+  var seen={},list=[];
+  clubContacts().forEach(function(p){
+    if(!p.email||p.noClub)return;
+    var k=p.email.toLowerCase();if(!seen[k]){seen[k]=1;list.push(p.email);}
+  });
+  if(!list.length){toast("No club email addresses on file");return;}
+  document.getElementById("emailListBox").value=list.join(", ");
+  document.getElementById("emailListScrim").classList.add("open");
+  setTimeout(function(){var b=document.getElementById("emailListBox");b.focus();b.select();},50);
+});
+document.getElementById("contactsCsv").addEventListener("click",function(){
+  function q(v){v=(v===null||v===undefined)?"":(""+v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+  var lines=[["Name","Email","Phone","Email scores only"].join(",")];
+  clubContacts().forEach(function(p){
+    lines.push([p.name,p.email,p.phone,p.noClub?"Yes":"No"].map(q).join(","));});
+  download("club-contacts-"+stamp()+".csv",lines.join("\n"),"text/csv");
+  toast("Contact list saved");
+});
 function openWhatsNew(){
   var un=unreadNews(),show=un.length?un:WHATSNEW.slice(0,3);
   document.getElementById("wnIntro").textContent=un.length
@@ -1216,7 +1335,7 @@ document.getElementById("set-whatsnew").addEventListener("click",openWhatsNew);
 /* The ONLY thing that clears the dot. Remind me later, the \u2715 and tapping
    outside all just close the sheet. */
 document.getElementById("wnRead").addEventListener("click",function(){
-  cfg.seenVersion=APP_VERSION;saveCfg();renderNewDots();
+  cfg.seenVersion=APP_VERSION;saveCfg();renderNewDots();checkStorage();
   document.getElementById("whatsNewScrim").classList.remove("open");
   toast("Marked as read");
 });
@@ -1325,9 +1444,14 @@ function renderRemoveList(){
   list.innerHTML=people.map(function(p){
     return '<div class="cirow" data-pid="'+p.pid+'"><div class="meta"><div class="nm">'+esc(p.rep.name||"(unnamed)")+'</div>'
       +'<div class="dv">'+(p.n>1?p.n+" entries":esc(p.rep.division||"\u2014"))+(p.scored?' \u00b7 has scores':'')+(p.rep.active?' \u00b7 checked in':'')+'</div></div>'
-      +'<span class="cistat" style="background:var(--red);color:#fff">Remove</span></div>';}).join("");
+      +'<span class="cistat">Edit</span></div>';}).join("");
   list.querySelectorAll(".cirow").forEach(function(row){
-    row.addEventListener("click",function(){removePerson(row.dataset.pid);});});
+    row.addEventListener("click",function(){
+      /* Open the person. Removal is inside their card, so a stray tap on a row
+         can no longer start a deletion. */
+      var first=state.entries.filter(function(e){return e.personId===row.dataset.pid;})[0];
+      if(first)openEdit(first.id,{identityOnly:true});
+    });});
 }
 /* A roster push replaces the club's whole list, so it belongs to whoever holds
    the complete picture: a director curating beforehand, or the tablet that just
@@ -1993,7 +2117,7 @@ function rosterFingerprint(entries){
   var t=function(v){return String(v==null?"":v).trim();};   /* trim, but keep case:
                                                                "bob" -> "Bob" is a real correction */
   return (entries||[]).map(function(e){
-      return [t(e.personId),t(e.name),t(e.email),t(e.phone),t(e.category),(e.ro?"1":"0")].join("\u0001");
+      return [t(e.personId),t(e.name),t(e.email),t(e.phone),t(e.category),(e.ro?"1":"0"),(e.noClub?"1":"0")].join("\u0001");
     })
     .sort()                    /* by personId first — otherwise check-in order
                                   makes every compile look different */
@@ -2306,7 +2430,6 @@ document.querySelectorAll("#setupType button").forEach(function(b){b.addEventLis
   state.meta.matchType=b.dataset.type;save();renderSetup();
 });});
 document.getElementById("checkinBtnSetup").addEventListener("click",openCheckin);
-document.getElementById("addBtnSetup").addEventListener("click",function(){openEdit(null);});
 document.getElementById("startMatchBtn").addEventListener("click",function(){
   /* Everything downstream — uploads, the compile screen, finding other squads —
      is keyed on the match date. Starting without one produces a match nothing
@@ -2396,7 +2519,7 @@ function ciNeedsEmail(e){return e.active&&!e.email;}
 function renderCheckin(){
   var q=(document.getElementById("checkinSearch").value||"").toLowerCase();
   var list=document.getElementById("checkinList");
-  if(!state.entries.length){list.innerHTML='<div class="empty" style="padding:20px">No shooters on file yet.<br>Tap “Add new shooter”.</div>';return;}
+  if(!state.entries.length){list.innerHTML='<div class="empty" style="padding:20px">No shooters on file yet.<br>Tap “Add someone not on the list”.</div>';return;}
   /* One row per PERSON, not per entry. In v2 a person owns one entry per
      round / division-run, so listing raw entries shows them repeatedly —
      especially after merging several tablets. */
@@ -2410,6 +2533,19 @@ function renderCheckin(){
     return {pid:pid,runs:runs,rep:(act[0]||runs[0]),active:act.length>0,nActive:act.length};});
   people.sort(function(a,b){return (a.rep.name||"").localeCompare(b.rep.name||"");});
   var shown=people.filter(function(p){return !q||(p.rep.name||"").toLowerCase().indexOf(q)>=0;});
+  if(!shown.length&&q){
+    /* Typed in the order people say names, so guess the last word is the
+       surname. The card opens with both boxes filled and correctable. */
+    var g=splitName(document.getElementById("checkinSearch").value||"");
+    list.innerHTML='<div class="empty" style="padding:18px">No shooter matching \u201c'+esc(q)+'\u201d.'
+      +'<div style="height:10px"></div>'
+      +'<button class="btn" id="checkinAddTyped">+ Add '+esc(composeName(g.last,g.first,g.mid)||q)+' as a new shooter</button></div>';
+    document.getElementById("checkinAddTyped").addEventListener("click",function(){
+      document.getElementById("checkinScrim").classList.remove("open");
+      openEdit(null,{first:g.first,last:g.last});
+    });
+    return;
+  }
   list.innerHTML=shown.map(function(p){
     var e=p.rep;
     var badges=(ciNeedsDG(e)?' <span class="cibadge warn">needs div/gun</span>':'')
@@ -3005,7 +3141,7 @@ function renderResults(){
   else lb.innerHTML=ord.map(function(o){var e=o.e,fin=o.place!=="DNF"&&o.place!=="DQ";
     return '<div class="lbrow'+(o.place==="1"?' gold':'')+'"><div class="rk'+(fin?'':' st')+'">'+o.place+'</div>'
     +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+'</div><div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')+(e.category?' · '+esc(e.category):'')+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
-    +'<div class="sc">'+fmt(total(e))+'<small>total</small></div></div>';}).join("");
+    +'<div class="sc">'+finalCell(e)+'<small>'+(fin?'total':o.place)+'</small></div></div>';}).join("");
   updateBackupInfo();
 }
 /* ===== INDOOR RESULTS ================================================= */
@@ -3076,7 +3212,7 @@ function composeEmailIndoor(e){
   var rounds=state.entries.filter(function(r){return r.personId===e.personId&&inResults(r);})
     .sort(function(a,b){return (a.checkinSeq||0)-(b.checkinSeq||0);});
   if(!rounds.length)rounds=[e];
-  var match=state.meta.match||"Indoor Match",L=[];
+  var match=matchDisplay(state.meta.match)||"Indoor Match",L=[];
   L.push("Indoor Match — Score Report");L.push("Match: "+match);L.push("");
   L.push("Competitor:  "+(e.name||""));
   if(e.squad)L.push("Squad:       "+e.squad);
@@ -3131,7 +3267,20 @@ document.getElementById("emailClose").addEventListener("click",function(){docume
 document.getElementById("emailScrim").addEventListener("click",function(ev){if(ev.target.id==="emailScrim")ev.currentTarget.classList.remove("open");});
 
 /* results tables */
-function stageCells(raw,pen,rank){var fin=raw+pen;
+/* A DQ or DNF has no final time — printing one puts a number in the same
+   column as the winner's, and a DNF's is missing a whole stage anyway. */
+function finalCell(e){return isFinisher(e)?fmt(total(e)):"\u2014";}
+/* A stage nobody shot is not a zero. Zero reads as a perfect run. */
+function stageShot(e,key){
+  var st=e[key];if(!st)return false;
+  if((st.t||[]).some(function(v){return v!==null&&v!==undefined&&v!=="";}))return true;
+  if((st.targets||[]).some(function(t){return (t.a||0)+(t.c||0)+(t.d||0)+(t.miss||0)>0;}))return true;
+  if((st.hits||[]).some(function(n){return n>0;}))return true;
+  return !!(st.steelHits||st.steelMiss);
+}
+function stageCells(raw,pen,rank,shot){
+  if(shot===false)return '<td style="'+SC.tdr+'">\u2014</td><td style="'+SC.tdr+'">\u2014</td><td style="'+SC.tdr+'">\u2014</td><td style="'+SC.tdr+'">\u2014</td>';
+  var fin=raw+pen;
   return '<td style="'+SC.tdr+'">'+fmt(raw)+'</td><td style="'+SC.tdr+'">'+(pen>0?pen:0)+'</td><td style="'+SC.tdr+'">'+fmt(fin)+'</td><td style="'+SC.tdr+'">'+rank+'</td>';}
 function detailTable(title,list,secLabel,secFn){
   if(!list.length)return '';
@@ -3145,10 +3294,10 @@ function detailTable(title,list,secLabel,secFn){
     +'<th style="'+SC.thr+'">Time</th>'+sub+sub+sub+'</tr></thead><tbody>';
   ord.forEach(function(o){var e=o.e,fin=isFinisher(e),rk=function(m){return fin?m[e.id]:"—";};
     h+='<tr><td style="'+SC.tdr+'">'+o.place+'</td><td style="'+SC.td+'">'+esc(e.name||"(unnamed)")+'</td><td style="'+SC.td+'">'+esc(secFn(e))+'</td><td style="'+SC.td+'">'+esc(e.gun||"")+'</td>'
-      +'<td style="'+SC.tdr+'">'+fmt(total(e))+'</td>'
-      +stageCells(sumT(e.five.t),fivePen(e),rk(r5))
-      +stageCells(sumT(e.glockm.t),glockmPen(e),rk(rM))
-      +stageCells(sumT(e.plates.t),platesPen(e),rk(rP))
+      +'<td style="'+SC.tdr+'">'+finalCell(e)+'</td>'
+      +stageCells(sumT(e.five.t),fivePen(e),rk(r5),stageShot(e,"five"))
+      +stageCells(sumT(e.glockm.t),glockmPen(e),rk(rM),stageShot(e,"glockm"))
+      +stageCells(sumT(e.plates.t),platesPen(e),rk(rP),stageShot(e,"plates"))
       +'</tr>';
   });
   h+='</tbody></table>';
@@ -3224,7 +3373,7 @@ function withMatchState(entries,meta,fn){
   finally{state.entries=se;state.meta=sm;}
 }
 function buildTablesHTMLIndoor(){
-  var match=esc(state.meta.match||"Indoor Match"),now=new Date();
+  var match=esc(matchDisplay(state.meta.match)||"Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
   h+='<div style="font-size:19px;font-weight:bold">Indoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
@@ -3240,7 +3389,7 @@ function buildTablesHTMLIndoor(){
 }
 function buildTablesHTML(){
   if((state.meta.matchType||"outdoor")==="indoor")return buildTablesHTMLIndoor();
-  var match=esc(state.meta.match||"Outdoor Match"),now=new Date();
+  var match=esc(matchDisplay(state.meta.match)||"Outdoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
   h+='<div style="font-size:19px;font-weight:bold">Outdoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
@@ -3255,7 +3404,7 @@ function buildTablesHTML(){
 var CLOSEMSG='<div style="font:16px Arial;padding:28px;line-height:1.7">Finished with the results.'
   +'<br><br>Use your device\u2019s back gesture to return to Match Scorekeeper.</div>';
 function composeResultsHTML(autoprint){
-  var title=esc(state.meta.match||("GSSF "+typeLabel()+" Match Results"));
+  var title=esc(matchDisplay(state.meta.match)||(typeLabel()+" Match Results"));
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
     +'<title>'+title+'</title><style>body{margin:0;padding:20px;background:#fff;font-family:Arial,Helvetica,sans-serif}'
     +'@media print{body{padding:0}.noprint{display:none!important}}table{page-break-inside:auto}tr{page-break-inside:avoid}'
@@ -3285,7 +3434,7 @@ function padL(s,n){s=""+s;while(s.length<n)s=" "+s;return s;}
 function ptRow(pl,name,a,b,c,tot){return padL(pl,4)+"  "+padR(name,20)+padL(a,8)+padL(b,8)+padL(c,8)+padL(tot,9);}
 function ptRowIn(pl,name,div,gun,sc,x){return padL(pl,4)+"  "+padR(name,20)+padR(div,14)+padR(gun,8)+padL(sc,7)+padL(x,5);}
 function composeResultsTextIndoor(){
-  var match=state.meta.match||"Indoor Match",L=[];
+  var match=matchDisplay(state.meta.match)||"Indoor Match",L=[];
   L.push("Indoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRowIn("Pl","Name","Division","Glock","Score","X");
   var divs=byDivision();
@@ -3303,17 +3452,21 @@ function composeResultsTextIndoor(){
 }
 function composeResultsText(){
   if((state.meta.matchType||"outdoor")==="indoor")return composeResultsTextIndoor();
-  var match=state.meta.match||"Outdoor Match",L=[];
+  var match=matchDisplay(state.meta.match)||"Outdoor Match",L=[];
   L.push("Outdoor Match — Final Results");L.push("Match: "+match);L.push("");
   var hdr=ptRow("Pl","Name","5toG","GlockM","Plates","Total");
   var divs=byDivision();
   L.push("DIVISION RANKINGS");
   Object.keys(divs).sort().forEach(function(d){
     L.push("");L.push("-- "+d+" --");L.push(hdr);
-    ordered(divs[d]).forEach(function(o){var e=o.e;L.push(ptRow(o.place,e.name||"",fmt(stageFive(e)),fmt(stageGlockm(e)),fmt(statePlates(e)),fmt(total(e))));});
+    ordered(divs[d]).forEach(function(o){var e=o.e;L.push(ptRow(o.place,e.name||"",
+    stageShot(e,"five")?fmt(stageFive(e)):"\u2014",stageShot(e,"glockm")?fmt(stageGlockm(e)):"\u2014",
+    stageShot(e,"plates")?fmt(statePlates(e)):"\u2014",finalCell(e)));});
   });
   L.push("");L.push("OVERALL — ALL DIVISIONS");L.push(hdr);
-  ordered(resultEntries()).forEach(function(o){var e=o.e;L.push(ptRow(o.place,(e.name||"")+" ["+(e.division||"—")+"]",fmt(stageFive(e)),fmt(stageGlockm(e)),fmt(statePlates(e)),fmt(total(e))));});
+  ordered(resultEntries()).forEach(function(o){var e=o.e;L.push(ptRow(o.place,(e.name||"")+" ["+(e.division||"—")+"]",
+    stageShot(e,"five")?fmt(stageFive(e)):"\u2014",stageShot(e,"glockm")?fmt(stageGlockm(e)):"\u2014",
+    stageShot(e,"plates")?fmt(statePlates(e)):"\u2014",finalCell(e)));});
   L.push("");L.push("Lower total wins. Congratulations to all shooters!");
   return L.join("\n");
 }
@@ -3376,19 +3529,94 @@ function execCopy(html){
 
 /* edit */
 var editingId=null;
-function openEdit(id){editingId=id||null;fPair.asked=false;var e=id?byId(id):blankEntry();
+/* Names are stored as one "Last, First M." string, which is what every list,
+   export and merge already uses. The card edits it as three boxes so nobody has
+   to remember the order, and these two functions are the only bridge. */
+/* Names get typed in a hurry, often all lower case. Capitalise the start of
+   each word, and after an apostrophe or hyphen, so "pat o'brien" reads as
+   "O'Brien". A word the RO capitalised themselves is left exactly as typed,
+   which keeps McDonald, vanDyke and SMITH intact. */
+function tidyNamePart(v){
+  return (v||"").trim().replace(/\S+/g,function(w){
+    if(/[A-Z]/.test(w))return w;
+    return w.replace(/(^|['\u2019-])([a-z])/g,function(m,sep,ch){return sep+ch.toUpperCase();});
+  });
+}
+function composeName(last,first,mid){
+  last=tidyNamePart(last);first=tidyNamePart(first);
+  mid=(mid||"").trim().replace(/[^A-Za-z]/g,"").slice(0,1).toUpperCase();
+  var out=last;
+  if(first)out=out?(out+", "+first):first;
+  if(mid)out=out+(out?" ":"")+mid+".";
+  return out.trim();
+}
+/* Splits an existing stored name back into the three boxes. A comma says which
+   part is which; without one, the last word is taken as the surname and the
+   guess is shown in the boxes for the RO to correct. */
+function splitName(name){
+  var n=(name||"").trim();if(!n)return {first:"",mid:"",last:""};
+  var first="",last="",mid="";
+  if(n.indexOf(",")>=0){
+    var bits=n.split(",");last=bits.shift().trim();first=bits.join(",").trim();
+  }else{
+    var w=n.split(/\s+/);
+    if(w.length===1){last=w[0];}
+    else{last=w.pop();first=w.join(" ");}
+  }
+  var m=first.match(/\s+([A-Za-z])\.?$/);      /* trailing initial */
+  if(m){mid=m[1].toUpperCase();first=first.slice(0,m.index).trim();}
+  return {first:first,mid:mid,last:last};
+}
+/* Who else is already on the list with this surname — shown when adding
+   someone, because that is the moment duplicates get created. */
+function sameLastNames(last,exceptPerson){
+  var l=(last||"").trim().toLowerCase();if(!l)return [];
+  var seen={},out=[];
+  state.entries.forEach(function(e){
+    if(e.personId===exceptPerson||seen[e.personId])return;
+    if(splitName(e.name).last.trim().toLowerCase()===l){seen[e.personId]=1;out.push(e.name);}
+  });
+  return out;
+}
+function renderSameLast(){
+  var el=document.getElementById("f-samelast");if(!el)return;
+  var cur=(editingId&&editingId!=="__new__")?byId(editingId):null;
+  var hits=sameLastNames(val("f-last"),cur?cur.personId:null);
+  el.innerHTML=hits.length?("<b>Already on the list:</b> "+hits.map(esc).join(" \u00b7 ")):"";
+  el.style.display=hits.length?"":"none";
+}
+function openEdit(id,opts){editingId=id||null;fPair.asked=false;var e=id?byId(id):blankEntry();
   document.getElementById("editTitle").textContent=id?"Edit Competitor":"Add Competitor";
-  document.getElementById("f-name").value=e.name||"";
+  opts=opts||{};
+  var nm=splitName(opts.name!==undefined?opts.name:(e.name||""));
+  document.getElementById("f-first").value=tidyNamePart(opts.first!==undefined?opts.first:nm.first);
+  document.getElementById("f-mid").value=nm.mid;
+  document.getElementById("f-last").value=tidyNamePart(opts.last!==undefined?opts.last:nm.last);
+  /* Opened from the club list: this is the person, not tonight's entry, so the
+     per-match fields are hidden and removal is offered instead. */
+  var idOnly=!!opts.identityOnly;
+  document.getElementById("f-matchfields").style.display=idOnly?"none":"";
+  document.getElementById("f-squad-wrap").style.display=idOnly?"none":"";
+  document.getElementById("f-removewrap").style.display=(idOnly&&id)?"":"none";
   setSelectValue("f-div",e.division||"");
   setGunValue(e.gun||"");
   setSelectValue("f-cat",e.category||"");
   document.getElementById("f-phone").value=e.phone||"";document.getElementById("f-email").value=e.email||"";
   document.getElementById("f-ro").checked=!!e.ro;
+  document.getElementById("f-noclub").checked=!!e.noClub;
   document.getElementById("f-squad").value=e.squad||state.meta.squad||"";
   document.getElementById("editScrim").classList.add("open");
-  if(!id){editingId="__new__";window.__draft=e;}}
+  if(!id){editingId="__new__";window.__draft=e;}
+  renderSameLast();}
 function closeEdit(){document.getElementById("editScrim").classList.remove("open");}
 document.getElementById("addBtn").addEventListener("click",function(){openEdit(null);});
+document.getElementById("f-last").addEventListener("input",renderSameLast);
+document.getElementById("editRemove").addEventListener("click",function(){
+  if(!editingId||editingId==="__new__")return;
+  var e=byId(editingId);if(!e)return;
+  closeEdit();removePerson(e.personId);
+  if(document.getElementById("removeScrim").classList.contains("open"))renderShooters();
+});
 document.getElementById("f-gun").addEventListener("change",function(){
   var other=document.getElementById("f-gun-other");
   if(this.value==="__other"){other.style.display="block";other.focus();}else{other.style.display="none";}
@@ -3401,16 +3629,23 @@ document.getElementById("f-div").addEventListener("change",function(){
 document.getElementById("editCancel").addEventListener("click",closeEdit);
 document.getElementById("editScrim").addEventListener("click",function(ev){if(ev.target.id==="editScrim")closeEdit();});
 document.getElementById("editSave").addEventListener("click",function(){
-  var name=val("f-name"),div=val("f-div"),cat=val("f-cat"),email=val("f-email"),sq=val("f-squad"),phone=val("f-phone");
+  var first=val("f-first"),mid=val("f-mid"),last=val("f-last");
+  var name=composeName(last,first,mid);
+  var div=val("f-div"),cat=val("f-cat"),email=val("f-email"),sq=val("f-squad"),phone=val("f-phone");
   var gun=document.getElementById("f-gun").value;if(gun==="__other")gun=val("f-gun-other");
-  var ro=document.getElementById("f-ro").checked;
-  if(!name){toast("Enter a name");return;}
+  var ro=document.getElementById("f-ro").checked,noClub=document.getElementById("f-noclub").checked;
+  if(!last&&!first){toast("Enter a name");return;}
+  if(!last){toast("Enter a last name");return;}
   if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast("Check the email address");return;}
   if(ro&&!email){toast("Add an email for the RO");return;}
-  if(editingId==="__new__"){var ne=window.__draft;ne.name=name;ne.division=div;ne.category=cat;ne.gun=gun;ne.phone=phone;ne.email=email;ne.squad=sq;ne.ro=ro;ne.active=true;ne.checkinSeq=state.meta.seq++;state.entries.push(ne);state.selected=ne.id;}
+  if(editingId==="__new__"){
+    var dup=sameLastNames(last,null);
+    if(dup.length&&!confirm("Already on the list:\n\n"+dup.join("\n")
+      +"\n\nAdd "+name+" as a new shooter as well?"))return;
+    var ne=window.__draft;ne.name=name;ne.division=div;ne.category=cat;ne.gun=gun;ne.phone=phone;ne.email=email;ne.squad=sq;ne.ro=ro;ne.noClub=noClub;ne.active=true;ne.checkinSeq=state.meta.seq++;state.entries.push(ne);state.selected=ne.id;}
   else{var e=byId(editingId);
     e.division=div;e.gun=gun;e.squad=sq;                                  /* per-run fields */
-    updatePerson(e.personId,{name:name,category:cat,phone:phone,email:email,ro:ro});  /* identity → all of this person's runs */
+    updatePerson(e.personId,{name:name,category:cat,phone:phone,email:email,ro:ro,noClub:noClub});  /* identity → all of this person's runs */
   }
   save();closeEdit();toast("Saved");
   /* Before the match starts there is no navigation bar, so landing on the

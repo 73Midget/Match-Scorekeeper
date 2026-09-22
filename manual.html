@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Match Scorekeeper — User Manual (app v2.2.0)
+  Match Scorekeeper — User Manual (app v2.3.0)
   Created by G. Groiss · Free software under the GNU AGPL v3.0
 -->
 <html lang="en">
@@ -68,7 +68,7 @@
 <header>
   <h1>Match <b>Scorekeeper</b></h1>
   <p>User manual — scoring for GSSF-style indoor &amp; outdoor matches</p>
-  <div class="v">app v2.2.0</div>
+  <div class="v">app v2.3.0</div>
 </header>
 <main>
 
@@ -207,7 +207,7 @@ available from every screen, including before a match has started.</p>
   <li><b>Match type</b> — <b>Outdoor</b> or <b>Indoor</b>.</li>
   <li><b>Match date</b> — pick it from the calendar. <b>Every tablet must have the same date</b>;
       it's how the app knows which squads belong together.</li>
-  <li><b>Check in shooters</b> — see section 6.</li>
+  <li><b>Check in shooters</b> — the only button you need; see section 6.</li>
   <li>Check the <b>Ready to start</b> line above the button — it lists the type, date, squad name
       and how many are checked in, and shows anything missing in red.</li>
   <li>Tap <b>› Start match</b>.</li>
@@ -232,11 +232,32 @@ available from every screen, including before a match has started.</p>
 
 <h2 id="s6">6 · Shooters &amp; Check-In</h2>
 
+<h3>Adding someone who isn't on the list</h3>
+<p>Type their name in the search box. If nobody matches, a line appears offering
+<b>+ Add [name] as a new shooter</b>, with the name already filled in. You can type it the way you'd
+say it — "todd smith" — and it's filed as <b>Smith, Todd</b>.</p>
+
+<p>New shooters are entered as <b>First name</b>, an optional <b>M.I.</b>, and <b>Last name</b>, so
+there's no order to remember. The middle initial is worth using when two people share a name.</p>
+
+<div class="tip">
+  <b>Duplicate check.</b> If someone with that surname is already on the list, the card shows who,
+  before you save. That's the moment duplicates are created, so it's worth a glance.
+</div>
+
+<p><b>Add</b> and <b>Done</b> stay at the bottom of the check-in screen, so you never scroll a long
+list to reach them.</p>
+
+<h3>Checking people in</h3>
 <p>Tap <b>Check in shooters</b> and pick a name to open their card. Set their <b>division</b> and
 <b>Glock model</b> for tonight, their <b>email</b>, and the <b>RO</b> tick if their address should
 always be included in the results email.</p>
 
-<p>Use <b>+ Add shooter</b> for someone not on the list. Latecomers can be checked in at any point.</p>
+<p>There's also <b>Email scores only</b>. Someone ticked still gets their match results, but is left
+out of the club contact list used for announcements.</p>
+
+<p>Latecomers can be checked in at any point, and the Roster has <b>+ Add a late shooter</b> for
+someone who arrives mid-match.</p>
 
 <div class="note">
   <b>Shooting order is check-in order</b> — the roster is numbered in the order people were checked in.
@@ -324,6 +345,12 @@ gun or division.</p>
 <span class="pill dq">DQ</span>. Tap again to clear it. Outdoor applies it to the shooter's entry;
 indoor applies it to that round, so a shooter can complete one round and DNF another. Both are listed
 at the bottom of the results rather than given a place.</p>
+
+<div class="note">
+  <b>Neither shows a final time.</b> A DQ keeps the stage times they shot, so you can still see how
+  the night went, but the Final column reads "—" so it can't be mistaken for a winning score. A DNF
+  shows "—" for any stage they didn't shoot, rather than 0.00.
+</div>
 
 <h2 id="s10">10 · Reading Results</h2>
 
@@ -427,10 +454,16 @@ and how many squads they had. Pick one to read its final results, and save a PDF
 <h2 id="s13">13 · The Shooter List</h2>
 
 <p><b>Tools › View &amp; edit shooter list</b> shows everyone on this tablet, one row per person,
-with search. From here you can add a shooter, remove one, and publish the list to the club.</p>
+with search. From here you can add a shooter, edit one, remove one, and publish the list to the club.</p>
+
+<h3>Editing someone</h3>
+<p>Tap a name to open their details — name, email, phone, category, RO and Email scores only. The
+division and Glock aren't shown here, because those belong to tonight's match rather than to the
+person.</p>
 
 <h3>Removing someone</h3>
-<p>Removing takes out that person and <b>all</b> of their entries, so a shooter with several
+<p><b>Remove</b> is at the bottom of that person's card, in red. Removing takes out that person and
+<b>all</b> of their entries, so a shooter with several
 divisions doesn't leave orphans behind. If they have scores in this match, you're warned first.
 <b>Undo</b> in Tools reverses it.</p>
 
@@ -448,6 +481,20 @@ afterwards gets this one.</p>
 <div class="note">
   You don't normally need to publish by hand at all. <b>Compiling the match publishes for you</b>
   (section 14), which is how walk-ins added during a match reach the club list.
+</div>
+
+<h3>Club contact list</h3>
+<p><b>Tools › Club contact list</b> is for sending club notices rather than results. It shows how
+many shooters are on the list, how many are on the club email list, and who has no email on file.</p>
+<ul>
+  <li><b>Copy email list for BCC</b> — everyone with an email, except anyone set to Email scores
+      only. Paste it into the BCC field of a new message.</li>
+  <li><b>Save contact list</b> — a spreadsheet of names, emails, phone numbers, and who is
+      scores-only.</li>
+</ul>
+<div class="warn">
+  That spreadsheet holds every shooter's contact details. Keep it somewhere sensible, and don't
+  share it more widely than the club's officers.
 </div>
 
 <h3>Earlier versions</h3>
@@ -742,6 +789,11 @@ change on the compiling tablet instead.</p>
 <p>Tap the <b>✕</b> in its top right corner, the <b>Close</b> button at the bottom, or anywhere on the
 dimmed area around it.</p>
 
+<h4>"What does the Storage line in Tools mean?"</h4>
+<p><b>Storage: kept</b> means the tablet won't clear the app's data to free space. If it says
+<b>may be cleared</b>, the tablet hasn't agreed to that — the app still works normally, but save a
+backup file regularly on that tablet.</p>
+
 <h4>"Did I lose scores when the screen locked?"</h4>
 <p>No. Everything auto-saves. Reopen the app and carry on.</p>
 
@@ -761,7 +813,7 @@ dimmed area around it.</p>
 
 </main>
 <footer>
-  Match Scorekeeper · User manual for app v2.2.0. Created by G. Groiss · Free software under the
+  Match Scorekeeper · User manual for app v2.3.0. Created by G. Groiss · Free software under the
   GNU AGPL v3.0. Keep a copy with the tablets and update it when the app version changes.<br><br>
   Not affiliated with, endorsed by, or sponsored by Glock Ges.m.b.H. or GLOCK, Inc. "GSSF" and
   "GLOCK" are trademarks of their respective owners and are used here only to describe match format.
