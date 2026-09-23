@@ -257,8 +257,10 @@
   nav.tabs button .ic{font-size:19px;line-height:1}
   nav.tabs button.on{color:var(--orange)}
   .scrim{position:fixed;inset:0;background:rgba(20,24,29,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
-  /* sheets opened from inside another sheet must stack above it, regardless of
-     where they sit in the document */
+  /* Fallback ladder only. Sheets are stacked in open order by the observer in
+     the script, which sets an inline z-index and so wins over these. These
+     remain for a browser with no MutationObserver, and are not kept up to date
+     for new sheets — the observer is what to rely on. */
   #fileScrim,#histScrim,#fixScrim,#pastScrim,#whatsNewScrim,#contactsScrim{z-index:60}
   /* "new" dot — passive, never a prompt. It stays until someone explicitly
      taps Mark as read, so a curious tap on the link doesn't clear it. */
@@ -404,7 +406,9 @@
   .steps{counter-reset:s;list-style:none;padding:0;margin:0 0 12px}
   .steps li{position:relative;padding:0 0 10px 30px;font-size:13px;color:var(--ink);line-height:1.5}
   .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
-  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:24px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:24px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:0 6px 20px rgba(0,0,0,.3);white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
+  /* z-index sits above every sheet in the stack: "Copied" is usually confirming
+     something tapped inside a sheet, so it can't appear behind one. */
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   .toast.act{pointer-events:auto;cursor:pointer;background:var(--orange)}
   .muted{color:var(--steel);font-size:12px}
@@ -907,13 +911,47 @@ var APP_VERSION="2.3.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-22-d";
+var APP_BUILD="2026-09-22-e";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
 var REMIND_MS=10*60*1000;
 var state={entries:[],selected:null,filterDiv:"All",filterSquad:"All",meta:{squad:"",match:"",lastBackup:null,remind:true,matchType:"outdoor",schemaVersion:SCHEMA_VERSION,compiled:[],stage:"five"}};
 var mem=null,lastRemind=0;
+
+/* ---- pop-up sheet stacking ------------------------------------------------
+   Sheets open other sheets: the shooter list opens a person's card, the contact
+   list opens the BCC box. Which one sits on top was decided by a z-index ladder
+   kept by hand in the CSS, and a ladder like that only has to be wrong once for
+   a sheet to open *behind* the sheet that launched it — which reads to an RO as
+   a button that does nothing.
+
+   So the ladder is gone. Every sheet is raised as it opens, above whatever is
+   already open, and reset as it closes; the counter returns to the floor once
+   the last sheet is shut, so it can't climb forever in a long match. One
+   observer covers all of them, including any sheet added in a later version,
+   without every call site having to remember to do this. */
+var SCRIM_Z=50;                    /* the floor, matching .scrim in the CSS */
+(function(){
+  /* No MutationObserver on a very old WebView: sheets then stack by the CSS
+     floor and document order, exactly as they did before this block existed. */
+  if(typeof MutationObserver!=="function")return;
+  var zTop=SCRIM_Z;
+  var obs=new MutationObserver(function(recs){
+    for(var i=0;i<recs.length;i++){
+      var el=recs[i].target;
+      if(el.classList.contains("open")){
+        zTop+=10;el.style.zIndex=String(zTop);
+      }else{
+        el.style.zIndex="";
+        if(!document.querySelectorAll(".scrim.open").length)zTop=SCRIM_Z;
+      }
+    }
+  });
+  var all=document.querySelectorAll(".scrim");
+  for(var i=0;i<all.length;i++)
+    obs.observe(all[i],{attributes:true,attributeFilter:["class"]});
+})();
 var SC={
   tbl:'border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;margin:0 0 22px',
   cap:'text-align:left;font-weight:bold;font-size:15px;margin:18px 0 4px',
@@ -1219,7 +1257,8 @@ var WHATSNEW=[
     "<b>Tools \u203a Club contact list</b> gives you everyone's email and phone, a BCC list for club notices, and a spreadsheet.",
     "A shooter can be set to <b>Email scores only</b>, so they still get their results but no club announcements.",
     "A DQ or DNF no longer shows a final time in the results, and a stage nobody shot shows \u201c\u2014\u201d instead of 0.00.",
-    "Fixed: someone shooting two divisions, or turning up in two squads, could end up with two entries disagreeing about their email or ticks. Both copies now stay in step."
+    "Fixed: someone shooting two divisions, or turning up in two squads, could end up with two entries disagreeing about their email or ticks. Both copies now stay in step.",
+    "Fixed: a pop-up that opened behind the one you opened it from — editing a shooter from the shooter list, or the BCC list from the contact list."
   ]},
   {v:"2.2.0",items:[
     "At the top of the <b>Roster</b>, set <b>Squad is shooting</b> to the stage your squad is on. Tap a shooter and that stage opens ready to score, marked <b>Now shooting</b>.",
