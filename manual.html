@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Match Scorekeeper — User Manual (app v2.3.0)
+  Match Scorekeeper — User Manual (app v2.4.0)
   Created by G. Groiss · Free software under the GNU AGPL v3.0
 -->
 <html lang="en">
@@ -68,7 +68,7 @@
 <header>
   <h1>Match <b>Scorekeeper</b></h1>
   <p>User manual — scoring for GSSF-style indoor &amp; outdoor matches</p>
-  <div class="v">app v2.3.0</div>
+  <div class="v">app v2.4.0</div>
 </header>
 <main>
 
@@ -443,12 +443,36 @@ paste the result into the setup code box.</p>
 
 <h3>Past matches</h3>
 <p><b>Tools › Past matches on the server</b> lists the club's earlier matches with their date, type
-and how many squads they had. Pick one to read its final results, and save a PDF if you need one.</p>
+and how many squads they had. Open one and you get two things: its <b>final results</b>, if the match
+was compiled, and underneath, <b>what each tablet uploaded</b> on the night.</p>
+
+<p>Tap any of those squad uploads to read it. You see who was checked in on that tablet, how far
+through the three stages each of them got, and their times — exactly as that tablet had it at the
+moment it last uploaded. Nothing is loaded onto your tablet and nothing is changed.</p>
 
 <div class="note">
   Viewing a past match doesn't touch the match on this tablet — you can look one up part-way through
-  a live match safely. Matches that were never compiled are shown but can't be opened, since there
-  are no final results to read.
+  a live match safely. Matches that were never compiled can be opened too; they simply have no final
+  results, only the uploads.
+</div>
+
+<h3>Looking inside a squad upload</h3>
+
+<p>The same read-only view is reachable during a compile. On the compile screen every squad has a
+<b>View upload</b> link beside <b>Show shooters</b>.</p>
+
+<p>At the top of it is a line like <b>8 shooters · 6 started · 5 finished</b>. That is the quickest
+way to tell a squad that is still going from one that was abandoned early — an abandoned upload has
+people checked in, almost nothing scored, and a last upload time well behind the other tablets.</p>
+
+<p>This matters most when two tablets have uploaded under the same squad name. Rather than guessing
+which to compile, you can read both.</p>
+
+<div class="note">
+  <b>A squad's shooter count is who checked in, not who has shot.</b> If thirty people check in
+  before the first shot, the compile screen shows 30 from the very first upload and it does not climb
+  as the night goes on. That is not a stuck tablet. To see actual progress, open <b>View upload</b>
+  and read the <b>started</b> and <b>finished</b> counts.
 </div>
 
 <h2 id="s13">13 · The Shooter List</h2>
@@ -794,6 +818,12 @@ dimmed area around it.</p>
 <b>may be cleared</b>, the tablet hasn't agreed to that — the app still works normally, but save a
 backup file regularly on that tablet.</p>
 
+<h4>"There's an orange TEST VERSION stripe across the top. Is this the right tablet?"</h4>
+<p>No — not for a real match. That stripe means the tablet is running a test copy of the app rather
+than the club's live one, and the line under it names the club server it is pointed at. Scores
+entered here do not reach the club's real records. Find a tablet without the stripe, and tell
+whoever looks after the tablets about this one.</p>
+
 <h4>"Did I lose scores when the screen locked?"</h4>
 <p>No. Everything auto-saves. Reopen the app and carry on.</p>
 
@@ -813,7 +843,7 @@ backup file regularly on that tablet.</p>
 
 </main>
 <footer>
-  Match Scorekeeper · User manual for app v2.3.0. Created by G. Groiss · Free software under the
+  Match Scorekeeper · User manual for app v2.4.0. Created by G. Groiss · Free software under the
   GNU AGPL v3.0. Keep a copy with the tablets and update it when the app version changes.<br><br>
   Not affiliated with, endorsed by, or sponsored by Glock Ges.m.b.H. or GLOCK, Inc. "GSSF" and
   "GLOCK" are trademarks of their respective owners and are used here only to describe match format.
