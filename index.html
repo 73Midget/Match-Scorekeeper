@@ -954,7 +954,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-27-a";
+var APP_BUILD="2026-09-27-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1260,6 +1260,9 @@ function renderSync(){
   else if(showSetup)syncStatus("idle","Paste your club's setup code to finish.");
   else syncStatus("ok","Connected"+(cfg.clubName?" to "+cfg.clubName:""));
   renderPending();
+  /* Whatever just changed about sync, the buttons it gates follow it now
+     rather than on the next time Tools is opened. */
+  renderOnlineControls();
 }
 
 function applyScreen(){
@@ -1275,6 +1278,27 @@ document.querySelectorAll("#set-screen button").forEach(function(b){
 });
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
 var namesEditing=false,matchEditing=false;
+/* Online controls appear only when they can do something — the group shrinks
+   rather than substituting a button that isn't really the same action.
+
+   Its own function because turning online services on, or saving a setup code,
+   changes the answer while Tools is already open. Both used to redraw only the
+   sync panel, so the buttons stayed hidden until Tools was closed and reopened
+   — the setup code case being the worse one, since the panel said "Connected"
+   while the things that connection unlocks were still missing. renderSync()
+   calls this too, so a caller cannot forget. */
+function renderOnlineControls(){
+  var on=syncOn();
+  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint",
+   "set-movehd","set-sendfile","set-sendfile-hint"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  var n=Object.keys(people).length;
+  var sub=document.getElementById("set-roster-sub");
+  if(sub)sub.textContent=
+    (n?(n+" on this tablet"):"none on this tablet")+(on&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"")
+    +" \u00b7 add, remove and publish from here";
+}
 function renderSettings(){
   document.getElementById("set-squad").value=state.meta.squad||"";
   document.getElementById("set-device").value=cfg.deviceLabel||"";
@@ -1283,16 +1307,7 @@ function renderSettings(){
   document.getElementById("names-view").style.display=namesEditing?"none":"";
   document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
   applyScreen();
-  /* Online controls appear only when they can do something — the group shrinks
-     rather than substituting a button that isn't really the same action. */
-  var on=syncOn();
-  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint","set-movehd","set-sendfile","set-sendfile-hint"].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
-  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
-  var n=Object.keys(people).length;
-  document.getElementById("set-roster-sub").textContent=
-    (n?(n+" on this tablet"):"none on this tablet")+(on&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"")
-    +" \u00b7 add, remove and publish from here";
+  renderOnlineControls();
   document.getElementById("set-match").value=state.meta.match||"";
   document.getElementById("set-match-shown").textContent=state.meta.match?matchDisplay(state.meta.match):"not set";
   document.getElementById("set-match-box").style.display=matchEditing?"":"none";
@@ -1318,7 +1333,8 @@ var WHATSNEW=[
     "You can now <b>look inside a squad upload without loading it</b>. On the compile screen, each squad has a <b>View upload</b> link showing who is on it and how far along they were \u2014 useful when two tablets uploaded the same squad name and you need to know which one to keep.",
     "<b>Tools \u203a Past matches</b> now opens every match, not only the ones that were compiled. Each match shows its final results, if there are any, and what each tablet uploaded on the night.",
     "If a tablet uploads again <b>after</b> you have compiled, the compile screen now says so before you tick anything, and tells you what to do instead.",
-    "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one."
+    "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
+    "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first."
   ]},
   {v:"2.3.0",items:[
     "Checking in is one button now. <b>Check in shooters</b> \u2014 search for someone, and if they are not on the list, tap the <b>+ Add</b> line that appears with their name already filled in.",
