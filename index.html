@@ -954,7 +954,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-27-b";
+var APP_BUILD="2026-09-29-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1142,7 +1142,12 @@ function bestIdentity(ex,ie){
   return {fields:out,at:Math.max(ta,tb)};
 }
 function ensureOutdoor(e){
-  e.done=e.done||{};e.done.five=!!e.done.five;e.done.glockm=!!e.done.glockm;e.done.plates=!!e.done.plates;
+  /* The mirror of the guard in ensureIndoor, and this one is not cosmetic: an
+     indoor entry stores `done` as a boolean, and `true||{}` is `true`, so the
+     next line would try to set a property on a primitive — a TypeError under
+     "use strict", which takes the whole render down. */
+  if(!e.done||typeof e.done!=="object")e.done={};
+  e.done.five=!!e.done.five;e.done.glockm=!!e.done.glockm;e.done.plates=!!e.done.plates;
   e.five=e.five||{};e.five.t=e.five.t||[null,null,null];
   if(!e.five.targets){e.five.targets=mkTargets(5);if(e.five.p1||e.five.p3||e.five.miss){e.five.targets[0]={a:0,c:e.five.p1||0,d:e.five.p3||0,miss:e.five.miss||0};}}
   e.glockm=e.glockm||{};e.glockm.t=e.glockm.t||[null,null,null];
@@ -1159,7 +1164,12 @@ function ensureIndoor(e){
      null = not yet entered. `done` is a single boolean (round confirmed/locked). */
   e.score=(typeof e.score==="number")?e.score:null;
   e.x=(typeof e.x==="number")?e.x:null;
-  e.done=!!e.done;
+  /* Strictly `=== true`, not a truthiness test. Outdoor stores `done` as an
+     object of three stage flags, and every object is truthy — so an entry
+     carried over from an outdoor match read as a confirmed round and opened
+     locked, with no scores in it. Anything that is not literally true means
+     this round has not been confirmed. */
+  e.done=(e.done===true);
   return e;
 }
 function load(){
@@ -1334,7 +1344,8 @@ var WHATSNEW=[
     "<b>Tools \u203a Past matches</b> now opens every match, not only the ones that were compiled. Each match shows its final results, if there are any, and what each tablet uploaded on the night.",
     "If a tablet uploads again <b>after</b> you have compiled, the compile screen now says so before you tick anything, and tells you what to do instead.",
     "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
-    "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first."
+    "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first.",
+    "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in."
   ]},
   {v:"2.3.0",items:[
     "Checking in is one button now. <b>Check in shooters</b> \u2014 search for someone, and if they are not on the list, tap the <b>+ Add</b> line that appears with their name already filled in.",
@@ -2604,7 +2615,17 @@ function renderSetup(){
 }
 document.querySelectorAll("#setupType button").forEach(function(b){b.addEventListener("click",function(){
   if(state.meta.started)return;                       /* type locks once the match starts */
-  state.meta.matchType=b.dataset.type;save();renderSetup();
+  if(state.meta.matchType===b.dataset.type)return;
+  state.meta.matchType=b.dataset.type;
+  /* Convert everyone already checked in, rather than leaving entries in the
+     old type's shape for the new type's screens to read. Check-in retypes a
+     shooter as they come through it, so only people already on the tablet when
+     the type changed were left behind — and a stale shape does not read as
+     empty, it reads as whatever the other type's field happens to mean.
+     Safe here because the type is locked once the match has started, so there
+     are no scores to lose. */
+  state.entries.forEach(function(e){retypeEntry(e,state.meta.matchType);});
+  save();renderSetup();
 });});
 document.getElementById("checkinBtnSetup").addEventListener("click",openCheckin);
 document.getElementById("startMatchBtn").addEventListener("click",function(){
@@ -2670,7 +2691,7 @@ function renderRosterIndoor(active,q){
   var list=document.getElementById("rosterList");
   if(!people.length){list.innerHTML='<div class="empty">No match for “'+esc(q)+'”.</div>';return;}
   list.innerHTML=people.map(function(p,i){
-    var n=p.rounds.length,locked=p.rounds.filter(function(r){return r.done;}).length,st=p.rounds.some(function(r){return statusOf(r)!=="normal";}),best=bestRound(p.rounds);
+    var n=p.rounds.length,locked=p.rounds.filter(function(r){return r.done===true;}).length,st=p.rounds.some(function(r){return statusOf(r)!=="normal";}),best=bestRound(p.rounds);
     return '<div class="entry" data-id="'+p.rep.id+'"><div class="ord">'+(i+1)+'</div><div class="meta"><div class="nm">'+esc(p.rep.name||"(unnamed)")
       +(st?' <span class="sbadge DNF">!</span>':'')+'</div>'
       +'<div class="dv">'+n+' round'+(n===1?'':'s')+(locked?' · '+locked+' locked':'')+'</div></div>'
@@ -2960,7 +2981,12 @@ document.getElementById("confirmReject").addEventListener("click",function(){
 });
 document.getElementById("confirmScrim").addEventListener("click",function(ev){if(ev.target.id==="confirmScrim"){ev.currentTarget.classList.remove("open");pendingStage=null;pendingRoundId=null;confirmKind="stage";}});
 /* ===== INDOOR SCORE SCREEN ============================================ */
-function roundComplete(r){return !!(r.done||statusOf(r)!=="normal");}
+/* `=== true` throughout the indoor screens, never truthiness: outdoor stores
+   `done` as an object of stage flags, and an entry can reach an indoor screen
+   still wearing the outdoor shape — from a switch, a restore, or a payload
+   from a tablet that was on the other type. An object is truthy, so a
+   truthiness test reads "not started" as "confirmed and locked". */
+function roundComplete(r){return r.done===true||statusOf(r)!=="normal";}
 function personRounds(pid){return state.entries.filter(function(r){return r.personId===pid&&r.active;});}
 function renderScoreIndoor(){
   var body=document.getElementById("scoreBody"),sel=byId(state.selected);
@@ -2970,7 +2996,7 @@ function renderScoreIndoor(){
   var h='<h2 class="section">'+esc(sel.name||"(unnamed)")+'</h2>';
   h+='<div class="countline">'+rounds.length+' round'+(rounds.length===1?'':'s')+(best?' · best '+num0(best.score)+' ('+num0(best.x)+'X)':'')+'</div>';
   rounds.forEach(function(r,k){
-    var locked=!!r.done,st=statusOf(r);
+    var locked=(r.done===true),st=statusOf(r);
     h+='<div class="card stage iround'+(locked?' locked':'')+'" id="iround-'+r.id+'">';
     h+='<div class="hd"><div class="name">ROUND '+(k+1)+(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>';
     h+='<div class="stagescore">'+(r.score!=null?num0(r.score):'—')+'<small>'+(r.x!=null?num0(r.x)+'X':'score')+'</small></div></div>';
