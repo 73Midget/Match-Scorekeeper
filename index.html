@@ -505,7 +505,7 @@
         <button class="btn ghost sm" id="compileBtn">Compile match results</button>
     <div class="btnhint"><b>Match director only</b> — combines every squad at the end.</div>
     <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
-    <div class="btnhint" id="republishHint" style="display:none">Sends a correction made after compiling up to the server.</div>
+    <div class="btnhint" id="republishHint" style="display:none"><b>Match director only</b> — sends a correction made after compiling up to the server.</div>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -954,7 +954,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-10-03-a";
+var APP_BUILD="2026-10-03-b";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
