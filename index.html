@@ -90,6 +90,17 @@
   header h1 b{color:var(--orange)}
   header h1 .ver{font-size:10px;font-weight:700;color:var(--steel-soft);letter-spacing:.06em;margin-left:6px}
   header .sub{font-family:var(--mono);font-size:11px;color:var(--steel-soft);letter-spacing:.04em;white-space:nowrap;flex:0 0 auto;margin-left:auto;text-align:right}
+  /* Test-deployment stripe. Inside the sticky header so it never scrolls away,
+     and deliberately loud: it only matters on the one night nobody is paying
+     attention, which is exactly when a discreet marker fails. The second line
+     names the club this tablet is pointed at — a test tablet wrongly connected
+     to the real club then shows the real club's name in the middle of an orange
+     stripe, which a person notices. The app never guesses which club is which. */
+  .testbar{display:none;background:var(--orange-deep);color:#fff;font-weight:800;font-size:11.5px;
+           letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:7px 12px;
+           margin:10px -16px -14px;border-top:2px solid rgba(0,0,0,.25)}
+  .testbar .club{font-size:11px;opacity:.92;font-weight:700;letter-spacing:.04em;text-transform:none;margin-top:2px}
+  body.istest .testbar{display:block}
   header .sub b{color:#9fd9b6;font-weight:700}
   main{max-width:680px;margin:0 auto;padding:14px 14px 30px}
   .view{display:none}.view.active{display:block}
@@ -307,6 +318,12 @@
   .warnbox{background:#fdf2f0;border:1px solid #e7c3bd;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:10px;line-height:1.5}
   .warnbox b{color:var(--red)}
   .goodbox{background:#eef7f2;border:1px solid #bcdccb;border-radius:10px;padding:10px 12px;font-size:12px;color:var(--green);margin-bottom:10px;line-height:1.5}
+  /* Context, not alarm. Deliberately quieter than .warnbox and .goodbox — those
+     say a wrong move costs you, or that something went well; this one just
+     explains. Until 2.4.0 .note had no rule at all and rendered as bare prose. */
+  .note{background:#f3f1ea;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--ink);margin-bottom:10px;line-height:1.5}
+  body.night .note{background:#1f2219;border-color:var(--line);color:var(--ink)}
+  body.sun .note{background:#fff;border-color:#000;border-width:2px}
   .goodbox b{color:var(--green)}
   .pendbadge{background:var(--gold);color:#231b06;border:none;font-size:10px;font-weight:800;letter-spacing:.03em;
              padding:5px 9px;border-radius:999px;margin-left:auto;flex:0 0 auto;cursor:pointer;white-space:nowrap;max-width:46%;
@@ -386,6 +403,7 @@
   .crow .src{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--steel);color:#fff;margin-left:6px}
   .crow .src.file{background:var(--orange-deep)}
   .crow .exp{background:none;border:none;color:var(--orange-deep);font-size:11px;font-weight:800;text-decoration:underline;padding:4px 0 0;cursor:pointer}
+  .crow .expsep{color:var(--line-strong);font-size:11px;padding:0 7px}
   .crow .names{font-size:11px;color:var(--ink);background:#f6f4ee;border-radius:8px;padding:7px 9px;margin-top:6px;line-height:1.6}
   .subhd{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);font-weight:800;margin:14px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
   /* the picker icon is the tap target on a tablet — make it worth aiming at */
@@ -419,7 +437,8 @@
 <header><div class="row"><h1>Match <b>Scorekeeper</b> <span class="ver" id="appver"></span></h1>
   <button class="pendbadge" id="pendingBadge" style="display:none"></button>
   <span class="sub" id="saved">not saved yet</span>
-  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><span class="newdot"></span><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div></header>
+  <button class="gearbtn" id="gearBtn" title="Tools" aria-label="Tools"><span class="newdot"></span><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false"><g fill="currentColor"><rect x="10.6" y="1" width="2.8" height="22" rx="1"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(45 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(90 12 12)"/><rect x="10.6" y="1" width="2.8" height="22" rx="1" transform="rotate(135 12 12)"/><circle cx="12" cy="12" r="7"/></g><circle cx="12" cy="12" r="3" fill="#fff"/></svg><span>Tools</span></button></div>
+  <div class="testbar" id="testbar">Test version &middot; not the club&rsquo;s live app<div class="club" id="testbarClub"></div></div></header>
 
 <main>
   <section class="view active" id="view-setup">
@@ -486,7 +505,7 @@
         <button class="btn ghost sm" id="compileBtn">Compile match results</button>
     <div class="btnhint"><b>Match director only</b> — combines every squad at the end.</div>
     <button class="btn ghost sm" id="republishBtn" style="display:none">↑ Publish corrected results</button>
-    <div class="btnhint" id="republishHint" style="display:none">Sends a correction made after compiling up to the server.</div>
+    <div class="btnhint" id="republishHint" style="display:none"><b>Match director only</b> — sends a correction made after compiling up to the server.</div>
     <div class="infoline" id="backupInfo"><span class="dot" style="background:var(--steel-soft)"></span><span>Last backup: never</span></div>
     <input type="file" id="restoreFile" accept="application/json" hidden>
     <input type="file" id="mergeFile" accept="application/json" multiple hidden>
@@ -604,6 +623,30 @@
   <div style="height:10px"></div>
   <button class="btn ghost sm" id="pastPrint" style="margin-bottom:8px">Save as PDF</button>
   <button class="btn ghost" id="pastViewClose">Close</button>
+</div></div>
+
+<div class="scrim" id="pastMatchScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="pastMatchScrim" aria-label="Close">✕</button>
+  <h3 id="pastMatchTitle">Match</h3>
+  <p class="muted" style="margin:0 0 10px">What each tablet uploaded. Nothing here changes the match on this tablet.</p>
+  <div id="pastMatchBody"></div>
+  <div style="height:12px"></div>
+  <button class="btn ghost" id="pastMatchClose">Close</button>
+</div></div>
+
+<div class="scrim" id="sqViewScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="sqViewScrim" aria-label="Close">✕</button>
+  <h3>Squad upload</h3>
+  <p class="muted" style="margin:0 0 10px">Read only — nothing here changes the match on this tablet.</p>
+  <div class="card pad" style="margin-bottom:10px">
+    <div id="sqvTitle" style="font-weight:800;font-size:15px"></div>
+    <div id="sqvMeta" style="font-size:11px;color:var(--steel);margin-top:2px"></div>
+    <div id="sqvSummary" style="margin-top:9px;font-weight:800;font-size:13px"></div>
+  </div>
+  <div id="sqvNote"></div>
+  <div id="sqvBody" style="max-height:52vh;overflow:auto"></div>
+  <div class="btnrow" style="margin-top:10px;margin-bottom:0">
+    <button class="btn ghost sm" id="sqvToggle">View as results</button>
+    <button class="btn ghost sm" id="sqvClose">Close</button>
+  </div>
 </div></div>
 
 <div class="scrim" id="contactsScrim"><div class="sheet" style="max-height:94vh"><button class="sheetx" data-closes="contactsScrim" aria-label="Close">✕</button>
@@ -906,12 +949,12 @@
 <script>
 "use strict";
 /* Match Scorekeeper — indoor + outdoor. Autosaves to device on every change. */
-var APP_VERSION="2.3.0";
+var APP_VERSION="2.4.0";
 /* Build stamp. APP_VERSION moves only on a release, so this is what
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-22-e";
+var APP_BUILD="2026-10-03-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -952,6 +995,29 @@ var SCRIM_Z=50;                    /* the floor, matching .scrim in the CSS */
   for(var i=0;i<all.length;i++)
     obs.observe(all[i],{attributes:true,attributeFilter:["class"]});
 })();
+
+/* ---- test deployments ------------------------------------------------------
+   Netlify names every branch deploy <branch>--<site>.netlify.app, so a double
+   dash in the hostname means a branch rather than the club's site. Matching the
+   pattern rather than listing branch names covers any branch added later
+   without editing this, and cannot misfire on the live app: neither the live
+   host nor a custom domain contains one, so moving off netlify.app can never
+   brand the club's real app as a test.
+
+   A copy opened from a file has no hostname at all. That is someone's own copy,
+   not a deployment, so it is left unmarked. */
+function isTestDeploy(){
+  try{return /--/.test(location.hostname||"");}catch(e){return false;}
+}
+/* Called again whenever the club name changes, since the stripe names the club
+   this tablet is pointed at and that is the half that catches a real mistake. */
+function renderTestBar(){
+  if(!isTestDeploy())return;
+  document.body.classList.add("istest");
+  var el=document.getElementById("testbarClub");
+  if(el)el.textContent=cfg.clubName?("Connected to: "+cfg.clubName)
+       :(syncConfigured()?"Connected to a club server":"No club server set up");
+}
 var SC={
   tbl:'border-collapse:collapse;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:12px;margin:0 0 22px',
   cap:'text-align:left;font-weight:bold;font-size:15px;margin:18px 0 4px',
@@ -1076,7 +1142,12 @@ function bestIdentity(ex,ie){
   return {fields:out,at:Math.max(ta,tb)};
 }
 function ensureOutdoor(e){
-  e.done=e.done||{};e.done.five=!!e.done.five;e.done.glockm=!!e.done.glockm;e.done.plates=!!e.done.plates;
+  /* The mirror of the guard in ensureIndoor, and this one is not cosmetic: an
+     indoor entry stores `done` as a boolean, and `true||{}` is `true`, so the
+     next line would try to set a property on a primitive — a TypeError under
+     "use strict", which takes the whole render down. */
+  if(!e.done||typeof e.done!=="object")e.done={};
+  e.done.five=!!e.done.five;e.done.glockm=!!e.done.glockm;e.done.plates=!!e.done.plates;
   e.five=e.five||{};e.five.t=e.five.t||[null,null,null];
   if(!e.five.targets){e.five.targets=mkTargets(5);if(e.five.p1||e.five.p3||e.five.miss){e.five.targets[0]={a:0,c:e.five.p1||0,d:e.five.p3||0,miss:e.five.miss||0};}}
   e.glockm=e.glockm||{};e.glockm.t=e.glockm.t||[null,null,null];
@@ -1093,7 +1164,12 @@ function ensureIndoor(e){
      null = not yet entered. `done` is a single boolean (round confirmed/locked). */
   e.score=(typeof e.score==="number")?e.score:null;
   e.x=(typeof e.x==="number")?e.x:null;
-  e.done=!!e.done;
+  /* Strictly `=== true`, not a truthiness test. Outdoor stores `done` as an
+     object of three stage flags, and every object is truthy — so an entry
+     carried over from an outdoor match read as a confirmed round and opened
+     locked, with no scores in it. Anything that is not literally true means
+     this round has not been confirmed. */
+  e.done=(e.done===true);
   return e;
 }
 function load(){
@@ -1194,6 +1270,9 @@ function renderSync(){
   else if(showSetup)syncStatus("idle","Paste your club's setup code to finish.");
   else syncStatus("ok","Connected"+(cfg.clubName?" to "+cfg.clubName:""));
   renderPending();
+  /* Whatever just changed about sync, the buttons it gates follow it now
+     rather than on the next time Tools is opened. */
+  renderOnlineControls();
 }
 
 function applyScreen(){
@@ -1209,6 +1288,27 @@ document.querySelectorAll("#set-screen button").forEach(function(b){
 });
 function syncSetupSquad(){var el=document.getElementById("f-squad-device");if(el)el.value=state.meta.squad||"";}
 var namesEditing=false,matchEditing=false;
+/* Online controls appear only when they can do something — the group shrinks
+   rather than substituting a button that isn't really the same action.
+
+   Its own function because turning online services on, or saving a setup code,
+   changes the answer while Tools is already open. Both used to redraw only the
+   sync panel, so the buttons stayed hidden until Tools was closed and reopened
+   — the setup code case being the worse one, since the panel said "Connected"
+   while the things that connection unlocks were still missing. renderSync()
+   calls this too, so a caller cannot forget. */
+function renderOnlineControls(){
+  var on=syncOn();
+  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint",
+   "set-movehd","set-sendfile","set-sendfile-hint"].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
+  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
+  var n=Object.keys(people).length;
+  var sub=document.getElementById("set-roster-sub");
+  if(sub)sub.textContent=
+    (n?(n+" on this tablet"):"none on this tablet")+(on&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"")
+    +" \u00b7 add, remove and publish from here";
+}
 function renderSettings(){
   document.getElementById("set-squad").value=state.meta.squad||"";
   document.getElementById("set-device").value=cfg.deviceLabel||"";
@@ -1217,16 +1317,7 @@ function renderSettings(){
   document.getElementById("names-view").style.display=namesEditing?"none":"";
   document.getElementById("names-edit-box").style.display=namesEditing?"":"none";
   applyScreen();
-  /* Online controls appear only when they can do something — the group shrinks
-     rather than substituting a button that isn't really the same action. */
-  var on=syncOn();
-  ["set-getroster","set-getroster-hint","set-getsquad","set-getsquad-hint","set-past","set-past-hint","set-movehd","set-sendfile","set-sendfile-hint"].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.display=on?"":"none";});
-  var people={};state.entries.forEach(function(e){people[e.personId]=1;});
-  var n=Object.keys(people).length;
-  document.getElementById("set-roster-sub").textContent=
-    (n?(n+" on this tablet"):"none on this tablet")+(on&&cfg.rosterRevision?(" \u00b7 club list #"+cfg.rosterRevision):"")
-    +" \u00b7 add, remove and publish from here";
+  renderOnlineControls();
   document.getElementById("set-match").value=state.meta.match||"";
   document.getElementById("set-match-shown").textContent=state.meta.match?matchDisplay(state.meta.match):"not set";
   document.getElementById("set-match-box").style.display=matchEditing?"":"none";
@@ -1248,6 +1339,16 @@ document.getElementById("gearBtn").addEventListener("click",openSettings);
    Which version this tablet has marked read lives in cfg, so it is per
    tablet and never exported. */
 var WHATSNEW=[
+  {v:"2.4.0",items:[
+    "You can now <b>look inside a squad upload without loading it</b>. On the compile screen, each squad has a <b>View upload</b> link showing who is on it and how far along they were \u2014 useful when two tablets uploaded the same squad name and you need to know which one to keep.",
+    "<b>Tools \u203a Past matches</b> now opens every match, not only the ones that were compiled. Each match shows its final results, if there are any, and what each tablet uploaded on the night.",
+    "If a tablet uploads again <b>after</b> you have compiled, the compile screen now says so before you tick anything, and tells you what to do instead.",
+    "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
+    "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first.",
+    "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in.",
+    "<b>What\u2019s new</b> now opens on the last three releases if nobody on this tablet has tapped <b>Mark as read</b> before, so a club coming back after a break sees what it missed rather than only the newest version.",
+    "Fixed (indoor): results were ranking rounds rather than shooters, so someone who fired three rounds took three places and pushed everyone below them down. Each shooter is now placed once, on their best round \u2014 on screen, in the PDF and in the emailed results."
+  ]},
   {v:"2.3.0",items:[
     "Checking in is one button now. <b>Check in shooters</b> \u2014 search for someone, and if they are not on the list, tap the <b>+ Add</b> line that appears with their name already filled in.",
     "<b>Add</b> and <b>Done</b> stay at the bottom of the check-in screen, so you never scroll a long list to reach them.",
@@ -1287,8 +1388,16 @@ function verCmp(a,b){
    has never marked anything read sees only the current version — a fresh
    install shouldn't open to the whole history. */
 function unreadNews(){
-  if(!cfg.seenVersion)return WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)===0;});
-  return WHATSNEW.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0&&verCmp(w.v,APP_VERSION)<=0;});
+  /* Never list something the tablet isn't running yet. */
+  var upTo=WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)<=0;});
+  /* Nothing marked read yet. Showing only the newest version reads as right for
+     a genuinely new install, but it is wrong for the club this page exists for:
+     one that has been running the app for a year with the dot quietly showing
+     and nobody ever tapping Mark as read. They have missed the most and would
+     be told the least. Three matches what the up-to-date view already shows,
+     and a new club scrolling past two releases it never had costs nothing. */
+  if(!cfg.seenVersion)return upTo.slice(0,3);
+  return upTo.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0;});
 }
 /* Browsers may clear a site's saved data when the device runs low on space.
    Asking once marks it as durable. Chrome and Safari decide silently and
@@ -1446,7 +1555,7 @@ document.getElementById("set-blob-save").addEventListener("click",function(){
        club and produces a 409 on the first push. */
     if(cfg.clubId&&cfg.clubId!==c.club){cfg.rosterRevision=0;cfg.pending=null;}
     cfg.serverUrl=c.url;cfg.clubId=c.club;cfg.secret=c.secret;
-    cfg.clubName=clubName||"";
+    cfg.clubName=clubName||"";renderTestBar();
     if(!cfg.deviceId)cfg.deviceId=newDeviceId();      /* generate once, never regenerate (§2.3) */
     if(!cfg.dataClubId)cfg.dataClubId=c.club;
     cfg.online=true;saveCfg();
@@ -1461,7 +1570,7 @@ document.getElementById("set-test").addEventListener("click",function(){
   if(!syncOn())return;
   syncStatus("idle","Checking\u2026");
   apiPing({url:cfg.serverUrl,club:cfg.clubId,secret:cfg.secret}).then(function(n){
-    cfg.clubName=n||"";saveCfg();syncStatus("ok","Connected"+(n?" to "+n:"")+".");
+    cfg.clubName=n||"";saveCfg();renderTestBar();syncStatus("ok","Connected"+(n?" to "+n:"")+".");
   }).catch(function(err){
     syncStatus("bad",typeof err==="string"?err:"Couldn't reach the server. The app still works offline.");
   });
@@ -1833,8 +1942,10 @@ function retryPending(){
 /* --- squad list & download (§4.4, §4.5) --------------------------------
    The match_key carries the match type, so the list can never return squads
    from a different match type — no client-side filtering needed. */
-function apiListSquads(){
-  var mk=matchKey(state.meta.match,state.meta.matchType);
+/* Same as apiGetSquad: mk defaults to the current match, Past matches passes
+   one in so it can list any match's uploads. */
+function apiListSquads(mk){
+  mk=mk||matchKey(state.meta.match,state.meta.matchType);
   return fetch(cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)+"/squads",
     {headers:{"Authorization":"Bearer "+cfg.secret}})
   .then(function(res){
@@ -1843,8 +1954,11 @@ function apiListSquads(){
     return res.json();
   }).then(function(j){return (j&&j.squads)||[];});
 }
-function apiGetSquad(deviceId,revision){
-  var mk=matchKey(state.meta.match,state.meta.matchType);
+/* mk defaults to the match this tablet is on, which is what compiling wants.
+   Past matches passes one in, so a squad can be read without the tablet having
+   to be set to that match. */
+function apiGetSquad(deviceId,revision,mk){
+  mk=mk||matchKey(state.meta.match,state.meta.matchType);
   var u=cfg.serverUrl+"/v1/clubs/"+encodeURIComponent(cfg.clubId)+"/matches/"+encodeURIComponent(mk)
        +"/squads/"+encodeURIComponent(deviceId)+(revision?("?revision="+encodeURIComponent(revision)):"");
   return fetch(u,{headers:{"Authorization":"Bearer "+cfg.secret}}).then(function(res){
@@ -1972,6 +2086,11 @@ function renderCompile(){
         +'<div class="dv">'+esc(r.device||(r.kind==="file"?"from a file":"unnamed tablet"))
         +' · '+(r.count||0)+' shooters'+(r.at?' · '+esc(whenText(r.at)):'')+'</div>'
         +'<button class="exp" data-x="'+i+'">'+(r.open?"Hide shooters":"Show shooters")+'</button>'
+        /* Server rows only: a squad that arrived as a file is already on this
+           tablet, so there is nothing to fetch and nothing the RO cannot see. */
+        +(r.kind==="server"
+            ? '<span class="expsep">|</span><button class="exp" data-v="'+i+'">View upload</button>'
+            : '')
         +(r.open?'<div class="names">'+(r.names?esc(r.names.join(", ")):"Loading…")+'</div>':'')
         +'</div></div>';}).join("");
     el.querySelectorAll("input[type=checkbox]").forEach(function(cb){
@@ -1998,7 +2117,14 @@ function renderCompile(){
         }
         row.selected=cb.checked;renderCompileWarn();});});
     el.querySelectorAll(".exp").forEach(function(b){
-      b.addEventListener("click",function(){toggleCompileNames(+b.dataset.x);});});
+      b.addEventListener("click",function(){
+        if(b.dataset.v!==undefined){
+          var r=compileRows[+b.dataset.v];
+          openSquadView({deviceId:r.device_id,squad:r.squad,device:r.device,at:r.at,
+            kind:r.redo?"redo":(r.done?"done":(compileDup(r)?"dup":""))});
+          return;
+        }
+        toggleCompileNames(+b.dataset.x);});});
   }
   renderCompileWarn();
 }
@@ -2007,11 +2133,31 @@ function renderCompile(){
 function compileAllDone(){
   return compileRows.length>0&&compileRows.every(function(r){return r.done;});
 }
+/* Does another row claim the same squad name? Used both for the warning below
+   and to tell the viewer which note to show. */
+function compileDup(row){
+  var k=(row.squad||"").toLowerCase();
+  if(!k)return false;
+  return compileRows.filter(function(r){return (r.squad||"").toLowerCase()===k;}).length>1;
+}
 function renderCompileWarn(){
   var w=document.getElementById("compile-warn"),counts={};
   compileRows.forEach(function(r){var k=(r.squad||"").toLowerCase();if(k)counts[k]=(counts[k]||0)+1;});
   var dups=Object.keys(counts).filter(function(k){return counts[k]>1;});
   var h="";
+  /* A re-upload after a compile used to announce itself only through a badge on
+     the row and a confirm() *after* the tick. A confirm arrives once the RO has
+     already decided and gets dismissed on reflex, which is how the wrong squad
+     gets re-imported. Duplicate squad names have always warned before anyone
+     touches anything; this closes that asymmetry. */
+  var redo=compileRows.filter(function(r){return r.redo;});
+  if(redo.length)
+    h+='<div class="warnbox" style="margin-top:10px"><b>'
+      +(redo.length===1?('\u201c'+esc(redo[0].squad||"One squad")+'\u201d uploaded again after you compiled it.')
+                       :(redo.length+' squads uploaded again after you compiled them.'))
+      +'</b> That tablet has newer scores than your compiled results. Tap <b>View upload</b> to see what '
+      +'is on it. Don\u2019t tick it \u2014 re-importing replays the whole squad and can list a shooter '
+      +'twice. To take a change in, fix it on the <b>Roster</b> and use <b>Publish corrected results</b>.</div>';
   if(dups.length)h+='<div class="warnbox" style="margin-top:10px"><b>Two tablets used the same squad name.</b> '
     +'Check whether these are different squads that were both labelled the same — compile both — or a replacement tablet taking over, in which case compile one. '
     +'Tap <b>Show shooters</b> on each: overlapping names mean a replacement, different names mean two squads.</div>';
@@ -2479,7 +2625,17 @@ function renderSetup(){
 }
 document.querySelectorAll("#setupType button").forEach(function(b){b.addEventListener("click",function(){
   if(state.meta.started)return;                       /* type locks once the match starts */
-  state.meta.matchType=b.dataset.type;save();renderSetup();
+  if(state.meta.matchType===b.dataset.type)return;
+  state.meta.matchType=b.dataset.type;
+  /* Convert everyone already checked in, rather than leaving entries in the
+     old type's shape for the new type's screens to read. Check-in retypes a
+     shooter as they come through it, so only people already on the tablet when
+     the type changed were left behind — and a stale shape does not read as
+     empty, it reads as whatever the other type's field happens to mean.
+     Safe here because the type is locked once the match has started, so there
+     are no scores to lose. */
+  state.entries.forEach(function(e){retypeEntry(e,state.meta.matchType);});
+  save();renderSetup();
 });});
 document.getElementById("checkinBtnSetup").addEventListener("click",openCheckin);
 document.getElementById("startMatchBtn").addEventListener("click",function(){
@@ -2545,7 +2701,7 @@ function renderRosterIndoor(active,q){
   var list=document.getElementById("rosterList");
   if(!people.length){list.innerHTML='<div class="empty">No match for “'+esc(q)+'”.</div>';return;}
   list.innerHTML=people.map(function(p,i){
-    var n=p.rounds.length,locked=p.rounds.filter(function(r){return r.done;}).length,st=p.rounds.some(function(r){return statusOf(r)!=="normal";}),best=bestRound(p.rounds);
+    var n=p.rounds.length,locked=p.rounds.filter(function(r){return r.done===true;}).length,st=p.rounds.some(function(r){return statusOf(r)!=="normal";}),best=bestRound(p.rounds);
     return '<div class="entry" data-id="'+p.rep.id+'"><div class="ord">'+(i+1)+'</div><div class="meta"><div class="nm">'+esc(p.rep.name||"(unnamed)")
       +(st?' <span class="sbadge DNF">!</span>':'')+'</div>'
       +'<div class="dv">'+n+' round'+(n===1?'':'s')+(locked?' · '+locked+' locked':'')+'</div></div>'
@@ -2835,7 +2991,12 @@ document.getElementById("confirmReject").addEventListener("click",function(){
 });
 document.getElementById("confirmScrim").addEventListener("click",function(ev){if(ev.target.id==="confirmScrim"){ev.currentTarget.classList.remove("open");pendingStage=null;pendingRoundId=null;confirmKind="stage";}});
 /* ===== INDOOR SCORE SCREEN ============================================ */
-function roundComplete(r){return !!(r.done||statusOf(r)!=="normal");}
+/* `=== true` throughout the indoor screens, never truthiness: outdoor stores
+   `done` as an object of stage flags, and an entry can reach an indoor screen
+   still wearing the outdoor shape — from a switch, a restore, or a payload
+   from a tablet that was on the other type. An object is truthy, so a
+   truthiness test reads "not started" as "confirmed and locked". */
+function roundComplete(r){return r.done===true||statusOf(r)!=="normal";}
 function personRounds(pid){return state.entries.filter(function(r){return r.personId===pid&&r.active;});}
 function renderScoreIndoor(){
   var body=document.getElementById("scoreBody"),sel=byId(state.selected);
@@ -2845,7 +3006,7 @@ function renderScoreIndoor(){
   var h='<h2 class="section">'+esc(sel.name||"(unnamed)")+'</h2>';
   h+='<div class="countline">'+rounds.length+' round'+(rounds.length===1?'':'s')+(best?' · best '+num0(best.score)+' ('+num0(best.x)+'X)':'')+'</div>';
   rounds.forEach(function(r,k){
-    var locked=!!r.done,st=statusOf(r);
+    var locked=(r.done===true),st=statusOf(r);
     h+='<div class="card stage iround'+(locked?' locked':'')+'" id="iround-'+r.id+'">';
     h+='<div class="hd"><div class="name">ROUND '+(k+1)+(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>';
     h+='<div class="stagescore">'+(r.score!=null?num0(r.score):'—')+'<small>'+(r.x!=null?num0(r.x)+'X':'score')+'</small></div></div>';
@@ -3219,7 +3380,10 @@ function renderResultsIndoor(){
     sf.innerHTML='<span class="filtlab">Squad</span>'+sqs.map(function(d){return '<button class="chip sq'+(d===state.filterSquad?' on':'')+'" data-d="'+esc(d)+'">'+esc(d)+'</button>';}).join("");
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
-  var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
+  /* Same rule as the printed results: one row per shooter, on their best round
+     within whatever filter is showing. Ranking rounds here would disagree with
+     the PDF the shooters are handed. */
+  var ord=ordered(bestPerPerson(filterEntries(state.filterDiv,state.filterSquad))),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
   if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
   lb.innerHTML=ord.map(lbRowIndoor).join("");
   var xh="";
@@ -3424,16 +3588,38 @@ function withMatchState(entries,meta,fn){
   try{state.entries=entries;state.meta=meta;return fn();}
   finally{state.entries=se;state.meta=sm;}
 }
+/* Indoor is scored on a shooter's BEST round, so every ranked view must rank
+   people rather than rounds. Without this a shooter who shot three times takes
+   three places and pushes everyone below them down: a two-person division read
+   as one shooter 1st, 2nd and 3rd, with the person who actually came second
+   shown as fourth.
+
+   Used by the leaderboard, the PDF tables and the emailed text, so all three
+   agree by construction rather than by three separate fixes staying in step.
+   Grouping is by personId, so a shooter who entered two divisions is reduced
+   once per list: once inside each division table, and once overall. */
+function bestPerPerson(list){
+  var by={},order=[];
+  list.forEach(function(e){
+    var k=e.personId||e.id,cur=by[k];
+    if(!cur){by[k]=e;order.push(k);return;}
+    /* A round that counts always beats a DQ or DNF; between two of the same
+       kind, the better score wins on the match type's own comparison. */
+    if(isFinisher(e)&&!isFinisher(cur)){by[k]=e;return;}
+    if(isFinisher(e)===isFinisher(cur)&&cmpTotal(e,cur)<0)by[k]=e;
+  });
+  return order.map(function(k){return by[k];});
+}
 function buildTablesHTMLIndoor(){
   var match=esc(matchDisplay(state.meta.match)||"Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
   h+='<div style="font-size:19px;font-weight:bold">Indoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
-  h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · high score wins, X breaks ties</div>';
+  h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · best round counts, X breaks ties</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
   if(!dk.length)return h+'<div>No scored rounds.</div></div>';
-  dk.forEach(function(d){h+=detailTableIndoor(d,divs[d],"Squad",function(e){return e.squad||"";});});
-  h+=detailTableIndoor("Overall — All Divisions",resultEntries(),"Division",function(e){return e.division||"";});
+  dk.forEach(function(d){h+=detailTableIndoor(d,bestPerPerson(divs[d]),"Squad",function(e){return e.squad||"";});});
+  h+=detailTableIndoor("Overall — All Divisions",bestPerPerson(resultEntries()),"Division",function(e){return e.division||"";});
   h+=rollupTableIndoor();
   h+=bestTableIndoor();
   h+='</div>';
@@ -3493,13 +3679,13 @@ function composeResultsTextIndoor(){
   L.push("DIVISION RANKINGS");
   Object.keys(divs).sort().forEach(function(d){
     L.push("");L.push("-- "+d+" --");L.push(hdr);
-    ordered(divs[d]).forEach(function(o){var e=o.e,f=isFinisher(e);
+    ordered(bestPerPerson(divs[d])).forEach(function(o){var e=o.e,f=isFinisher(e);
       L.push(ptRowIn(o.place,e.name||"",e.division||"",e.gun||"",f?num0(e.score):statusOf(e),f?num0(e.x):""));});
   });
   L.push("");L.push("OVERALL — ALL DIVISIONS");L.push(hdr);
-  ordered(resultEntries()).forEach(function(o){var e=o.e,f=isFinisher(e);
+  ordered(bestPerPerson(resultEntries())).forEach(function(o){var e=o.e,f=isFinisher(e);
     L.push(ptRowIn(o.place,e.name||"",e.division||"",e.gun||"",f?num0(e.score):statusOf(e),f?num0(e.x):""));});
-  L.push("");L.push("High score wins; X count breaks ties. Congratulations to all shooters!");
+  L.push("");L.push("Best round counts; X count breaks ties. Congratulations to all shooters!");
   return L.join("\n");
 }
 function composeResultsText(){
@@ -3751,14 +3937,74 @@ function openPastMatches(){
         +' <span class="cibadge">'+esc(m.match_type||"")+'</span></div>'
         +'<div class="dv">'+(m.squad_count||0)+' squad'+((m.squad_count===1)?'':'s')
         +(m.has_compiled?'':' \u00b7 not compiled')+'</div></div>'
-        +'<span class="cistat '+(m.has_compiled?'on':'')+'">'+(m.has_compiled?'View':'\u2014')+'</span></div>';}).join("");
+        /* Every match opens now. It used to be "View" or a dead \u2014: tapping a
+           match nobody compiled answered "No compiled results for that match"
+           and stopped there, which are exactly the nights worth looking at. */
+        +'<span class="cistat on">Open</span></div>';}).join("");
     el.querySelectorAll(".cirow").forEach(function(row){
-      row.addEventListener("click",function(){viewPastMatch(row.dataset.mk,row.dataset.lbl);});});
+      row.addEventListener("click",function(){openPastMatch(row.dataset.mk,row.dataset.lbl);});});
   }).catch(function(err){
     document.getElementById("pastList").innerHTML='<div class="empty" style="padding:18px">'
       +(err===AUTH_ERR?"The server rejected this tablet's setup code.":esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
   });
 }
+/* One sheet per match: the final results at the top when there are any, and
+   underneath, what each tablet actually uploaded. Both are read only.
+
+   This replaces going straight to the compiled results, which meant an
+   uncompiled match had nowhere to go at all. */
+function openPastMatch(mk,label){
+  var body=document.getElementById("pastMatchBody");
+  document.getElementById("pastMatchTitle").textContent=label||"Match";
+  body.innerHTML='<div class="empty" style="padding:18px">Looking…</div>';
+  document.getElementById("pastMatchScrim").classList.add("open");
+  apiListSquads(mk).then(function(list){
+    /* The compiled archive is a result, not a squad someone shot (§4.10), so
+       it is lifted out and offered as results rather than listed as a tablet. */
+    var compiled=list.filter(function(s){return s.device_id==="compiled";})[0];
+    var squads=list.filter(function(s){return s.device_id!=="compiled";});
+    var h="";
+    if(compiled){
+      h+='<button class="btn dark" id="pmResults">Final results</button>'
+        +'<div class="sethint" style="margin-bottom:10px">The compiled results for this match.</div>';
+    }else{
+      h+='<div class="note">This match was never compiled, so there are no final results — only '
+        +'what each tablet uploaded on the night.</div>';
+    }
+    h+='<div class="subhd">Squad uploads</div>';
+    if(!squads.length){
+      h+='<div class="empty" style="padding:18px">No squads were uploaded for this match.</div>';
+    }else{
+      h+='<div class="card" style="max-height:46vh;overflow:auto">'+squads.map(function(s,i){
+        return '<div class="cirow" data-i="'+i+'"><div class="meta">'
+          +'<div class="nm">'+esc(s.squad_label||"(no squad name)")+'</div>'
+          +'<div class="dv">'+esc(s.device_label||"unnamed tablet")
+          +' · '+(s.entry_count||0)+' shooters'
+          +(s.uploaded_at?' · '+esc(whenText(s.uploaded_at)):'')+'</div></div>'
+          +'<span class="cistat">View</span></div>';}).join("")+'</div>';
+    }
+    body.innerHTML=h;
+    var fr=document.getElementById("pmResults");
+    if(fr)fr.addEventListener("click",function(){viewPastMatch(mk,label);});
+    body.querySelectorAll(".cirow").forEach(function(row){
+      row.addEventListener("click",function(){
+        var s=squads[+row.dataset.i];
+        /* No kind: these badges are computed against this tablet's own compile
+           record, which says nothing about a match it never compiled. */
+        openSquadView({deviceId:s.device_id,matchKey:mk,squad:s.squad_label,
+          device:s.device_label,at:s.uploaded_at});
+      });});
+  }).catch(function(err){
+    body.innerHTML='<div class="empty" style="padding:18px">'
+      +(err===AUTH_ERR?"The server rejected this tablet's setup code."
+        :esc(typeof err==="string"?err:"Couldn't reach the server."))+'</div>';
+  });
+}
+document.getElementById("pastMatchClose").addEventListener("click",function(){
+  document.getElementById("pastMatchScrim").classList.remove("open");});
+document.getElementById("pastMatchScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="pastMatchScrim")ev.currentTarget.classList.remove("open");});
+
 function viewPastMatch(mk,label){
   toast("Loading results\u2026");
   apiGetCompiled(mk).then(function(sq){
@@ -3780,6 +4026,152 @@ function viewPastMatch(mk,label){
 document.getElementById("pastClose").addEventListener("click",function(){document.getElementById("pastScrim").classList.remove("open");});
 document.getElementById("pastScrim").addEventListener("click",function(ev){if(ev.target.id==="pastScrim")ev.currentTarget.classList.remove("open");});
 document.getElementById("pastViewClose").addEventListener("click",function(){document.getElementById("pastViewScrim").classList.remove("open");});
+
+/* --- read-only squad upload viewer -------------------------------------
+   Before this existed the only way to see inside an upload was "Restore a
+   squad from the server", which replaces everything on the tablet. That is far
+   too blunt for the question people actually have — "is this the abandoned
+   Squad 3, or the real one?" — so they guessed, or restored and undid it.
+
+   Nothing here writes. withMatchState() lends the borrowed entries to the
+   renderers and puts this tablet's own back in a finally, exactly as the
+   past-match viewer does.
+
+   `revision` is accepted but never passed yet. Stepping back through a squad's
+   history is deliberately not in 2.4.0; taking the argument now means adding
+   the picker later is a list fetch and a control rather than a rewrite. When it
+   is added it must enumerate the server's revisions list — revision numbers are
+   contiguous as issued but not as retained, so n-1 may have been pruned. */
+var sqvState=null;      /* {entries, meta, mt, asResults} for the open sheet */
+
+/* Outdoor has three fixed stages, so "finished" means all three. Indoor is
+   rounds-based and open-ended — there is no count that means finished — so it
+   reports people and how many have scored, and says nothing more. */
+function squadSummary(entries,mt){
+  var live=entries.filter(function(e){return e.active;});
+  if(mt==="indoor"){
+    var people={},scored={};
+    live.forEach(function(e){people[e.personId]=1;if(hasAny(e))scored[e.personId]=1;});
+    var n=Object.keys(people).length;
+    return n+" shooter"+(n===1?"":"s")+" · "+Object.keys(scored).length+" with scores";
+  }
+  var started=0,done=0;
+  live.forEach(function(e){
+    if(hasAny(e))started++;
+    if(e.done&&e.done.five&&e.done.glockm&&e.done.plates)done++;
+  });
+  return live.length+" shooter"+(live.length===1?"":"s")+" · "+started+" started · "+done+" finished";
+}
+
+/* The roster's own row, minus the tap. Same F/M/P dots an RO already reads on
+   the Roster, so there is nothing new to learn in a screen they open once a
+   season. */
+function squadRowsHTML(entries,mt){
+  var live=entries.filter(function(e){return e.active;});
+  if(!live.length)return '<div class="empty" style="padding:18px">Nobody is checked in on this upload.</div>';
+  if(mt==="indoor")
+    return '<div class="card">'+live.map(function(e,i){
+      var s=hasAny(e);
+      return '<div class="entry" style="cursor:default"><div class="ord">'+(i+1)+'</div>'
+        +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")+'</div>'
+        +'<div class="dv">'+esc(e.division||"—")+(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+        +'<div class="tot">'+(s?esc(""+(e.score==null?"—":e.score)):'—')
+        +'<small>'+(s?'score':'not shot')+'</small></div></div>';}).join("")+'</div>';
+  return '<div class="card">'+live.map(function(e,i){
+    var s=hasAny(e),st=statusOf(e),d=e.done||{};
+    return '<div class="entry" style="cursor:default"><div class="ord">'+(i+1)+'</div>'
+      +'<div class="meta"><div class="nm">'+esc(e.name||"(unnamed)")
+      +(st!=="normal"?' <span class="sbadge '+st+'">'+st+'</span>':'')+'</div>'
+      +'<div class="dv">'+esc(e.division||"—")+(e.gun?' · '+esc(e.gun):'')
+      +(e.squad?' · '+esc(e.squad):'')+'</div></div>'
+      +'<div class="stagedots"><span class="sdot'+(d.five?' on':'')+'" title="Five to Glock">F</span>'
+      +'<span class="sdot'+(d.glockm?' on':'')+'" title="Glock’M">M</span>'
+      +'<span class="sdot'+(d.plates?' on':'')+'" title="Glock the Plates">P</span></div>'
+      +'<div class="tot">'+(st!=="normal"?'—':(s?fmt(total(e)):'—'))
+      +'<small>'+(st!=="normal"?esc(st):(s?'total':'not shot'))+'</small></div></div>';}).join("")+'</div>';
+}
+
+/* Guidance appears only for a state the app actually knows about. An ordinary
+   upload gets nothing — the two-second read is the point of the screen, and a
+   note on every upload would be noise that trains people to skip it. */
+function squadViewNote(kind,squad){
+  if(kind==="done")
+    return '<div class="note"><b>Already in your compiled results.</b> Nothing to do — leave it '
+      +'unticked. Ticking it again replays this copy over anything you have corrected since.</div>';
+  if(kind==="redo")
+    return '<div class="warnbox"><b>This tablet uploaded again after you compiled.</b> You are looking '
+      +'at the newer copy.<br><br><b>Do not tick it.</b> That replays the whole squad over your compiled '
+      +'results and can list a shooter twice. If something here is missing from your results, fix it on '
+      +'the <b>Roster</b> of this tablet, then tap <b>Publish corrected results</b>.'
+      +'<div style="height:8px"></div><button class="btn ghost sm" id="sqvFix">How do I fix a mistake?</button></div>';
+  if(kind==="dup")
+    return '<div class="note"><b>Another tablet also uploaded a “'+esc(squad||"squad")+'”.</b> '
+      +'Close this and tap <b>Show shooters</b> on both rows to compare them side by side. The same '
+      +'people means one tablet replaced the other — compile only the one with the scores. '
+      +'Different people means two real squads — compile both.</div>';
+  return "";
+}
+
+function renderSquadView(){
+  if(!sqvState)return;
+  var body=document.getElementById("sqvBody"),btn=document.getElementById("sqvToggle");
+  if(sqvState.asResults){
+    /* Not wrapped in .card: the results tables are wider than the sheet, and
+       .card is overflow:hidden, which would clip the right-hand columns with no
+       way to scroll to them. Bare, the tables overflow #sqvBody, which scrolls. */
+    body.innerHTML=withMatchState(sqvState.entries,sqvState.meta,function(){return buildTablesHTML();});
+    btn.textContent="View the shooters";
+  }else{
+    body.innerHTML=squadRowsHTML(sqvState.entries,sqvState.mt);
+    btn.textContent="View as results";
+  }
+}
+
+/* opts: {deviceId, revision, matchKey, squad, device, at, kind}
+   kind is "", "done", "redo" or "dup" — whatever the caller knows. Opened from
+   Past matches on a tablet that never compiled the match there is no compile
+   record, so kind is "" and no note appears, which is correct: there is
+   nothing to say. */
+function openSquadView(opts){
+  opts=opts||{};
+  toast("Loading squad…");
+  apiGetSquad(opts.deviceId,opts.revision,opts.matchKey).then(function(sq){
+    if(!sq||!sq.payload)throw "That upload came back empty.";
+    var d;try{d=JSON.parse(sq.payload);}catch(e){throw "That upload couldn't be read.";}
+    if(!d||!d.entries)throw "That upload had no shooters in it.";
+    var mt=backupType(d),meta=JSON.parse(JSON.stringify(d.meta||{}));
+    meta.matchType=mt;
+    var entries=d.entries.map(function(e){return ensureShape(JSON.parse(JSON.stringify(e)),mt);});
+    sqvState={entries:entries,meta:meta,mt:mt,asResults:false};
+
+    document.getElementById("sqvTitle").textContent=
+      (opts.squad||sq.squad_label||meta.squad||"(no squad name)");
+    var bits=[];
+    if(opts.device||sq.device_label)bits.push(opts.device||sq.device_label);
+    /* "revision 14", never "14 uploads" — the number is the server's counter,
+       not a count of what is still stored, and pruning keeps only the newest
+       for an older match. */
+    if(sq.revision)bits.push("revision "+sq.revision);
+    var at=opts.at||sq.uploaded_at;
+    if(at)bits.push(whenText(at));
+    document.getElementById("sqvMeta").textContent=bits.join(" · ");
+    document.getElementById("sqvSummary").textContent=squadSummary(entries,mt);
+    document.getElementById("sqvNote").innerHTML=squadViewNote(opts.kind,opts.squad||sq.squad_label);
+    var fx=document.getElementById("sqvFix");
+    if(fx)fx.addEventListener("click",openFixGuide);
+    renderSquadView();
+    document.getElementById("sqViewScrim").classList.add("open");
+  }).catch(function(err){
+    toast(err===AUTH_ERR?"Setup code rejected — check Tools"
+      :(typeof err==="string"?err:"Couldn't load that upload."));
+  });
+}
+document.getElementById("sqvToggle").addEventListener("click",function(){
+  if(!sqvState)return;sqvState.asResults=!sqvState.asResults;renderSquadView();});
+document.getElementById("sqvClose").addEventListener("click",function(){
+  document.getElementById("sqViewScrim").classList.remove("open");});
+document.getElementById("sqViewScrim").addEventListener("click",function(ev){
+  if(ev.target.id==="sqViewScrim")ev.currentTarget.classList.remove("open");});
 document.getElementById("pastViewScrim").addEventListener("click",function(ev){if(ev.target.id==="pastViewScrim")ev.currentTarget.classList.remove("open");});
 document.getElementById("pastPrint").addEventListener("click",function(){
   if(!pastPrintHTML)return;
@@ -4246,6 +4638,8 @@ loadCfg();applyScreen();load();markSaved(true);
 /* After loadCfg(), never before: the dot depends on the read marker stored in
    cfg. Drawn earlier, it sees an empty cfg and shows on every launch. */
 renderNewDots();
+/* Same reason: the stripe names the club, which is read from cfg. */
+renderTestBar();
 ["f-match","set-match"].forEach(function(id){
   var el=document.getElementById(id);if(!el)return;
   el.max=dateMax();
