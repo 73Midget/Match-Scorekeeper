@@ -954,7 +954,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-10-03-b";
+var APP_BUILD="2026-10-03-c";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1346,6 +1346,7 @@ var WHATSNEW=[
     "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
     "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first.",
     "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in.",
+    "<b>What\u2019s new</b> now opens on the last three releases if nobody on this tablet has tapped <b>Mark as read</b> before, so a club coming back after a break sees what it missed rather than only the newest version.",
     "Fixed (indoor): results were ranking rounds rather than shooters, so someone who fired three rounds took three places and pushed everyone below them down. Each shooter is now placed once, on their best round \u2014 on screen, in the PDF and in the emailed results."
   ]},
   {v:"2.3.0",items:[
@@ -1387,8 +1388,16 @@ function verCmp(a,b){
    has never marked anything read sees only the current version — a fresh
    install shouldn't open to the whole history. */
 function unreadNews(){
-  if(!cfg.seenVersion)return WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)===0;});
-  return WHATSNEW.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0&&verCmp(w.v,APP_VERSION)<=0;});
+  /* Never list something the tablet isn't running yet. */
+  var upTo=WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)<=0;});
+  /* Nothing marked read yet. Showing only the newest version reads as right for
+     a genuinely new install, but it is wrong for the club this page exists for:
+     one that has been running the app for a year with the dot quietly showing
+     and nobody ever tapping Mark as read. They have missed the most and would
+     be told the least. Three matches what the up-to-date view already shows,
+     and a new club scrolling past two releases it never had costs nothing. */
+  if(!cfg.seenVersion)return upTo.slice(0,3);
+  return upTo.filter(function(w){return verCmp(w.v,cfg.seenVersion)>0;});
 }
 /* Browsers may clear a site's saved data when the device runs low on space.
    Asking once marks it as durable. Chrome and Safari decide silently and
