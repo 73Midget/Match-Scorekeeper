@@ -954,7 +954,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-09-29-a";
+var APP_BUILD="2026-10-03-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1345,7 +1345,8 @@ var WHATSNEW=[
     "If a tablet uploads again <b>after</b> you have compiled, the compile screen now says so before you tick anything, and tells you what to do instead.",
     "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
     "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first.",
-    "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in."
+    "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in.",
+    "Fixed (indoor): results were ranking rounds rather than shooters, so someone who fired three rounds took three places and pushed everyone below them down. Each shooter is now placed once, on their best round \u2014 on screen, in the PDF and in the emailed results."
   ]},
   {v:"2.3.0",items:[
     "Checking in is one button now. <b>Check in shooters</b> \u2014 search for someone, and if they are not on the list, tap the <b>+ Add</b> line that appears with their name already filled in.",
@@ -3370,7 +3371,10 @@ function renderResultsIndoor(){
     sf.innerHTML='<span class="filtlab">Squad</span>'+sqs.map(function(d){return '<button class="chip sq'+(d===state.filterSquad?' on':'')+'" data-d="'+esc(d)+'">'+esc(d)+'</button>';}).join("");
     sf.querySelectorAll(".chip").forEach(function(c){c.addEventListener("click",function(){state.filterSquad=c.dataset.d;renderResults();});});
   }else{sf.style.display="none";sf.innerHTML="";}
-  var ord=ordered(filterEntries(state.filterDiv,state.filterSquad)),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
+  /* Same rule as the printed results: one row per shooter, on their best round
+     within whatever filter is showing. Ranking rounds here would disagree with
+     the PDF the shooters are handed. */
+  var ord=ordered(bestPerPerson(filterEntries(state.filterDiv,state.filterSquad))),lb=document.getElementById("leaderboard"),extra=document.getElementById("indoorExtra");
   if(!ord.length){lb.innerHTML='<div class="empty"><div class="ico">≡</div>No scored rounds yet.</div>';extra.innerHTML="";updateBackupInfo();return;}
   lb.innerHTML=ord.map(lbRowIndoor).join("");
   var xh="";
@@ -3575,16 +3579,38 @@ function withMatchState(entries,meta,fn){
   try{state.entries=entries;state.meta=meta;return fn();}
   finally{state.entries=se;state.meta=sm;}
 }
+/* Indoor is scored on a shooter's BEST round, so every ranked view must rank
+   people rather than rounds. Without this a shooter who shot three times takes
+   three places and pushes everyone below them down: a two-person division read
+   as one shooter 1st, 2nd and 3rd, with the person who actually came second
+   shown as fourth.
+
+   Used by the leaderboard, the PDF tables and the emailed text, so all three
+   agree by construction rather than by three separate fixes staying in step.
+   Grouping is by personId, so a shooter who entered two divisions is reduced
+   once per list: once inside each division table, and once overall. */
+function bestPerPerson(list){
+  var by={},order=[];
+  list.forEach(function(e){
+    var k=e.personId||e.id,cur=by[k];
+    if(!cur){by[k]=e;order.push(k);return;}
+    /* A round that counts always beats a DQ or DNF; between two of the same
+       kind, the better score wins on the match type's own comparison. */
+    if(isFinisher(e)&&!isFinisher(cur)){by[k]=e;return;}
+    if(isFinisher(e)===isFinisher(cur)&&cmpTotal(e,cur)<0)by[k]=e;
+  });
+  return order.map(function(k){return by[k];});
+}
 function buildTablesHTMLIndoor(){
   var match=esc(matchDisplay(state.meta.match)||"Indoor Match"),now=new Date();
   var h='<div style="font-family:Arial,Helvetica,sans-serif;color:#111">';
   h+='<div style="font-size:19px;font-weight:bold">Indoor Match — Final Results</div>';
   h+='<div style="font-size:13px;color:#333;margin:2px 0">Match: '+match+'</div>';
-  h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · high score wins, X breaks ties</div>';
+  h+='<div style="font-size:12px;color:#555;margin-bottom:6px">'+esc(now.toLocaleString())+' · best round counts, X breaks ties</div>';
   var divs=byDivision(),dk=Object.keys(divs).sort();
   if(!dk.length)return h+'<div>No scored rounds.</div></div>';
-  dk.forEach(function(d){h+=detailTableIndoor(d,divs[d],"Squad",function(e){return e.squad||"";});});
-  h+=detailTableIndoor("Overall — All Divisions",resultEntries(),"Division",function(e){return e.division||"";});
+  dk.forEach(function(d){h+=detailTableIndoor(d,bestPerPerson(divs[d]),"Squad",function(e){return e.squad||"";});});
+  h+=detailTableIndoor("Overall — All Divisions",bestPerPerson(resultEntries()),"Division",function(e){return e.division||"";});
   h+=rollupTableIndoor();
   h+=bestTableIndoor();
   h+='</div>';
@@ -3644,13 +3670,13 @@ function composeResultsTextIndoor(){
   L.push("DIVISION RANKINGS");
   Object.keys(divs).sort().forEach(function(d){
     L.push("");L.push("-- "+d+" --");L.push(hdr);
-    ordered(divs[d]).forEach(function(o){var e=o.e,f=isFinisher(e);
+    ordered(bestPerPerson(divs[d])).forEach(function(o){var e=o.e,f=isFinisher(e);
       L.push(ptRowIn(o.place,e.name||"",e.division||"",e.gun||"",f?num0(e.score):statusOf(e),f?num0(e.x):""));});
   });
   L.push("");L.push("OVERALL — ALL DIVISIONS");L.push(hdr);
-  ordered(resultEntries()).forEach(function(o){var e=o.e,f=isFinisher(e);
+  ordered(bestPerPerson(resultEntries())).forEach(function(o){var e=o.e,f=isFinisher(e);
     L.push(ptRowIn(o.place,e.name||"",e.division||"",e.gun||"",f?num0(e.score):statusOf(e),f?num0(e.x):""));});
-  L.push("");L.push("High score wins; X count breaks ties. Congratulations to all shooters!");
+  L.push("");L.push("Best round counts; X count breaks ties. Congratulations to all shooters!");
   return L.join("\n");
 }
 function composeResultsText(){
