@@ -284,6 +284,8 @@
   .wnbtn .newdot{border-color:var(--card)}
   .wnver{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:14px 0 6px;color:var(--ink)}
   .wnver:first-child{margin-top:0}
+  .wnnew{display:inline-block;background:var(--orange);color:#fff;font-size:9px;font-weight:800;
+         letter-spacing:.1em;padding:2px 7px;border-radius:20px;vertical-align:middle;margin-left:6px}
   .wnlist{margin:0 0 4px;padding-left:19px}
   .wnlist li{margin-bottom:6px;line-height:1.45}
   #pastViewScrim{z-index:70}
@@ -954,7 +956,7 @@ var APP_VERSION="2.4.0";
    actually distinguishes one pre-release build from another. Bump it (and the
    matching BUILD in sw.js) whenever you deploy, so tablets can be told apart
    and the service-worker cache refreshes. */
-var APP_BUILD="2026-10-03-c";
+var APP_BUILD="2026-10-04-a";
 var SCHEMA_VERSION=1;              /* payload shape version; bumps if entry shape changes (A->C etc.) */
 var KEY="gssf_scorekeeper_v5";
 var RING1=1,RING3=3,MISS=10,STEEL=10;
@@ -1346,7 +1348,7 @@ var WHATSNEW=[
     "A build running from a test address shows an orange <b>TEST VERSION</b> stripe with the club it is connected to, so a test tablet can\u2019t be mistaken for a real one.",
     "Fixed: turning on online services, or saving a setup code, now makes the buttons it unlocks appear straight away. Tools used to have to be closed and reopened first.",
     "Fixed (indoor): a shooter\u2019s score sheet could open with the round already locked, as though they had shot. Switching a match between Indoor and Outdoor now converts everyone already checked in.",
-    "<b>What\u2019s new</b> now opens on the last three releases if nobody on this tablet has tapped <b>Mark as read</b> before, so a club coming back after a break sees what it missed rather than only the newest version.",
+    "<b>What\u2019s new</b> is now a running history \u2014 always the last three releases, and more if this tablet has missed more. Anything you haven\u2019t read yet is marked <b>new</b>.",
     "Fixed (indoor): results were ranking rounds rather than shooters, so someone who fired three rounds took three places and pushed everyone below them down. Each shooter is now placed once, on their best round \u2014 on screen, in the PDF and in the emailed results."
   ]},
   {v:"2.3.0",items:[
@@ -1478,13 +1480,30 @@ document.getElementById("contactsCsv").addEventListener("click",function(){
   download("club-contacts-"+stamp()+".csv",lines.join("\n"),"text/csv");
   toast("Contact list saved");
 });
+/* What the sheet lists, which is NOT the same as what counts as unread.
+
+   unreadNews() drives the orange dot, so it has to shrink as a tablet catches
+   up. The page itself is a running history: always the last three releases, and
+   more when a tablet has missed more. Showing only the unread ones meant a
+   tablet one release behind opened on a single entry — fine as "what's new",
+   useless as "what have we missed", which is what a club returning after a
+   break actually opens it for. */
+function newsToShow(){
+  var upTo=WHATSNEW.filter(function(w){return verCmp(w.v,APP_VERSION)<=0;});
+  var un=unreadNews();
+  return (un.length>3)?un:upTo.slice(0,3);
+}
 function openWhatsNew(){
-  var un=unreadNews(),show=un.length?un:WHATSNEW.slice(0,3);
+  var un=unreadNews(),show=newsToShow();
+  /* Which versions are actually unread, so the older ones shown for context
+     aren't mistaken for changes that just landed. */
+  var isNew={};un.forEach(function(w){isNew[w.v]=1;});
   document.getElementById("wnIntro").textContent=un.length
-    ? "Changes since this tablet was last updated."
+    ? "Changes since this tablet was last updated, with earlier releases below."
     : "You're up to date. Recent changes:";
   document.getElementById("wnBody").innerHTML=show.map(function(w){
-    return '<div class="wnver">Version '+esc(w.v)+'</div><ul class="wnlist">'
+    return '<div class="wnver">Version '+esc(w.v)
+      +(isNew[w.v]&&un.length?' <span class="wnnew">new</span>':'')+'</div><ul class="wnlist">'
       +w.items.map(function(t){return "<li>"+t+"</li>";}).join("")+"</ul>";
   }).join("");
   /* nothing unread: there is nothing to mark, so offer only a way out */
